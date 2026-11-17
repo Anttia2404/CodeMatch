@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.URI;
 import java.util.Map;
@@ -41,6 +42,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ResponseEntity<ProblemDetail> handleUnreadableBody() {
         return problem(HttpStatus.BAD_REQUEST, "invalid_json", "Yêu cầu JSON không hợp lệ.");
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ProblemDetail> handleInvalidParameter() {
+        return problem(HttpStatus.BAD_REQUEST, "invalid_parameter", "Một tham số yêu cầu không hợp lệ.");
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
