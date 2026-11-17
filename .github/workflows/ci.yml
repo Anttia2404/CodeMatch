@@ -33,7 +33,26 @@ jobs:
           cache-dependency-path: backend/pom.xml
       - run: java -version
       - run: ./mvnw -version
-      - run: docker info
+      - name: Diagnose Docker for Testcontainers
+        shell: bash
+        run: |
+          set -euxo pipefail
+          docker version
+          docker info
+          docker ps
+          if [ -S /var/run/docker.sock ]; then
+            stat /var/run/docker.sock
+          else
+            echo 'Docker socket /var/run/docker.sock is unavailable'
+            exit 1
+          fi
+          for name in DOCKER_HOST DOCKER_CONTEXT DOCKER_TLS_VERIFY DOCKER_CERT_PATH TESTCONTAINERS_HOST_OVERRIDE TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE; do
+            if printenv "$name" >/dev/null; then
+              printf '%s=%s\n' "$name" "$(printenv "$name")"
+            else
+              printf '%s=<unset>\n' "$name"
+            fi
+          done
       - run: ./mvnw -B compile
       - run: ./mvnw -B test
       - run: ./mvnw -B verify
