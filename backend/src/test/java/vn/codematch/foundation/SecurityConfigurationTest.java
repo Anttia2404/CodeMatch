@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,9 +21,12 @@ class SecurityConfigurationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockitoBean
+    private UserDetailsService users;
+
     @Test
     void deniesUnimplementedApiRoutesByDefault() throws Exception {
-        mockMvc.perform(get("/api/v1/probe")).andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/v1/probe")).andExpect(status().isUnauthorized());
     }
 
     @Test

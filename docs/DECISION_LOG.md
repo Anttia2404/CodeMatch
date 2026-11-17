@@ -23,3 +23,15 @@ The audited workstation has Java 21.0.4 in IntelliJ IDEA's JBR. Instructions set
 
 ## 2026-11-17 — Keep local Compose services on loopback
 Publish the local API and PostgreSQL ports on `127.0.0.1` only. Sample credentials are explicitly local-development values and `.env` remains ignored.
+
+## 2026-11-17 — Use JDBC-backed sessions for M1
+Use Spring Security sessions stored by Spring Session JDBC, with HttpOnly `CMSESSION`, SameSite=Lax, configurable Secure, CSRF cookie/header validation, and a strict single-origin credentialed CORS policy. This keeps bearer credentials out of browser storage and fits the same-origin local frontend/API development setup.
+
+## 2026-11-17 — A profile enables developer capabilities without replacing learner use
+Every account may use learner features; one owner-managed developer profile signals developer capabilities. M1 does not impose mutually exclusive account roles.
+
+## 2026-11-17 — Keep skill selection controlled
+M1 seeds a normalized skill catalog in Flyway and accepts only known skill identifiers in profile writes; clients cannot create arbitrary catalog entries.
+
+## 2026-11-17 — Keep discovery examples explicitly local
+M1 auth and developer-profile pages use the API, while home discovery examples remain labeled static demo data until the learning-request milestone introduces their API. The API health badge reports reachability only.

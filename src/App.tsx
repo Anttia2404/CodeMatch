@@ -1,7 +1,9 @@
 import { ArrowRight, Bookmark, Braces, ChevronDown, Clock3, Code2, MapPin, Menu, Search, ShieldCheck, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { checkApiHealth } from './lib/api'
+import { api, checkApiHealth } from './lib/api'
+import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom'
+import { AccountPage, DeveloperProfileFormPage, LoginPage, PublicDeveloperProfilePage, RegisterPage } from './AuthPages'
 
 const requests = [
   { title: 'Mình muốn hiểu React hooks qua một project nhỏ', detail: 'Đang làm quen với React, muốn tự tay hoàn thiện một ứng dụng quản lý công việc để hiểu state và effect thực sự hoạt động ra sao.', name: 'Minh Anh', initials: 'MA', color: 'lavender', time: 'Đăng 2 giờ trước', level: 'Mới bắt đầu', budget: '200–350k / buổi', tags: ['React', 'JavaScript', 'Frontend'], sessions: '4–6 buổi' },
@@ -12,11 +14,17 @@ const requests = [
 const filters = ['Tất cả kỹ năng', 'Mức kinh nghiệm', 'Ngân sách', 'Lịch học']
 
 export default function App() {
+  return <BrowserRouter><Routes><Route path="/" element={<HomePage />} /><Route path="/login" element={<LoginPage />} /><Route path="/register" element={<RegisterPage />} /><Route path="/account" element={<AccountPage />} /><Route path="/developer-profile" element={<DeveloperProfileFormPage />} /><Route path="/developers/:profileId" element={<PublicDeveloperProfilePage />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes></BrowserRouter>
+}
+
+function HomePage() {
   const [saved, setSaved] = useState<number[]>([])
   const [query, setQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState('Tất cả kỹ năng')
   const [mobileOpen, setMobileOpen] = useState(false)
   const apiStatus = useQuery({ queryKey: ['api-health'], queryFn: checkApiHealth, retry: 0, refetchInterval: 60_000 })
+  const account = useQuery({ queryKey: ['account'], queryFn: api.current, retry: false })
+  const authenticated = account.isSuccess && Boolean(account.data)
   const visibleRequests = requests.filter((request) => `${request.title} ${request.detail} ${request.tags.join(' ')}`.toLowerCase().includes(query.toLowerCase()))
 
   function toggleSaved(index: number) {
@@ -30,9 +38,9 @@ export default function App() {
         <button className="mobile-menu" aria-label="Mở menu" aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}><Menu /></button>
         <nav className={mobileOpen ? 'main-nav is-open' : 'main-nav'} aria-label="Điều hướng chính">
           <a className="nav-link active" href="#requests">Tìm cơ hội học</a><a className="nav-link" href="#how">Cách hoạt động</a>
-          <a className="nav-link mobile-auth" href="#login">Đăng nhập</a><a className="button button-outline nav-join" href="#signup">Tham gia CodeMatch</a>
+          {authenticated ? <><Link className="nav-link mobile-auth" to="/account">Tài khoản</Link><Link className="button button-outline nav-join" to="/developer-profile">Hồ sơ developer</Link></> : <><Link className="nav-link mobile-auth" to="/login">Đăng nhập</Link><Link className="button button-outline nav-join" to="/register">Tham gia CodeMatch</Link></>}
         </nav>
-        <div className="account-actions"><a className="login-link" href="#login">Đăng nhập</a><a className="button button-outline" href="#signup">Tham gia CodeMatch</a></div>
+        <div className="account-actions">{authenticated ? <><Link className="login-link" to="/account">Tài khoản</Link><Link className="button button-outline" to="/developer-profile">Hồ sơ developer</Link></> : <><Link className="login-link" to="/login">Đăng nhập</Link><Link className="button button-outline" to="/register">Tham gia CodeMatch</Link></>}</div>
       </header>
 
       <main id="home">
@@ -41,7 +49,7 @@ export default function App() {
             <div className="trust-note"><span className="trust-dot" /> Học 1:1 cùng developer độc lập</div>
             <h1>Học code theo cách <span>của bạn.</span></h1>
             <p className="hero-description">Chia sẻ điều bạn muốn học. Tìm một developer phù hợp để cùng bạn đi tiếp, từng buổi một.</p>
-            <div className="hero-actions"><a className="button button-primary" href="#requests">Khám phá yêu cầu học <ArrowRight size={17} /></a><a className="quiet-link" href="#how">Bạn là developer? <span>Khám phá cơ hội</span></a></div>
+            <div className="hero-actions"><a className="button button-primary" href="#requests">Khám phá yêu cầu học <ArrowRight size={17} /></a><Link className="quiet-link" to="/developer-profile">Bạn là developer? <span>Tạo hồ sơ</span></Link></div>
           </div>
           <div className="hero-art" aria-label="Minh họa kết nối người học và developer">
             <div className="orbit orbit-one" /><div className="orbit orbit-two" />

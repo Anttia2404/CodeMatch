@@ -9,14 +9,15 @@
 ## Required security/concurrency coverage
 IDOR, proposal ownership, duplicate active proposal, own-request proposal, non-open request submission, forbidden CV download, malformed/oversized/non-PDF upload, request owner/moderator CV access, concurrent acceptance, invalid transition, and sensitive response/log leakage.
 
-## M0/M0.5 checks
-The Vite build, ESLint, and Vitest cover Vietnamese request discovery, search, save/empty state, and the API health client. Backend tests cover deny-by-default API security, configured CORS preflight, and a Testcontainers PostgreSQL integration path that verifies Flyway schema history, SQL access, and the actuator health endpoint. Docker-less runs explicitly skip Testcontainers and do not count as database verification. Playwright E2E remains a later milestone.
+## M1 checks
+The PostgreSQL Testcontainers integration suite verifies migrations/session tables/seed skills, health, password hashing, duplicate emails, validation and CSRF, generic failed login, session creation/logout, profile owner authorization, public projection privacy, updates, and invalid skill rejection. Security slice tests cover deny-by-default and CORS. Frontend Vitest covers discovery and form validation; the API client uses real credentials and CSRF handling. A live-browser/backend smoke flow remains an explicit M1 final verification step. Playwright coverage is planned later.
 
 For Windows verification, run `npm ci`, `npm run build`, `npm run lint`, and `npm test` at the root. Set Java 21 in the current PowerShell session and run `backend\mvnw.cmd -B -DskipTests compile`, `backend\mvnw.cmd -B test`, and `backend\mvnw.cmd -B verify` from the root (or use `Push-Location backend` and `./mvnw.cmd`). Ensure Docker Desktop's Linux engine is running before interpreting integration results; Maven reports explicitly skipped Testcontainers tests when no engine is available.
 
-## M0.5 workstation result (2026-11-17)
-- `npm ci`, `npm run build`, `npm run lint`, `npm test`: passed; four frontend tests passed; `npm audit`: zero vulnerabilities.
-- Java 21.0.4 (IntelliJ JBR) with Maven Wrapper 3.3.4 / Maven 3.10.1: compile passed; `test` and full `verify` each ran 4 tests with 0 failures and 0 skips (2 security/CORS tests, 2 PostgreSQL integration tests).
-- Docker Desktop Engine 28.5.1 reports Linux. Compose PostgreSQL 17 container is healthy at host `127.0.0.1:5433` → container `5432`; the pre-existing Windows PostgreSQL 18 listener on host port 5432 was left untouched.
-- Flyway applied migration `V1__baseline` successfully. The integration test verified one successful Flyway history row and SQL query access. The Compose API container is healthy, and the live actuator endpoint returned `UP`.
-- Real local HTTP verification fetched the Vite frontend at `http://localhost:5173/`, then queried the API health URL with frontend Origin `http://localhost:5173`; response was HTTP 200 with matching `Access-Control-Allow-Origin` and health `UP`.
+## M1 local verification (2026-11-17)
+- Java 21.0.4 (IntelliJ JBR) and Maven Wrapper 3.3.4 using Maven 3.10.1: `mvnw compile`, `mvnw test`, and `mvnw verify` passed.
+- Maven totals: 9 tests, 0 failures, 0 errors, 0 skipped (2 security/CORS slice tests and 7 PostgreSQL Testcontainers integration tests).
+- Frontend: `npm run build`, `npm run lint`, and `npm test` passed; Vitest totals 7 tests across 3 files, 0 failures. `npm install` reported zero vulnerabilities.
+- Docker Desktop 28.5.1 uses the Linux engine. Compose PostgreSQL 17 is healthy at `127.0.0.1:5433` → container `5432`; Windows PostgreSQL 18 continues on port 5432. The Compose API health endpoint returned `UP`.
+- Compose database Flyway history contains successful V1 and V2 entries; V2 created the account/profile/skills/session schema and 11 skills.
+- Browser verification at `http://localhost:5173` used the actual frontend to register and log in, then create and publicly display a profile through the running API. Direct live HTTP verification also checked skills, `/auth/me`, profile update, logout/session invalidation, health, and credentialed CORS. Temporary smoke accounts were removed afterward. `127.0.0.1:5173` is not the configured allowed CORS origin; use the documented `localhost:5173` URL.

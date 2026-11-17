@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
+import { api } from './lib/api'
 
 function renderApp() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -24,5 +25,14 @@ describe('marketplace discovery foundation', () => {
     expect(screen.getByRole('button', { name: 'Bỏ lưu yêu cầu' })).toHaveAttribute('aria-pressed', 'true')
     fireEvent.change(screen.getByRole('textbox', { name: /Tìm theo kỹ năng/ }), { target: { value: 'Rust' } })
     expect(screen.getByText('Chưa tìm thấy yêu cầu phù hợp')).toBeInTheDocument()
+  })
+
+  it('shows account and developer links after the API authenticates the user', async () => {
+    const current = vi.spyOn(api, 'current').mockResolvedValue({ id: 'user-1', email: 'person@example.test', displayName: 'Linh', status: 'ACTIVE', createdAt: '', updatedAt: '' })
+    renderApp()
+    expect(await screen.findAllByRole('link', { name: 'Hồ sơ developer' })).toHaveLength(2)
+    expect(screen.getAllByRole('link', { name: 'Tài khoản' })).toHaveLength(2)
+    expect(screen.queryByRole('link', { name: 'Đăng nhập' })).not.toBeInTheDocument()
+    current.mockRestore()
   })
 })

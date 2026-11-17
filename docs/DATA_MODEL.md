@@ -1,9 +1,12 @@
 # Data model
 
+## Implemented in M1 (Flyway V2)
+- `users`: UUID, case-insensitive unique email, BCrypt hash, display name, account status, timestamps. A single user can learn and create a developer profile.
+- `developer_profiles`: unique owner, headline, biography, experience (0–60), HTTPS links, teaching approach, availability, timestamps.
+- `skills` and `developer_profile_skills`: seeded controlled catalog and normalized many-to-many profile skills.
+- `SPRING_SESSION` and `SPRING_SESSION_ATTRIBUTES`: JDBC-backed Spring Security sessions.
+
 ## Planned entities
-- `users`: credentials, status, timestamps; a user can hold learner and developer roles.
-- `developer_profiles`: display name, headline, biography, experience, links, teaching approach, availability.
-- `skills` and `developer_skills`: normalized skill catalog and developer proficiency associations.
 - `learning_requests`: owner, learning goal, level, language, format, schedule, budget, session count, CV-required flag, status.
 - `request_skills`: normalized request skill tags.
 - `teaching_proposals`: developer, request, proposal text, plan, price, duration, availability, status.
