@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { api, ApiError } from './lib/api'
 import type { DeveloperProfile, ProfileInput, Skill } from './lib/api'
 
@@ -32,10 +32,11 @@ export function RegisterPage() {
 }
 
 export function LoginPage() {
-  const navigate = useNavigate(); const client = useQueryClient(); const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
+  const navigate = useNavigate(); const location = useLocation(); const client = useQueryClient(); const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
+  const destination = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/account'
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setError(''); const data = new FormData(event.currentTarget)
-    try { const account = await api.login({ email: String(data.get('email')), password: String(data.get('password')) }); client.setQueryData(['account'], account); navigate('/account') }
+    try { const account = await api.login({ email: String(data.get('email')), password: String(data.get('password')) }); client.setQueryData(['account'], account); navigate(destination, { replace: true }) }
     catch (caught) { setError(problem(caught)) } finally { setBusy(false) }
   }
   return <PageFrame title="Đăng nhập"><form onSubmit={submit} className="product-form">

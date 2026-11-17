@@ -8,6 +8,24 @@ export type DeveloperProfile = {
   availability: string; skills: Skill[]; createdAt: string; updatedAt: string
 }
 export type ProfileInput = Omit<DeveloperProfile, 'id' | 'developerId' | 'displayName' | 'skills' | 'createdAt' | 'updatedAt'> & { skillIds: string[] }
+export type LearningRequestStatus = 'DRAFT' | 'OPEN' | 'CLOSED'
+export type LearningLevel = 'BEGINNER' | 'BASIC' | 'INTERMEDIATE' | 'ADVANCED'
+export type LearningFormat = 'ONLINE' | 'OFFLINE'
+export type BudgetUnit = 'PER_HOUR' | 'PER_SESSION' | 'TOTAL'
+export type LearningRequest = {
+  id: string; title: string; description: string; learningGoal: string; currentLevel: LearningLevel
+  preferredFormat: LearningFormat; city: string | null; budgetMin: number | null; budgetMax: number | null
+  budgetUnit: BudgetUnit | null; currency: 'VND'; preferredSchedule: string; expectedDuration: string
+  teachingExpectations: string; requiresCv: boolean; status: LearningRequestStatus; skills: Skill[]
+  createdAt: string; updatedAt: string; publishedAt: string | null; closedAt: string | null
+}
+export type LearningRequestInput = Omit<LearningRequest, 'id' | 'currency' | 'status' | 'skills' | 'createdAt' | 'updatedAt' | 'publishedAt' | 'closedAt'> & { skillIds: string[] }
+export type PageResult<T> = { content: T[]; page: number; size: number; totalElements: number; totalPages: number }
+export type DiscoveryFilters = {
+  q?: string; skillIds?: string[]; level?: LearningLevel | ''; format?: LearningFormat | ''
+  minBudget?: string; maxBudget?: string; budgetUnit?: BudgetUnit | ''; requiresCv?: boolean | ''
+  page?: number; size?: number; sort?: 'NEWEST' | 'OLDEST'
+}
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string, public fields: Record<string, string> = {}) {
@@ -47,6 +65,14 @@ export async function checkApiHealth(): Promise<{ status: string }> {
   return health
 }
 
+function queryString(values: Record<string, string | number | boolean | undefined | null>): string {
+  const params = new URLSearchParams()
+  Object.entries(values).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') params.set(key, String(value))
+  })
+  return params.toString()
+}
+
 export const api = {
   current: () => request<Account>('/auth/me'),
   register: (input: { email: string; password: string; displayName: string }) => request<Account>('/auth/register', { method: 'POST', body: JSON.stringify(input) }),
@@ -57,4 +83,22 @@ export const api = {
   publicProfile: (id: string) => request<DeveloperProfile>(`/developers/${encodeURIComponent(id)}`),
   createProfile: (input: ProfileInput) => request<DeveloperProfile>('/developers/me', { method: 'POST', body: JSON.stringify(input) }),
   updateProfile: (input: ProfileInput) => request<DeveloperProfile>('/developers/me', { method: 'PUT', body: JSON.stringify(input) }),
+  discoverRequests: (filters: DiscoveryFilters) => {
+    const query = queryString({ q: filters.q, level: filters.level, format: filters.format,
+      minBudget: filters.minBudget, maxBudget: filters.maxBudget, budgetUnit: filters.budgetUnit,
+      requiresCv: filters.requiresCv, page: filters.page ?? 0, size: filters.size ?? 12, sort: filters.sort ?? 'NEWEST' })
+    const params = new URLSearchParams(query)
+    filters.skillIds?.forEach((id) => params.append('skillIds', id))
+    return request<PageResult<LearningRequest>>(`/learning-requests?${params.toString()}`)
+  },
+  learningRequest: (id: string) => request<LearningRequest>(`/learning-requests/${encodeURIComponent(id)}`),
+  myLearningRequests: (status?: LearningRequestStatus, page = 0) => request<PageResult<LearningRequest>>(
+    `/me/learning-requests?${queryString({ status, page, size: 20 })}`),
+  createLearningRequest: (input: LearningRequestInput) => request<LearningRequest>('/learning-requests', { method: 'POST', body: JSON.stringify(input) }),
+  updateLearningRequest: (id: string, input: LearningRequestInput) => request<LearningRequest>(`/learning-requests/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(input) }),
+  publishLearningRequest: (id: string) => request<LearningRequest>(`/learning-requests/${encodeURIComponent(id)}/publish`, { method: 'POST' }),
+  closeLearningRequest: (id: string) => request<LearningRequest>(`/learning-requests/${encodeURIComponent(id)}/close`, { method: 'POST' }),
+  savedRequests: () => request<LearningRequest[]>('/saved-requests'),
+  saveRequest: (id: string) => request<void>(`/saved-requests/${encodeURIComponent(id)}`, { method: 'PUT' }),
+  unsaveRequest: (id: string) => request<void>(`/saved-requests/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 }
