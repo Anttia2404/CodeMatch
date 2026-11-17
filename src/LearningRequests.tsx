@@ -32,9 +32,11 @@ export function RequestDiscovery({ authenticated }: { authenticated: boolean }) 
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [message, setMessage] = useState('')
   const skills = useQuery({ queryKey: ['skills'], queryFn: api.skills, staleTime: 300_000 })
+  const budgetNeedsUnit = Boolean(filters.minBudget || filters.maxBudget) && !filters.budgetUnit
+  const queryFilters = budgetNeedsUnit ? { ...filters, minBudget: '', maxBudget: '' } : filters
   const requests = useQuery({
     queryKey: ['learning-requests', { ...filters, q: debouncedQuery }],
-    queryFn: () => api.discoverRequests({ ...filters, q: debouncedQuery }),
+    queryFn: () => api.discoverRequests({ ...queryFilters, q: debouncedQuery }),
     retry: 1,
   })
   const saved = useQuery({ queryKey: ['saved-requests'], queryFn: api.savedRequests, enabled: authenticated })
@@ -88,6 +90,7 @@ export function RequestDiscovery({ authenticated }: { authenticated: boolean }) 
       </select></label>
       <button className="clear-filters" type="button" onClick={() => { setFilters({ q: '', skillIds: [], page: 0, size: 12, sort: 'NEWEST' }); setDebouncedQuery('') }}><X size={15} /> Xóa bộ lọc</button>
     </div>
+    {budgetNeedsUnit && <p className="filter-hint" role="status">Chọn đơn vị ngân sách để áp dụng khoảng giá.</p>}
 
     <div className="discovery-results" aria-live="polite" aria-busy={requests.isLoading}>
       {requests.isLoading && <div className="request-skeletons" aria-label="Đang tải yêu cầu">{Array.from({ length: 4 }, (_, index) => <div className="request-skeleton" key={index}><span /><span /><span /></div>)}</div>}

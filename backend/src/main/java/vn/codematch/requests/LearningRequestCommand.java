@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.UUID;
 
 public record LearningRequestCommand(
-    @NotBlank @Size(max = 140) String title,
-    @NotBlank @Size(max = 3000) String description,
-    @NotBlank @Size(max = 2000) String learningGoal,
+    @NotBlank @Size(min = 8, max = 140) String title,
+    @NotBlank @Size(min = 30, max = 3000) String description,
+    @NotBlank @Size(min = 10, max = 2000) String learningGoal,
     @NotNull LearningLevel currentLevel,
     @NotNull LearningFormat preferredFormat,
     @Size(max = 100) String city,
@@ -20,7 +20,7 @@ public record LearningRequestCommand(
     BudgetUnit budgetUnit,
     @NotBlank @Size(max = 500) String preferredSchedule,
     @NotBlank @Size(max = 120) String expectedDuration,
-    @NotBlank @Size(max = 1000) String teachingExpectations,
+    @NotBlank @Size(min = 8, max = 1000) String teachingExpectations,
     boolean requiresCv,
     @NotNull @Size(min = 1, max = 10) List<@NotNull UUID> skillIds
 ) {}

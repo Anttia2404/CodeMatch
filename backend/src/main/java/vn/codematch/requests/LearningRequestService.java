@@ -81,6 +81,11 @@ public class LearningRequestService {
         if (minBudget != null && maxBudget != null && minBudget > maxBudget) {
             throw ApiException.badRequest("Ngân sách thấp nhất không được lớn hơn ngân sách cao nhất.");
         }
+        if ((minBudget != null || maxBudget != null) && unit == null) {
+            throw ApiException.badRequest("Chọn đơn vị ngân sách khi lọc theo khoảng giá.");
+        }
+        if (keyword != null && keyword.length() > 120) throw ApiException.badRequest("Từ khóa tìm kiếm không được dài quá 120 ký tự.");
+        if (skillIds != null && skillIds.size() > 10) throw ApiException.badRequest("Chọn tối đa 10 kỹ năng để lọc.");
         Sort order = "OLDEST".equals(sort) ? Sort.by(Sort.Direction.ASC, "publishedAt")
             : Sort.by(Sort.Direction.DESC, "publishedAt");
         Page<LearningRequestResponse> results = requests.findAll(

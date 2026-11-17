@@ -33,5 +33,5 @@ Every account may use learner features; one owner-managed developer profile sign
 ## 2026-11-17 — Keep skill selection controlled
 M1 seeds a normalized skill catalog in Flyway and accepts only known skill identifiers in profile writes; clients cannot create arbitrary catalog entries.
 
-## 2026-11-17 — Keep discovery examples explicitly local
-M1 auth and developer-profile pages use the API, while home discovery examples remain labeled static demo data until the learning-request milestone introduces their API. The API health badge reports reachability only.
+## 2026-11-17 — Replace demo discovery with persisted learning requests in M2
+Learning request discovery reads OPEN requests from PostgreSQL and uses controlled skill filters. Learners own draft/open/closed lifecycle actions and saved requests. Budget range filtering requires an explicit unit because hourly, per-session, and total VND values are not comparable without conversion. Proposals and CV flows remain out of scope until M3.

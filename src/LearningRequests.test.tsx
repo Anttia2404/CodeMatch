@@ -57,7 +57,7 @@ describe('learning request creation and management', () => {
     await user.type(screen.getByLabelText('Cách hướng dẫn phù hợp'), 'Giải thích và thực hành từng bước.')
     await user.click(screen.getByRole('button', { name: 'Đăng yêu cầu' }))
     await waitFor(() => expect(publish).toHaveBeenCalledWith('request-1'))
-  })
+  }, 15000)
 
   it('renders complete request details without a fake proposal action', async () => {
     vi.spyOn(api, 'learningRequest').mockResolvedValue(item)

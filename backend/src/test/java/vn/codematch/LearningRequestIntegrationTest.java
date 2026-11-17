@@ -139,6 +139,8 @@ class LearningRequestIntegrationTest {
             .andExpect(status().isOk()).andExpect(jsonPath("$.content.length()").value(0));
         mockMvc.perform(get("/api/v1/learning-requests").param("size", "51"))
             .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/v1/learning-requests").param("minBudget", "100000"))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("invalid_request"));
     }
 
     @Test

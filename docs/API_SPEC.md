@@ -1,6 +1,6 @@
 # API specification
 
-The versioned base path is `/api/v1`. M1 endpoints are implemented as below; later marketplace endpoints remain planned.
+The versioned base path is `/api/v1`. M1 and M2 endpoints below are implemented; proposals, CVs, matching, and moderation remain planned.
 
 ## M1 identity and developer profiles
 - `GET /auth/csrf` returns 204 and initializes the `XSRF-TOKEN` cookie. Send its value in `X-XSRF-TOKEN` for unsafe requests.
@@ -14,13 +14,21 @@ The versioned base path is `/api/v1`. M1 endpoints are implemented as below; lat
 
 Browser requests must use credentials. CORS allows only the configured frontend origin. Cookie auth is CSRF-protected.
 
+## M2 learning requests and discovery
+- `POST /learning-requests` creates an authenticated learner's DRAFT request (201).
+- `GET /learning-requests` returns paged OPEN requests. Filters: `q`, repeated `skillIds`, `level`, `format`, `minBudget`, `maxBudget`, `budgetUnit`, `requiresCv`, `page`, `size` (1–50), and `sort` (`NEWEST` or `OLDEST`). Budget filters require `budgetUnit`.
+- `GET /learning-requests/{id}` returns an OPEN request publicly; owners can read their own DRAFT/CLOSED requests. Other users receive not-found for private statuses.
+- `GET /me/learning-requests` returns the authenticated owner's paged requests, optionally filtered by status.
+- `PATCH /learning-requests/{id}` updates the owner's DRAFT or OPEN request; CLOSED requests cannot be edited.
+- `POST /learning-requests/{id}/publish` transitions DRAFT → OPEN. `POST /learning-requests/{id}/close` transitions OPEN → CLOSED.
+- `GET /saved-requests` lists the current owner's saved requests. `PUT /saved-requests/{requestId}` saves an OPEN request idempotently (204); `DELETE /saved-requests/{requestId}` unsaves it (204). A saved request remains visible to its owner if it later closes.
+- Request body includes title, description, learningGoal, currentLevel, preferredFormat, city, budgetMin/budgetMax/budgetUnit, preferredSchedule, expectedDuration, teachingExpectations, requiresCv, and one or more controlled `skillIds`. Response DTOs contain no learner account identity.
+
 ## Planned resource outline
-- `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`
-- `GET|POST /requests`, `GET|PATCH /requests/{id}`, `POST /requests/{id}/cancel`
 - `GET /requests/{id}/proposals`, `POST /requests/{id}/proposals`
 - `POST /proposals/{id}/withdraw`, `POST /requests/{id}/proposals/{proposalId}/accept`
 - `GET|POST|DELETE /developer/cvs`, `GET /requests/{id}/proposals/{proposalId}/cv`
-- `GET|PATCH /developers/{id}` and private owner profile routes
+- `GET|PATCH /developers/{id}` and private owner profile routes (M1 implemented)
 - Moderator-only report and moderation routes
 
 ## Contract conventions
