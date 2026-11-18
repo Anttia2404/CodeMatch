@@ -72,4 +72,8 @@ Learners can select one submitted proposal for an OPEN request. Selection confir
 
 ## Project documentation
 
+### Security and moderation status
+
+M5 adds configurable API rate limits, database-backed admin authorization, reports, request hiding, account suspension and security audit events through Flyway V6. Admin accounts require explicit database provisioning; no default credentials are created. GitHub Actions runs browser E2E against an isolated React, Spring Boot and PostgreSQL stack and collects service logs on failure. Rate limits are process-local and audit retention is manual, so production deployment needs shared rate limiting and a retention job.
+
 See [architecture](docs/ARCHITECTURE.md), [API specification](docs/API_SPEC.md), [data model](docs/DATA_MODEL.md), [security model](docs/SECURITY_MODEL.md), and [test strategy](docs/TEST_STRATEGY.md).

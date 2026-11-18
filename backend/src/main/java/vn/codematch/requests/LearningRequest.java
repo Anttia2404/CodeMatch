@@ -96,6 +96,9 @@ public class LearningRequest {
     @Column(name = "closed_at")
     private Instant closedAt;
 
+    @Column(name = "hidden_at")
+    private Instant hiddenAt;
+
     protected LearningRequest() {}
 
     public LearningRequest(UUID id, User learner, LearningRequestCommand command, Set<Skill> skills) {
@@ -143,6 +146,8 @@ public class LearningRequest {
         this.updatedAt = this.closedAt;
     }
 
+    public void setHidden(boolean hidden) { this.hiddenAt = hidden ? Instant.now() : null; }
+
     @PreUpdate
     void beforeUpdate() { this.updatedAt = Instant.now(); }
 
@@ -167,4 +172,5 @@ public class LearningRequest {
     public Instant getUpdatedAt() { return updatedAt; }
     public Instant getPublishedAt() { return publishedAt; }
     public Instant getClosedAt() { return closedAt; }
+    public Instant getHiddenAt() { return hiddenAt; }
 }

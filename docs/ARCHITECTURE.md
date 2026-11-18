@@ -22,7 +22,7 @@ On Windows, use Java 21 from an existing JDK/JBR and set `JAVA_HOME` in the curr
 - `proposals`: submission, owner editing/withdrawal, learner review, and proposal-scoped CV access (M3).
 - `cvs`: PDF content validation, opaque private storage, owner management, and controlled download authorization (M3).
 - `matching`: learner selection, confirmed-match lifecycle, participant-scoped reads, and proposal selection status (M4).
-- `moderation`: reports, review actions, audit trail (later M5).
+- `moderation`: reports, review actions, audit trail (M5).
 
 ## Runtime configuration
 Configuration is environment based. `.env.example` contains local placeholders only. Compose binds PostgreSQL 17 to host `127.0.0.1:5433` → container `5432`, leaving Windows PostgreSQL 18 on 5432 untouched; local JVM datasource defaults to 5433. `/actuator/health` is exposed for container health checks. Never log passwords, session/CSRF tokens, CV bytes, or private CV metadata.
@@ -30,3 +30,9 @@ Configuration is environment based. `.env.example` contains local placeholders o
 CV metadata and associations are in PostgreSQL; PDF content is stored outside web/static resources through `PrivateCvStorage`. Compose mounts the named `private_cvs` volume at `/var/lib/codematch/private-cvs`; a local API process defaults to `%USERPROFILE%\\.codematch\\private-cvs` or `CODEMATCH_CV_STORAGE_DIR`. Storage keys are opaque UUID values and are not returned in DTOs. The owner manages their files, while only an owner or the learner who owns an associated proposal can download bytes. Delete is blocked while a submitted proposal refers to a CV. Closing a request prevents new applications while preserving existing proposals for authorized review. V4 migration adds these tables and constraints.
 
 M4 persists confirmed matches in PostgreSQL. Selection locks the learning-request row and selected proposal, validates ownership and `SUBMITTED` status, changes the request to `MATCHED`, and inserts the match in one transaction. V5 adds one-match-per-request uniqueness and composite foreign keys tying the learner and selected developer/proposal to the same request. A matched request blocks new proposals; proposals remain historical and immutable after selection. Only the owning learner and selected developer can read match details.
+
+## M5 moderation and abuse controls
+- A Spring MVC interceptor applies configurable process-local limits to sensitive API paths and returns standardized 429 responses.
+- Reports and audit events are persisted in PostgreSQL via Flyway V6. Admin paths require database-derived `ROLE_ADMIN`; frontend state does not grant access.
+- Hidden requests remain stored for their owner/moderation history but are excluded from public discovery.
+- Shared rate-limit storage and automated audit retention are deployment requirements before horizontal scaling/production.

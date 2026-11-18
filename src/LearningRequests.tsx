@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { api, ApiError } from './lib/api'
 import type { BudgetUnit, DiscoveryFilters, LearningFormat, LearningLevel, LearningRequest, LearningRequestInput, LearningRequestStatus, Skill } from './lib/api'
 import './learning-requests.css'
+import { ReportButton } from './ModerationPages'
 
 const levelLabels: Record<LearningLevel, string> = { BEGINNER: 'Mới bắt đầu', BASIC: 'Cơ bản', INTERMEDIATE: 'Trung cấp', ADVANCED: 'Nâng cao' }
 const formatLabels: Record<LearningFormat, string> = { ONLINE: 'Học online', OFFLINE: 'Học trực tiếp' }
@@ -299,6 +300,7 @@ export function RequestDetailPage({ authenticated }: { authenticated: boolean })
       {item.status === 'OPEN' && (authenticated ? <button className="button button-outline" onClick={() => toggle.mutate()} disabled={toggle.isPending}><Bookmark size={16} fill={saved.data?.some((savedItem) => savedItem.id === id) ? 'currentColor' : 'none'} />{saved.data?.some((savedItem) => savedItem.id === id) ? 'Đã lưu' : 'Lưu yêu cầu'}</button>
         : <Link className="button button-outline" to="/login">Đăng nhập để lưu</Link>)}
     </div>
+    {authenticated && <ReportButton targetType="LEARNING_REQUEST" targetId={item.id} />}
     {toggle.isError && <p className="form-error" role="alert">{errorMessage(toggle.error)}</p>}
     <div className="detail-layout"><article className="detail-content">
       <DetailSection title="Mục tiêu học tập"><p>{item.learningGoal}</p></DetailSection>

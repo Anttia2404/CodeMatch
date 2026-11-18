@@ -1,0 +1,41 @@
+name: codematch-m5-e2e-local
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: codematch_e2e
+      POSTGRES_USER: codematch_e2e
+      POSTGRES_PASSWORD: e2e-local-only
+    ports:
+      - "127.0.0.1:15433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codematch_e2e -d codematch_e2e"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  api:
+    build: ./backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/codematch_e2e
+      SPRING_DATASOURCE_USERNAME: codematch_e2e
+      SPRING_DATASOURCE_PASSWORD: e2e-local-only
+      CODEMATCH_CV_STORAGE_DIR: /var/lib/codematch/private-cvs
+      CODEMATCH_CORS_ALLOWED_ORIGIN: http://127.0.0.1:5173
+    ports:
+      - "127.0.0.1:18080:8080"
+    volumes:
+      - private_cvs:/var/lib/codematch/private-cvs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+volumes:
+  postgres_data:
+  private_cvs:

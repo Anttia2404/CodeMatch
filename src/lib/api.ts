@@ -1,6 +1,6 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1'
 
-export type Account = { id: string; email: string; displayName: string; status: string; createdAt: string; updatedAt: string }
+export type Account = { id: string; email: string; displayName: string; status: string; admin?: boolean; createdAt: string; updatedAt: string }
 export type Skill = { id: string; slug: string; name: string }
 export type DeveloperProfile = {
   id: string; developerId: string; displayName: string; headline: string; biography: string; yearsExperience: number
@@ -47,6 +47,12 @@ export type ConfirmedMatch = {
 export type ProposalInput = {
   introduction: string; teachingApproach: string; relevantExperience: string; proposedRate: number
   rateUnit: BudgetUnit; proposedSchedule: string; estimatedDuration: string; cvId: string | null; removeCv: boolean
+}
+export type ReportTargetType = 'LEARNING_REQUEST' | 'DEVELOPER_PROFILE' | 'TEACHING_PROPOSAL'
+export type ReportStatus = 'OPEN' | 'RESOLVED' | 'DISMISSED'
+export type ModerationReport = {
+  id: string; reporterId: string; targetType: ReportTargetType; targetId: string; reason: string
+  description: string | null; status: ReportStatus; createdAt: string; reviewedAt: string | null
 }
 
 export class ApiError extends Error {
@@ -137,6 +143,12 @@ export const api = {
   developerMatches: () => request<ConfirmedMatch[]>('/me/matches'),
   developerMatch: (matchId: string) => request<ConfirmedMatch>(`/me/matches/${encodeURIComponent(matchId)}`),
   proposalSelectionStatus: (proposalId: string) => request<ProposalSelection>(`/proposals/${encodeURIComponent(proposalId)}/selection-status`),
+  createReport: (input: { targetType: ReportTargetType; targetId: string; reason: string; description?: string }) => request<ModerationReport>('/reports', { method: 'POST', body: JSON.stringify(input) }),
+  adminReports: (status = 'OPEN') => request<ModerationReport[]>(`/admin/reports?${queryString({ status })}`),
+  reviewReport: (id: string, status: Exclude<ReportStatus, 'OPEN'>) => request<ModerationReport>(`/admin/reports/${encodeURIComponent(id)}/review`, { method: 'POST', body: JSON.stringify({ status }) }),
+  hideRequest: (id: string) => request<void>(`/admin/learning-requests/${encodeURIComponent(id)}/hide`, { method: 'POST' }),
+  restoreRequest: (id: string) => request<void>(`/admin/learning-requests/${encodeURIComponent(id)}/restore`, { method: 'POST' }),
+  suspendUser: (id: string) => request<void>(`/admin/users/${encodeURIComponent(id)}/suspend`, { method: 'POST' }),
   downloadProposalCv: async (id: string) => {
     const response = await fetch(`${API_BASE_URL}/proposals/${encodeURIComponent(id)}/cv`, { credentials: 'include', headers: { Accept: 'application/pdf' } })
     if (!response.ok) {

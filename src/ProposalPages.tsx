@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api, ApiError } from './lib/api'
 import type { BudgetUnit, ConfirmedMatch, DeveloperCv, Proposal, ProposalInput, ProposalSelectionStatus } from './lib/api'
 import './proposals.css'
+import { ReportButton } from './ModerationPages'
 
 const rateLabels: Record<BudgetUnit, string> = { PER_HOUR: 'mỗi giờ', PER_SESSION: 'mỗi buổi', TOTAL: 'toàn bộ chương trình' }
 const formatRate = (rate: number, unit: BudgetUnit) => `${new Intl.NumberFormat('vi-VN').format(rate)} ₫ / ${rateLabels[unit]}`
@@ -41,7 +42,7 @@ export function ProposalApplyPage() {
       <label>Lời giới thiệu<textarea required minLength={30} maxLength={3000} rows={4} value={form.introduction} onChange={(e) => setForm({ ...form, introduction: e.target.value })} placeholder="Giới thiệu cách bạn có thể đồng hành với mục tiêu này…" /></label>
       <label>Phương pháp hướng dẫn<textarea required minLength={20} maxLength={3000} rows={4} value={form.teachingApproach} onChange={(e) => setForm({ ...form, teachingApproach: e.target.value })} /></label>
       <label>Kinh nghiệm liên quan<textarea required minLength={20} maxLength={2000} rows={3} value={form.relevantExperience} onChange={(e) => setForm({ ...form, relevantExperience: e.target.value })} /></label>
-      <div className="proposal-fields"><label>Mức phí (VND)<input required type="number" min="1" step="1000" value={form.proposedRate} onChange={(e) => setForm({ ...form, proposedRate: Number(e.target.value) })} /></label><label>Đơn vị<select value={form.rateUnit} onChange={(e) => setForm({ ...form, rateUnit: e.target.value as BudgetUnit })}>{Object.entries(rateLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label></div>
+      <div className="proposal-fields"><label>Mức phí (VND)<input required type="number" min="1000" step="1000" value={form.proposedRate} onChange={(e) => setForm({ ...form, proposedRate: Number(e.target.value) })} /></label><label>Đơn vị<select value={form.rateUnit} onChange={(e) => setForm({ ...form, rateUnit: e.target.value as BudgetUnit })}>{Object.entries(rateLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label></div>
       <label>Lịch bạn có thể hướng dẫn<input required maxLength={500} value={form.proposedSchedule} onChange={(e) => setForm({ ...form, proposedSchedule: e.target.value })} placeholder="Ví dụ: tối thứ Ba và thứ Năm" /></label>
       <label>Thời lượng dự kiến<input required maxLength={120} value={form.estimatedDuration} onChange={(e) => setForm({ ...form, estimatedDuration: e.target.value })} placeholder="Ví dụ: 4 buổi trong 1 tháng" /></label>
       <fieldset className="cv-picker"><legend>CV {item.requiresCv ? '(bắt buộc)' : '(không bắt buộc)'}</legend>
@@ -83,7 +84,7 @@ export function MyProposalsPage() {
     <section className="proposal-section"><h2>Đề xuất đã gửi</h2>
       {proposals.isLoading && <p role="status">Đang tải đề xuất…</p>}{proposals.isError && <p role="alert" className="form-error">{message(proposals.error)}</p>}
       {proposals.data?.length === 0 && <p className="proposal-empty">Bạn chưa gửi đề xuất nào. <Link to="/">Khám phá yêu cầu học đang mở</Link></p>}
-      <div className="proposal-list">{proposals.data?.map((proposal) => <article className="proposal-card" key={proposal.id}><div className="proposal-card-head"><div><span className={`proposal-status ${proposal.status.toLowerCase()}`}>{proposal.status === 'SUBMITTED' ? 'Đã gửi' : 'Đã rút'}</span><h3>{proposal.learningRequestTitle}</h3></div><strong>{formatRate(proposal.proposedRate, proposal.rateUnit)}</strong></div><p>{proposal.introduction}</p><ProposalSelectionNotice proposalId={proposal.id} /><div className="proposal-card-actions">{proposal.learningRequestStatus !== 'MATCHED' && proposal.status === 'SUBMITTED' && <Link className="button button-outline" to={`/my/proposals/${proposal.id}/edit`}>Chỉnh sửa</Link>}{proposal.learningRequestStatus !== 'MATCHED' && proposal.status === 'SUBMITTED' && <button className="button button-outline" disabled={withdraw.isPending} onClick={() => { if (window.confirm('Rút đề xuất này?')) withdraw.mutate(proposal.id) }}>Rút đề xuất</button>}{proposal.learningRequestStatus === 'MATCHED' && <Link className="button button-outline" to="/my/matches">Xem kết quả</Link>}</div></article>)}</div>
+      <div className="proposal-list">{proposals.data?.map((proposal) => <article className="proposal-card" key={proposal.id}><div className="proposal-card-head"><div><span className={`proposal-status ${proposal.status.toLowerCase()}`}>{proposal.status === 'SUBMITTED' ? 'Đã gửi' : 'Đã rút'}</span><h3>{proposal.learningRequestTitle}</h3></div><strong>{formatRate(proposal.proposedRate, proposal.rateUnit)}</strong></div><p>{proposal.introduction}</p><ProposalSelectionNotice proposalId={proposal.id} /><ReportButton targetType="TEACHING_PROPOSAL" targetId={proposal.id} /><div className="proposal-card-actions">{proposal.learningRequestStatus !== 'MATCHED' && proposal.status === 'SUBMITTED' && <Link className="button button-outline" to={`/my/proposals/${proposal.id}/edit`}>Chỉnh sửa</Link>}{proposal.learningRequestStatus !== 'MATCHED' && proposal.status === 'SUBMITTED' && <button className="button button-outline" disabled={withdraw.isPending} onClick={() => { if (window.confirm('Rút đề xuất này?')) withdraw.mutate(proposal.id) }}>Rút đề xuất</button>}{proposal.learningRequestStatus === 'MATCHED' && <Link className="button button-outline" to="/my/matches">Xem kết quả</Link>}</div></article>)}</div>
       {withdraw.isError && <p role="alert" className="form-error">{message(withdraw.error)}</p>}
     </section>
   </ProposalFrame>
@@ -127,6 +128,7 @@ export function ReceivedProposalsPage() {
       <dl className="compare-facts"><div><dt>Mức phí</dt><dd>{formatRate(proposal.proposedRate, proposal.rateUnit)}</dd></div><div><dt>Lịch đề xuất</dt><dd>{proposal.proposedSchedule}</dd></div><div><dt>Thời lượng</dt><dd>{proposal.estimatedDuration}</dd></div></dl>
       {proposal.hasCv && <button className="button button-outline" disabled={download.isPending} onClick={() => download.mutate(proposal)}>Tải CV riêng tư</button>}
       <ProposalSelectionNotice proposalId={proposal.id} />
+      <ReportButton targetType="TEACHING_PROPOSAL" targetId={proposal.id} />
       {proposal.status === 'SUBMITTED' && proposal.learningRequestStatus === 'OPEN' && !confirmed && <button className="button button-primary select-proposal" disabled={select.isPending} onClick={() => setCandidate(proposal)}>{select.isPending ? 'Đang xác nhận…' : 'Chọn developer này'}</button>}
     </article>)}</div>
     {download.isError && <p role="alert" className="form-error">{message(download.error)}</p>}

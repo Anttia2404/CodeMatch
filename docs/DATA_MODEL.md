@@ -1,5 +1,11 @@
 # Data model
 
+## V6 moderation and audit additions
+- `users.is_admin` defaults to false; existing accounts do not become admins through migration.
+- `learning_requests.hidden_at` marks a request hidden from public discovery.
+- `moderation_reports` stores reporter, target type/id, reason, optional description, status, creation/review times and reviewer. A unique key limits each reporter to one report per target; target visibility is checked in the service.
+- `audit_events` stores actor, event type, target, outcome, timestamp and structured details. It excludes credentials, sessions and CV content. Retention is currently manual.
+
 ## Implemented through M4 (Flyway V1–V5)
 - `users`: UUID, case-insensitive unique email, BCrypt hash, display name, account status, timestamps. A single user can learn and create a developer profile.
 - `developer_profiles`: unique owner, headline, biography, experience (0–60), HTTPS links, teaching approach, availability, timestamps.

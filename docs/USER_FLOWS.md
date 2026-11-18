@@ -12,7 +12,12 @@ Register → create professional profile → browse open requests → submit one
 Review submitted proposal statuses → see whether the learner is still choosing or selected another developer → if selected, open the confirmed match and see only its request and proposal details. The developer selected by the learner can access the match; other developers cannot.
 
 ## Target moderation flow
-Review user reports → inspect relevant content under moderator authorization → take documented moderation action → preserve audit event.
+Review report metadata → review public or participant-visible target content using its normal access rules → resolve or dismiss → hide a request or suspend an account if needed → preserve an audit event.
 
 ## M0 implementation
-The M0 landing shell used explicitly illustrative examples. M2 replaces discovery examples with API-backed request results. Registration/profile, requests, proposals, CV operations, and matching call the API; sessions and moderation remain unimplemented.
+The M0 landing shell used explicitly illustrative examples. M2 replaces discovery examples with API-backed request results. Registration/profile, requests, proposals, CV operations, matching and M5 moderation call the API.
+## Report content and administrator review (M5)
+1. An authenticated user reports a visible learning request, developer profile, or proposal they can access as a participant.
+2. A report stores reason and optional description. The database prevents repeated reports from the same user for the same target.
+3. Administrators review a metadata-only queue and resolve or dismiss a report. They can hide/restore a request or suspend an account; suspension removes active server sessions.
+4. Moderation actions create audit events without copying proposal text or CV content.

@@ -2,6 +2,7 @@ package vn.codematch.api;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -21,7 +22,11 @@ import java.util.TreeMap;
 public class ApiExceptionHandler {
     @ExceptionHandler(ApiException.class)
     ResponseEntity<ProblemDetail> handleApiException(ApiException exception) {
-        return problem(exception.getStatus(), exception.getCode(), exception.getMessage());
+        ResponseEntity.BodyBuilder response = ResponseEntity.status(exception.getStatus());
+        if (exception.getRetryAfterSeconds() != null) {
+            response.header(HttpHeaders.RETRY_AFTER, exception.getRetryAfterSeconds().toString());
+        }
+        return response.body(problem(exception.getStatus(), exception.getCode(), exception.getMessage()).getBody());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

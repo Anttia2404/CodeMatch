@@ -3,10 +3,10 @@ package vn.codematch.identity;
 import java.time.Instant;
 import java.util.UUID;
 
-public record UserResponse(UUID id, String email, String displayName, AccountStatus status,
+public record UserResponse(UUID id, String email, String displayName, AccountStatus status, boolean admin,
                            Instant createdAt, Instant updatedAt) {
     static UserResponse from(User user) {
-        return new UserResponse(user.getId(), user.getEmail(), user.getDisplayName(), user.getAccountStatus(),
+        return new UserResponse(user.getId(), user.getEmail(), user.getDisplayName(), user.getAccountStatus(), user.isAdmin(),
             user.getCreatedAt(), user.getUpdatedAt());
     }
 }

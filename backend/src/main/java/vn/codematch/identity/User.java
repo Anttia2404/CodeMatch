@@ -26,6 +26,9 @@ public class User {
     @Column(name = "display_name", nullable = false, length = 80)
     private String displayName;
 
+    @Column(name = "is_admin", nullable = false)
+    private boolean admin;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "account_status", nullable = false, length = 16)
     private AccountStatus accountStatus;
@@ -53,10 +56,14 @@ public class User {
         this.updatedAt = Instant.now();
     }
 
+    public void suspend() { this.accountStatus = AccountStatus.SUSPENDED; }
+    public void activate() { this.accountStatus = AccountStatus.ACTIVE; }
+
     public UUID getId() { return id; }
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
     public String getDisplayName() { return displayName; }
+    public boolean isAdmin() { return admin; }
     public AccountStatus getAccountStatus() { return accountStatus; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
