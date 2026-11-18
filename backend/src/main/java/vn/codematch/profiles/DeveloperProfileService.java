@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.codematch.api.ApiException;
 import vn.codematch.identity.User;
 import vn.codematch.identity.UserRepository;
+import vn.codematch.foundation.PilotMetrics;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,11 +18,14 @@ public class DeveloperProfileService {
     private final DeveloperProfileRepository profiles;
     private final SkillRepository skills;
     private final UserRepository users;
+    private final PilotMetrics metrics;
 
-    public DeveloperProfileService(DeveloperProfileRepository profiles, SkillRepository skills, UserRepository users) {
+    public DeveloperProfileService(DeveloperProfileRepository profiles, SkillRepository skills,
+                                   UserRepository users, PilotMetrics metrics) {
         this.profiles = profiles;
         this.skills = skills;
         this.users = users;
+        this.metrics = metrics;
     }
 
     @Transactional
@@ -32,7 +36,9 @@ public class DeveloperProfileService {
         }
         Set<Skill> selectedSkills = resolveSkills(command.skillIds());
         DeveloperProfile profile = new DeveloperProfile(UUID.randomUUID(), owner, command, selectedSkills);
-        return DeveloperProfileResponse.from(profiles.save(profile));
+        DeveloperProfileResponse created = DeveloperProfileResponse.from(profiles.save(profile));
+        metrics.record("developer.profile.completed");
+        return created;
     }
 
     @Transactional

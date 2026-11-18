@@ -9,7 +9,20 @@ describe('API health client', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     await expect(checkApiHealth()).resolves.toEqual({ status: 'UP' })
-    expect(fetchMock).toHaveBeenCalledWith(new URL('http://localhost:8080/actuator/health'), {
+    expect(fetchMock).toHaveBeenCalledWith(new URL('http://localhost:3000/actuator/health'), {
+      headers: { Accept: 'application/json' },
+    })
+  })
+
+  it('resolves a same-origin health URL when the API is behind a reverse proxy', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', '/api/v1')
+    vi.resetModules()
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: 'UP' }) })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { checkApiHealth: checkRelativeApiHealth } = await import('./api')
+    await expect(checkRelativeApiHealth()).resolves.toEqual({ status: 'UP' })
+    expect(fetchMock).toHaveBeenCalledWith(new URL('http://localhost:3000/actuator/health'), {
       headers: { Accept: 'application/json' },
     })
   })

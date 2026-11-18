@@ -84,13 +84,9 @@ No public deployment is authorized by this plan. Before deployment approval, pro
 
 Before inviting pilot participants, separately approve pilot scope and dates, privacy/consent text, support and moderation coverage, admin provisioning, data retention/deletion, backup/restore evidence, malware/file handling decision, and participant recruitment. Synthetic E2E accounts and traffic are excluded from product analytics.
 
-## Required follow-up in M6
+## M6 implementation status (2026-11-18)
 
-1. Prepare environment-specific configuration and secret-free examples.
-2. Add and verify operational metrics, request correlation and safe management exposure.
-3. Add privacy-minimal aggregate funnel reporting backed by existing data where possible.
-4. Add an admin-only pilot overview with server-side aggregation and truthful empty states.
-5. Exercise encrypted backup/restore and CV volume persistence using disposable data.
-6. Extend real React/Spring/PostgreSQL E2E for login, profile, request, proposal, selection, CV, authorization, CSRF, logout and moderation.
-7. Add bounded local/isolated load checks and report actual measurements.
-8. Complete the runbook and validation plan before requesting deployment/pilot approval.
+- **Locally verified:** environment-specific examples/profiles, same-origin local Vite proxy, pinned Docker base-image indexes (including Linux ARM64), restricted management endpoints, metrics/correlation, aggregate admin overview, candidate staging Compose/Caddy config, real browser E2E, CV volume restart, disposable logical database/file-archive restore smoke, bounded read/proposal/match concurrency checks, runbook, pilot validation criteria and CI artifact/dependency checks.
+- **Not completed by design:** no cloud provider account or resource, DNS/domain, public staging, deployment workflow/credentials, encrypted off-host backup destination, or real-user pilot. The cloud/deployment gate remains closed pending the approval information listed above. Do not treat the local unencrypted restore smoke as evidence of an encrypted recovery system.
+- **Owner/operator prerequisites before invitation:** approve cost/provider/region/data location; configure and test encrypted off-host backup/restore; assign an operator to create/revoke the first admin account through a reviewed transaction plus audit record; finalize consent/privacy, deletion, support/moderation cover, retention, incident contact, and the file-malware policy. CI must pass on the review PR before merge.
+- **Outstanding security item:** the production npm dependency audit is clean, but the development dependency tree reports 11 high paths through `picomatch@4.0.7`; see `SECURITY_MODEL.md`. Re-run all audits immediately before any external launch.

@@ -266,6 +266,45 @@ class PostgresIntegrationTest {
         assertThat(jdbcTemplate.queryForObject("select count(*) from developer_profiles where user_id = (select id from users where email = ?)", Integer.class, email)).isZero();
     }
 
+    @Test
+    void pilotOverviewAndOperationalMetricsAreAdminOnlyAndAggregateOnly() throws Exception {
+        String email = registerAccount("pilot-admin");
+        Cookie userSession = login(email);
+        mockMvc.perform(get("/api/v1/admin/pilot-overview").cookie(userSession))
+            .andExpect(status().isForbidden());
+
+        jdbcTemplate.update("update users set is_admin = true where email = ?", email);
+        Cookie adminSession = login(email);
+        mockMvc.perform(get("/api/v1/admin/pilot-overview").cookie(adminSession))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalRegisteredUsers").isNumber())
+            .andExpect(jsonPath("$.activeDevelopers").isNumber())
+            .andExpect(jsonPath("$.requestProposalCoveragePercent").isNumber())
+            .andExpect(jsonPath("$.averageMinutesToFirstProposal").isNumber())
+            .andExpect(jsonPath("$.password").doesNotExist())
+            .andExpect(jsonPath("$.email").doesNotExist());
+
+        mockMvc.perform(get("/actuator/metrics/codematch.security.authentication.failures"))
+            .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/actuator/metrics/codematch.security.authentication.failures").cookie(adminSession))
+            .andExpect(status().isOk());
+        mockMvc.perform(get("/actuator/health/readiness"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("UP"));
+    }
+
+    @Test
+    void responseIncludesSafeCorrelationIdAndReplacesInvalidInput() throws Exception {
+        mockMvc.perform(get("/actuator/health").header("X-Request-ID", "pilot-test-42"))
+            .andExpect(status().isOk())
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                .string("X-Request-ID", "pilot-test-42"));
+        mockMvc.perform(get("/actuator/health").header("X-Request-ID", "invalid value with spaces"))
+            .andExpect(status().isOk())
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                .string("X-Request-ID", org.hamcrest.Matchers.matchesPattern("[0-9a-f-]{36}")));
+    }
+
     private String registerAccount(String prefix) throws Exception {
         String email = prefix + "-" + java.util.UUID.randomUUID() + "@example.test";
         String body = "{\"email\":\"" + email + "\",\"password\":\"Correct-Horse-83!\",\"displayName\":\"Test User\"}";

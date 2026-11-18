@@ -11,6 +11,7 @@ import vn.codematch.cvs.DeveloperCv;
 import vn.codematch.profiles.DeveloperProfile;
 import vn.codematch.profiles.DeveloperProfileRepository;
 import vn.codematch.identity.UserRepository;
+import vn.codematch.foundation.PilotMetrics;
 import vn.codematch.requests.LearningRequest;
 import vn.codematch.requests.LearningRequestRepository;
 import vn.codematch.requests.LearningRequestStatus;
@@ -26,15 +27,18 @@ public class ProposalService {
     private final CvService cvs;
     private final UserRepository users;
     private final AuditEventService audit;
+    private final PilotMetrics metrics;
 
     public ProposalService(TeachingProposalRepository proposals, LearningRequestRepository requests,
-                           DeveloperProfileRepository profiles, CvService cvs, UserRepository users, AuditEventService audit) {
+                           DeveloperProfileRepository profiles, CvService cvs, UserRepository users,
+                           AuditEventService audit, PilotMetrics metrics) {
         this.proposals = proposals;
         this.requests = requests;
         this.profiles = profiles;
         this.cvs = cvs;
         this.users = users;
         this.audit = audit;
+        this.metrics = metrics;
     }
 
     @Transactional
@@ -56,6 +60,7 @@ public class ProposalService {
         try {
             TeachingProposal created = proposals.saveAndFlush(
                 new TeachingProposal(UUID.randomUUID(), request, developer, cv, command));
+            metrics.record("teaching_proposal.submitted");
             return ProposalResponse.from(created);
         } catch (DataIntegrityViolationException exception) {
             throw duplicateProposal();
@@ -91,6 +96,7 @@ public class ProposalService {
             throw ApiException.conflict("proposal_already_withdrawn", "Đề xuất này đã được rút.");
         }
         proposal.withdraw();
+        metrics.record("teaching_proposal.withdrawn");
         return ProposalResponse.from(proposal);
     }
 

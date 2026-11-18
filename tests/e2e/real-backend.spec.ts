@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { execFileSync } from 'node:child_process'
 
 test.skip(!process.env.CODEMATCH_REAL_E2E, 'Enable with CODEMATCH_REAL_E2E=1 and the isolated E2E Compose stack.')
 
@@ -6,12 +7,20 @@ test('real browser completes request, CV proposal, match and denied access again
   test.setTimeout(120_000)
   const learnerContext = await browser.newContext({ baseURL: 'http://127.0.0.1:5173' })
   const learnerPage = await learnerContext.newPage()
-  const password = 'M5-Integration-Password-83!'
-  const learnerEmail = `m5-learner-${crypto.randomUUID()}@example.test`
-  const requestTitle = `M5 học React với backend thật ${crypto.randomUUID().slice(0, 8)}`
+  const password = `M6-${crypto.randomUUID()}-Aa1!`
+  const learnerEmail = `m6-learner-${crypto.randomUUID()}@example.test`
+  const requestTitle = `M6 học React với backend thật ${crypto.randomUUID().slice(0, 8)}`
 
   await register(learnerPage, learnerEmail, 'M5 Learner', password)
   await expect(learnerPage.getByText(learnerEmail)).toBeVisible()
+  await learnerPage.getByRole('button', { name: 'Đăng xuất' }).click()
+  await expect(learnerPage).toHaveURL(/\/login$/)
+  const loggedOut = await learnerPage.request.get('http://127.0.0.1:5173/api/v1/auth/me')
+  expect(loggedOut.status()).toBe(401)
+  await learnerPage.getByLabel('Email', { exact: true }).fill(learnerEmail)
+  await learnerPage.getByLabel('Mật khẩu', { exact: true }).fill(password)
+  await learnerPage.getByRole('button', { name: 'Đăng nhập' }).click()
+  await expect(learnerPage).toHaveURL(/\/account$/)
   await learnerPage.goto('/learning-requests/new')
   await learnerPage.getByLabel('Tiêu đề yêu cầu').fill(requestTitle)
   await learnerPage.getByLabel('Mô tả ngắn').fill('Tôi muốn luyện tập React thông qua một ứng dụng nhỏ có dữ liệu thật.')
@@ -52,9 +61,19 @@ test('real browser completes request, CV proposal, match and denied access again
   await developerPage.getByRole('button', { name: 'Gửi đề xuất' }).click()
   await expect(developerPage).toHaveURL(/\/my\/proposals\?notice=submitted$/)
 
+  // Verify the private CV remains available after restarting the isolated API container.
+  const composeProject = process.env.CODEMATCH_E2E_COMPOSE_PROJECT ?? 'codematch-m5-e2e-local'
+  execFileSync('docker', ['compose', '--project-name', composeProject, '-f', 'docker-compose.e2e.yml', 'restart', 'api'], { stdio: 'inherit' })
+  await expect.poll(async () => {
+    const response = await learnerPage.request.get('http://127.0.0.1:5173/actuator/health')
+    return response.ok() ? (await response.json()).status : 'DOWN'
+  }, { timeout: 60_000, intervals: [1000, 2000, 5000] }).toBe('UP')
+
   await learnerPage.goto(`/my/learning-requests/${requestId}/proposals`)
   await expect(learnerPage.getByRole('heading', { name: 'M5 Developer' })).toBeVisible()
+  const cvDownload = learnerPage.waitForEvent('download')
   await learnerPage.getByRole('button', { name: 'Tải CV riêng tư' }).click()
+  expect((await cvDownload).suggestedFilename()).toMatch(/\.pdf$/)
   await learnerPage.getByRole('button', { name: 'Chọn developer này' }).click()
   const dialog = learnerPage.getByRole('dialog', { name: 'Xác nhận lựa chọn' })
   await dialog.getByRole('button', { name: 'Xác nhận lựa chọn' }).click()
@@ -68,6 +87,14 @@ test('real browser completes request, CV proposal, match and denied access again
   await register(unrelatedPage, `m5-unrelated-${crypto.randomUUID()}@example.test`, 'M5 Unrelated', password)
   const denied = await unrelatedPage.request.get(`http://127.0.0.1:18080/api/v1/me/learning-requests/${requestId}/proposals`)
   expect(denied.status()).toBe(404)
+  const csrfDenied = await unrelatedPage.evaluate(async () => (await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' })).status)
+  expect(csrfDenied).toBe(403)
+  const stillAuthenticated = await unrelatedPage.request.get('http://127.0.0.1:5173/api/v1/auth/me')
+  expect(stillAuthenticated.status()).toBe(200)
+  const moderationDenied = await unrelatedPage.request.get('http://127.0.0.1:5173/api/v1/admin/reports')
+  expect(moderationDenied.status()).toBe(403)
+  const adminDenied = await unrelatedPage.request.get('http://127.0.0.1:5173/api/v1/admin/pilot-overview')
+  expect(adminDenied.status()).toBe(403)
 
   const apiHealth = await learnerPage.request.get('http://127.0.0.1:18080/actuator/health')
   expect(apiHealth.ok()).toBeTruthy()

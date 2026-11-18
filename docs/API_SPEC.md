@@ -1,6 +1,6 @@
 # API specification
 
-The versioned base path is `/api/v1`. M1–M5 endpoint groups below are implemented; local real-service browser coverage passes and CI verification is pending.
+The versioned base path is `/api/v1`. M1–M6 endpoint groups below are implemented; see the test strategy and pilot validation plan for verification evidence and limitations.
 
 ## M1 identity and developer profiles
 - `GET /auth/csrf` returns 204 and initializes the `XSRF-TOKEN` cookie. Send its value in `X-XSRF-TOKEN` for unsafe requests.
@@ -42,8 +42,6 @@ Browser requests must use credentials. CORS allows only the configured frontend 
 - A match has the single lifecycle state `CONFIRMED`. The learning request transitions from `OPEN` to `MATCHED` in the same transaction. A matched request accepts no proposals and allows no request/proposal edits. Existing proposals remain `SUBMITTED` for historical comparison; their separate selection status becomes `NOT_SELECTED`.
 - Withdrawn, cross-request, and non-submitted proposals cannot be selected. A closed request cannot be selected. Cookie-authenticated writes require the existing CSRF token.
 
-Moderator-only report/moderation endpoints remain planned.
-
 ## Contract conventions
 
 ## M5 moderation and rate limits
@@ -53,4 +51,8 @@ Moderator-only report/moderation endpoints remain planned.
 - `GET /me/reports` lists the caller's report metadata without target content.
 - Admin only: `GET /admin/reports?status=OPEN`, `GET /admin/reports/{id}`, `POST /admin/reports/{id}/review` with `{status: RESOLVED|DISMISSED}`, `POST /admin/learning-requests/{id}/hide`, `POST /admin/learning-requests/{id}/restore`, and `POST /admin/users/{id}/suspend`.
 - Admin access derives from the database `users.is_admin` flag, false by default; registration cannot assign it. Hidden requests are omitted from discovery and non-owner direct reads.
+- `GET /admin/pilot-overview` is admin-only. It returns aggregate registration, active developer, open request, submitted proposal, confirmed match, pending report, funnel coverage/conversion, and average time-to-first-proposal/match values. It does not return account identifiers or proposal/CV content; zero-data metrics are `0`.
+- Pilot aggregate counts are live database-derived values, not event-sourced analytics; time-to-first values consider requests with published timestamps and any recorded proposal/match. Synthetic test accounts/traffic must be excluded from real-pilot interpretation by using isolated databases. No analytics-retention table is introduced.
+- `GET /actuator/metrics` and metric subpaths require admin authority. Publicly reachable management routes are limited to health and info; `/actuator/health/readiness` checks application readiness and database connectivity.
+- Low-cardinality counters record selected business events, authentication failures, rate-limit responses, and proposal/match errors without user labels. Request correlation IDs are validated or generated and returned as `X-Request-ID`.
 Use JSON, ISO-8601 timestamps, stable opaque identifiers, field-level validation errors, and safe problem responses without stack traces or sensitive values. All object reads and writes require object-level authorization. CV bytes are returned only through authenticated, authorized endpoints with private/no-store cache policy. Match selection is idempotent for the same proposal and returns a conflict for a different proposal after resolution.

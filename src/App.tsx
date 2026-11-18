@@ -9,6 +9,7 @@ import { LearningRequestFormPage, LearnerDashboardPage, RequestDetailPage, Reque
 import { EditProposalPage, MyProposalsPage, ProposalApplyPage, ReceivedProposalsPage } from './ProposalPages'
 import { DeveloperMatchesPage, LearnerMatchPage } from './MatchPages'
 import { AdminReportsPage } from './ModerationPages'
+import { AdminPilotOverviewPage } from './PilotOverview'
 
 export default function App() {
   return <BrowserRouter><Routes>
@@ -28,6 +29,7 @@ export default function App() {
     <Route path="/my/learning-requests/:id/match" element={<RequireAccount><LearnerMatchPage /></RequireAccount>} />
     <Route path="/my/matches" element={<RequireAccount><DeveloperMatchesPage /></RequireAccount>} />
     <Route path="/admin/reports" element={<RequireAdmin><AdminReportsPage /></RequireAdmin>} />
+    <Route path="/admin/pilot" element={<RequireAdmin><AdminPilotOverviewPage /></RequireAdmin>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes></BrowserRouter>
 }

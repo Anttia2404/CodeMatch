@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.codematch.api.ApiException;
 import vn.codematch.audit.AuditEventService;
+import vn.codematch.foundation.PilotMetrics;
 import vn.codematch.profiles.DeveloperProfile;
 import vn.codematch.profiles.DeveloperProfileRepository;
 import vn.codematch.proposals.ProposalStatus;
@@ -24,14 +25,17 @@ public class MatchService {
     private final TeachingProposalRepository proposals;
     private final DeveloperProfileRepository profiles;
     private final AuditEventService audit;
+    private final PilotMetrics metrics;
 
     public MatchService(MatchRepository matches, LearningRequestRepository requests,
-                        TeachingProposalRepository proposals, DeveloperProfileRepository profiles, AuditEventService audit) {
+                        TeachingProposalRepository proposals, DeveloperProfileRepository profiles,
+                        AuditEventService audit, PilotMetrics metrics) {
         this.matches = matches;
         this.requests = requests;
         this.proposals = proposals;
         this.profiles = profiles;
         this.audit = audit;
+        this.metrics = metrics;
     }
 
     @Transactional
@@ -61,6 +65,7 @@ public class MatchService {
         try {
             Match created = matches.saveAndFlush(new Match(UUID.randomUUID(), request, proposal));
             audit.record(request.getLearner().getId(), "MATCH_CONFIRMED", "MATCH", created.getId(), true);
+            metrics.record("match.confirmed");
             return MatchResponse.from(created);
         } catch (DataIntegrityViolationException exception) {
             throw alreadyMatched();
