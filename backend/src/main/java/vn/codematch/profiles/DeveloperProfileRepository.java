@@ -13,5 +13,8 @@ public interface DeveloperProfileRepository extends JpaRepository<DeveloperProfi
     @EntityGraph(attributePaths = {"owner", "skills"})
     Optional<DeveloperProfile> findWithOwnerAndSkillsByOwnerId(UUID ownerId);
 
+    @EntityGraph(attributePaths = {"owner", "skills"})
+    Optional<DeveloperProfile> findWithOwnerAndSkillsByOwnerEmailIgnoreCase(String email);
+
     boolean existsByOwnerId(UUID ownerId);
 }

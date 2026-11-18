@@ -10,6 +10,14 @@ The browser is untrusted. Spring Security authenticates requests; services autho
 - Every private profile endpoint requires an authenticated account and resolves the profile through the account identity. Public projections omit email and credentials. Skill IDs are checked against the catalog.
 - DTO validation, HTTPS-only links, generic problem responses, and database constraints reject malformed/conflicting data. Stack traces and binding details are not returned.
 
+## M3 proposal and private CV controls
+- Proposal routes are authenticated and service checks enforce request ownership, developer ownership, request state, no self-application, and participant-only proposal visibility/download. Unrelated users receive not-found responses.
+- A PostgreSQL partial unique index backs the one-active-submission rule; submissions lock the request row so request closure and proposal submission serialize.
+- Uploads accept PDF only, cap content at 5 MiB, verify PDF signature and parse actual bytes using PDFBox; opaque UUID keys are generated server-side. Filesystem storage normalizes the configured root, rejects symlink reads, and is outside static resources.
+- CV metadata omits private storage keys and filesystem paths. Downloads are authenticated attachments with `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`. The CV owner may access their files; the learner may access only the CV attached to an associated proposal for a request they own.
+- Deletion is refused while a submitted proposal references the CV; after withdrawal, deletion is allowed. Replacement updates the existing owner-held file reference. Request closure prevents new proposals but does not revoke participants' access to existing proposals.
+- Logs exclude CV bytes, storage keys, and private file metadata. Local Docker uses a dedicated private volume and the JVM default is under the user's home directory. No automatic retention deadline is implemented; users should remove files when no longer needed.
+
 ## Controls required before pilot
 - Role and object-level checks on every operation; reject IDOR attempts without disclosing existence.
 - Bean validation and strict request DTOs; safe error mapping; parameterized persistence.
@@ -20,4 +28,4 @@ The browser is untrusted. Spring Security authenticates requests; services autho
 - Concurrency-safe proposal acceptance and database constraints for duplicates and one match.
 - Secret management via environment/deployment secret store; never commit real secrets.
 
-M1 implements authentication and developer profiles, but is not a production security certification. Add login/registration rate limits, operational secret management, HTTPS and Secure cookie deployment, CSP, security event auditing, and account recovery controls before a public pilot. M1 does not implement CV upload behavior.
+M1–M3 implement identity, profiles, proposals, and private CV controls, but this is not a production security certification. Add login/registration rate limits, operational secret management, HTTPS and Secure cookie deployment, CSP, malware scanning, security event auditing, automated retention policy, and account recovery controls before a public pilot.

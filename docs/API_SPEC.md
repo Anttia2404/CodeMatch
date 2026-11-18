@@ -1,6 +1,6 @@
 # API specification
 
-The versioned base path is `/api/v1`. M1 and M2 endpoints below are implemented; proposals, CVs, matching, and moderation remain planned.
+The versioned base path is `/api/v1`. M1–M3 endpoints below are implemented; matching and moderation remain planned.
 
 ## M1 identity and developer profiles
 - `GET /auth/csrf` returns 204 and initializes the `XSRF-TOKEN` cookie. Send its value in `X-XSRF-TOKEN` for unsafe requests.
@@ -24,12 +24,17 @@ Browser requests must use credentials. CORS allows only the configured frontend 
 - `GET /saved-requests` lists the current owner's saved requests. `PUT /saved-requests/{requestId}` saves an OPEN request idempotently (204); `DELETE /saved-requests/{requestId}` unsaves it (204). A saved request remains visible to its owner if it later closes.
 - Request body includes title, description, learningGoal, currentLevel, preferredFormat, city, budgetMin/budgetMax/budgetUnit, preferredSchedule, expectedDuration, teachingExpectations, requiresCv, and one or more controlled `skillIds`. Response DTOs contain no learner account identity.
 
-## Planned resource outline
-- `GET /requests/{id}/proposals`, `POST /requests/{id}/proposals`
-- `POST /proposals/{id}/withdraw`, `POST /requests/{id}/proposals/{proposalId}/accept`
-- `GET|POST|DELETE /developer/cvs`, `GET /requests/{id}/proposals/{proposalId}/cv`
-- `GET|PATCH /developers/{id}` and private owner profile routes (M1 implemented)
-- Moderator-only report and moderation routes
+## M3 proposals and CVs
+- `POST /learning-requests/{requestId}/proposals` submits a validated proposal for an OPEN request; developer profile required; self-application and an existing active submission conflict. Requires a CV when the request sets `requiresCv`.
+- `GET /me/proposals` lists the signed-in developer's own proposals.
+- `GET /me/learning-requests/{requestId}/proposals` lists proposals only if the caller owns that request.
+- `GET /proposals/{id}`, `PATCH /proposals/{id}`, `POST /proposals/{id}/withdraw`: proposal owner or owning learner may view; only the developer owner may edit/withdraw.
+- `POST /developer/cvs` uploads `multipart/form-data` part `file`; `GET /developer/cvs` lists the caller's files; `PUT /developer/cvs/{id}` replaces; `DELETE /developer/cvs/{id}` deletes unless referenced by a submitted proposal; `GET /developer/cvs/{id}/file` downloads an owned CV.
+- `GET /proposals/{id}/cv` downloads a CV only for the proposal owner or the learner who owns its request.
+- CVs are actual-content validated PDFs, at most 5 MiB. DTOs do not expose private storage keys or URLs. Download responses are `application/pdf`, attachment, `no-store`, and `nosniff`.
+- Proposal statuses are `SUBMITTED` and `WITHDRAWN`. Closing a request blocks new proposals but does not change existing proposal status or participant access. Selection/acceptance is deferred to M4.
+
+Matching acceptance and moderator-only report/moderation endpoints remain planned.
 
 ## Contract conventions
 Use JSON, ISO-8601 timestamps, stable opaque identifiers, field-level validation errors, and safe problem responses without stack traces or sensitive values. All object reads and writes require object-level authorization. CV bytes are returned only through authenticated, authorized endpoints with private/no-store cache policy. Proposal acceptance is idempotent or returns a conflict for an already resolved request.

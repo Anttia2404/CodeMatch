@@ -311,7 +311,7 @@ export function RequestDetailPage({ authenticated }: { authenticated: boolean })
       <div className="detail-fact"><small>Hình thức</small><strong>{formatLabels[item.preferredFormat]}{item.city ? ` · ${item.city}` : ''}</strong></div>
       <div className="detail-fact"><small>Ngân sách · VND</small><strong>{formatMoney(item.budgetMin, item.budgetMax, item.budgetUnit)}</strong></div>
       <div className="detail-fact"><small>CV developer</small><strong>{item.requiresCv ? 'Yêu cầu CV' : 'Không yêu cầu CV'}</strong></div>
-      <p className="future-note">Gửi đề xuất đồng hành sẽ có trong phiên bản sau.</p>
+      {item.status === 'OPEN' && (authenticated ? <Link className="button button-primary" to={`/learning-requests/${item.id}/proposals/new`}>Gửi đề xuất đồng hành <ArrowRight size={15} /></Link> : <Link className="button button-primary" to="/login">Đăng nhập để gửi đề xuất</Link>)}
     </aside></div>
   </main>
 }
@@ -334,7 +334,7 @@ export function LearnerDashboardPage() {
     onSuccess: () => { void client.invalidateQueries({ queryKey: ['my-learning-requests'] }); void client.invalidateQueries({ queryKey: ['learning-requests'] }) } })
   const notice = new URLSearchParams(location.search).get('notice')
   return <main className="learning-page dashboard-page"><div className="learning-page-heading"><div><span className="section-kicker">GÓC HỌC TẬP</span><h1>Yêu cầu học của tôi</h1><p>Theo dõi yêu cầu nháp, đang mở và đã đóng.</p></div><Link className="button button-primary" to="/learning-requests/new">Tạo yêu cầu học <ArrowRight size={16} /></Link></div>
-    <div className="dashboard-links"><Link to="/saved-requests">Yêu cầu đã lưu <ArrowRight size={15} /></Link></div>
+    <div className="dashboard-links"><Link to="/saved-requests">Yêu cầu đã lưu <ArrowRight size={15} /></Link><Link to="/my/proposals">Đề xuất và CV của tôi <ArrowRight size={15} /></Link></div>
     {notice === 'draft' && <p role="status" className="inline-success"><Check size={16} />Đã lưu bản nháp.</p>}
     <div className="dashboard-tabs" role="tablist" aria-label="Lọc yêu cầu theo trạng thái">{dashboardTabs.map((tab) => <button key={tab.label} role="tab" aria-selected={status === tab.value} className={status === tab.value ? 'is-active' : ''} onClick={() => { setStatus(tab.value); setPage(0) }}>{tab.label}</button>)}</div>
     {requests.isLoading && <div className="request-skeletons">{Array.from({ length: 3 }, (_, index) => <div className="request-skeleton" key={index}><span /><span /><span /></div>)}</div>}
@@ -348,7 +348,7 @@ export function LearnerDashboardPage() {
 
 function DashboardRequest({ item, onAction, busy }: { item: LearningRequest; onAction: (kind: 'publish' | 'close') => void; busy: boolean }) {
   return <article className="dashboard-request"><div className="dashboard-request-main"><span className={`status-pill status-${item.status.toLowerCase()}`}>{statusLabels[item.status]}</span><h2>{item.status === 'CLOSED' ? item.title : <Link to={item.status === 'DRAFT' ? `/learning-requests/${item.id}/edit` : `/learning-requests/${item.id}`}>{item.title}</Link>}</h2><p>{item.description}</p><div className="tag-list">{item.skills.map((skill) => <span className="skill-tag" key={skill.id}>{skill.name}</span>)}</div></div>
-    <div className="dashboard-request-actions">{item.status !== 'CLOSED' && <Link className="button button-outline" to={`/learning-requests/${item.id}/edit`}>Chỉnh sửa</Link>}{item.status === 'DRAFT' && <button className="button button-primary" disabled={busy} onClick={() => onAction('publish')}>Đăng yêu cầu</button>}{item.status === 'OPEN' && <><Link className="button button-outline" to={`/learning-requests/${item.id}`}>Xem công khai</Link><button className="text-action" disabled={busy} onClick={() => onAction('close')}>Đóng yêu cầu</button></>}</div>
+    <div className="dashboard-request-actions">{item.status !== 'CLOSED' && <Link className="button button-outline" to={`/learning-requests/${item.id}/edit`}>Chỉnh sửa</Link>}{item.status === 'DRAFT' && <button className="button button-primary" disabled={busy} onClick={() => onAction('publish')}>Đăng yêu cầu</button>}{item.status === 'OPEN' && <><Link className="button button-outline" to={`/my/learning-requests/${item.id}/proposals`}>Xem đề xuất</Link><Link className="button button-outline" to={`/learning-requests/${item.id}`}>Xem công khai</Link><button className="text-action" disabled={busy} onClick={() => onAction('close')}>Đóng yêu cầu</button></>}{item.status === 'CLOSED' && <Link className="button button-outline" to={`/my/learning-requests/${item.id}/proposals`}>Xem đề xuất</Link>}</div>
   </article>
 }
 

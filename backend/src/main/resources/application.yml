@@ -16,6 +16,10 @@ spring:
   session:
     jdbc:
       initialize-schema: never
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
 management:
   endpoints:
     web:
@@ -29,6 +33,8 @@ logging:
   level:
     root: INFO
 codematch:
+  cv:
+    storage-dir: ${CODEMATCH_CV_STORAGE_DIR:${user.home}/.codematch/private-cvs}
   cookie:
     secure: ${CODEMATCH_COOKIE_SECURE:false}
   cors:
