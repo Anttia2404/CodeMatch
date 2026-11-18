@@ -39,6 +39,20 @@ codematch:
     secure: ${CODEMATCH_COOKIE_SECURE:false}
   cors:
     allowed-origin: ${CODEMATCH_CORS_ALLOWED_ORIGIN:http://localhost:5173}
+  rate-limit:
+    enabled: ${CODEMATCH_RATE_LIMIT_ENABLED:true}
+    login:
+      limit: ${CODEMATCH_LOGIN_RATE_LIMIT:12}
+      window-seconds: ${CODEMATCH_LOGIN_RATE_WINDOW_SECONDS:900}
+    registration:
+      limit: ${CODEMATCH_REGISTRATION_RATE_LIMIT:20}
+      window-seconds: ${CODEMATCH_REGISTRATION_RATE_WINDOW_SECONDS:3600}
+    proposal:
+      limit: ${CODEMATCH_PROPOSAL_RATE_LIMIT:8}
+      window-seconds: ${CODEMATCH_PROPOSAL_RATE_WINDOW_SECONDS:60}
+    cv-download:
+      limit: ${CODEMATCH_CV_DOWNLOAD_RATE_LIMIT:30}
+      window-seconds: ${CODEMATCH_CV_DOWNLOAD_RATE_WINDOW_SECONDS:60}
 server:
   servlet:
     session:

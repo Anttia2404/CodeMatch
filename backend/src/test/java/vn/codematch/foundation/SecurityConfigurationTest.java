@@ -24,6 +24,9 @@ class SecurityConfigurationTest {
     @MockitoBean
     private UserDetailsService users;
 
+    @MockitoBean
+    private RateLimitService rateLimits;
+
     @Test
     void deniesUnimplementedApiRoutesByDefault() throws Exception {
         mockMvc.perform(get("/api/v1/probe")).andExpect(status().isUnauthorized());
