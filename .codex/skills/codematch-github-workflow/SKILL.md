@@ -20,7 +20,7 @@ Use this skill when completing a meaningful CodeMatch change or configuring its 
 
 ## Branches and synchronization
 
-- Keep work on the appropriate feature branch: `feature/m1-auth-profiles`, `feature/m2-learning-requests`, `feature/m3-proposals-cv`, `feature/m4-matching`, or `feature/m5-security-e2e`.
+- Keep work on the appropriate feature branch: `feature/m1-auth-profiles`, `feature/m2-learning-requests`, `feature/m3-proposals-cv`, `feature/m4-matching`, `feature/m5-security-e2e`, or `feature/m6-pilot-launch`.
 - Use `develop` as the integration baseline only after inspecting whether it exists and verifying its history. Never push directly to `main`.
 - After a verified commit, push the current feature branch with upstream tracking when needed (`git push --set-upstream origin HEAD`). Verify the remote branch head matches the local commit, then report the commit hash and push result.
 - If remote history exists, fetch and inspect before publishing. If histories diverge or a merge/rebase is required, stop and ask for approval. Never force-push, delete branches, bypass hooks/checks, or rewrite published history.

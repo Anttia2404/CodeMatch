@@ -1,5 +1,6 @@
 package vn.codematch.foundation;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -11,7 +12,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class RateLimitInterceptorTest {
     @Test
     void returnsStructured429WithRetryAfterForLoginAttempts() {
-        RateLimitInterceptor interceptor = new RateLimitInterceptor(new RateLimitService(), true,
+        var registry = new SimpleMeterRegistry();
+        RateLimitInterceptor interceptor = new RateLimitInterceptor(new RateLimitService(), new PilotMetrics(registry), true,
             1, 60, 5, 60, 5, 60, 5, 60, 2, 60);
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/v1/auth/login");
         request.setRemoteAddr("192.0.2.4");
@@ -25,11 +27,12 @@ class RateLimitInterceptorTest {
                 assertThat(exception.getCode()).isEqualTo("rate_limited");
                 assertThat(exception.getRetryAfterSeconds()).isEqualTo(60);
             });
+        assertThat(registry.get("codematch.security.rate_limit.events").counter().count()).isEqualTo(1);
     }
 
     @Test
     void appliesProposalAndCvDownloadBuckets() {
-        RateLimitInterceptor interceptor = new RateLimitInterceptor(new RateLimitService(), true,
+        RateLimitInterceptor interceptor = new RateLimitInterceptor(new RateLimitService(), new PilotMetrics(new SimpleMeterRegistry()), true,
             3, 60, 3, 60, 1, 60, 1, 60, 2, 60);
         MockHttpServletRequest proposal = new MockHttpServletRequest("POST", "/api/v1/learning-requests/abc/proposals");
         proposal.setRemoteAddr("192.0.2.5");

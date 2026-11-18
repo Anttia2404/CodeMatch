@@ -32,10 +32,16 @@ Use the configured Git credential helper (Git Credential Manager on this worksta
 ### Branching
 
 - `develop` is the integration baseline; do not assume it exists remotely.
-- Use `feature/m1-auth-profiles`, `feature/m2-learning-requests`, `feature/m3-proposals-cv`, `feature/m4-matching`, and `feature/m5-security-e2e` for the corresponding milestones.
+- Use `feature/m1-auth-profiles`, `feature/m2-learning-requests`, `feature/m3-proposals-cv`, `feature/m4-matching`, `feature/m5-security-e2e`, and `feature/m6-pilot-launch` for the corresponding milestones.
 - Create feature branches from the appropriate verified `develop` commit. Push each verified feature branch with upstream tracking.
 - When a milestone is ready for review, create or update a pull request targeting `develop`. Never merge it without explicit approval.
 - `gh` may be used for pull request operations when installed and authenticated. Otherwise use an available GitHub integration or the GitHub web UI; require `gh` installation only if a needed PR operation has no suitable alternative.
 - If the remote has commits not in local history, fetch and inspect them. Preserve both histories; stop for approval before any merge, rebase, or history rewrite.
+
+### Deployment approval
+
+- Local configuration, build, validation, and synthetic-data tests are authorized within the approved milestone.
+- Do not create paid/public cloud resources, enable billing, buy/register domains, publish DNS, or deploy externally without explicit user approval of the provider, region, cost cap, domain, data location, backup destination, and rollout.
+- Do not invite pilot participants or accept real CV/user data until the owner approves pilot dates/scope, privacy and consent text, support/moderation ownership, retention/deletion, and recovery evidence.
 
 See `.codex/skills/codematch-github-workflow/SKILL.md` for the repeatable workflow.

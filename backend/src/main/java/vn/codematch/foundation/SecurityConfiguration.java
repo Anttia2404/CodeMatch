@@ -108,6 +108,8 @@ public class SecurityConfiguration {
             .securityContext(context -> context.securityContextRepository(contextRepository))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers("/actuator/metrics", "/actuator/metrics/**").hasRole("ADMIN")
+                .requestMatchers("/actuator/info").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
                 .requestMatchers("/api/v1/reports", "/api/v1/me/reports").authenticated()

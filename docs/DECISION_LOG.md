@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-11-18 — Keep pilot deployment behind an explicit approval gate
+Document a same-origin Caddy + Spring Boot + PostgreSQL candidate topology, strict staging/production configuration, and operator runbooks without creating cloud resources or deploying. Preserve local Windows PostgreSQL 18 on port 5432; local Docker PostgreSQL uses loopback port 5433. Use isolated synthetic-data tests for real-browser, storage-restart and backup/restore evidence. Off-host encrypted backup, admin provisioning, privacy/retention and malware scanning remain pilot prerequisites.
+
+## 2026-11-18 — Keep pilot metrics aggregate and low-cardinality
+Record a limited event set without user identifiers and calculate funnel aggregates from existing relational data at read time, behind `ROLE_ADMIN`. Do not add a redundant analytics store or expose metrics to ordinary accounts. Keep the application single-replica because rate limits are process-local.
+
 ## 2026-11-18 — Add V6 moderation, audit and configurable rate limits
 - Admin authority is a database-controlled capability (`users.is_admin`, default false); public registration cannot set it.
 - Reports use a polymorphic target ID with service-level visibility checks and a unique reporter/target constraint. Report responses omit target content.
@@ -55,4 +61,4 @@ Reject deletion while a submitted proposal references a CV; after withdrawal, de
 Keep the match lifecycle to a single `CONFIRMED` state. Selection is allowed only for a submitted proposal on an OPEN request owned by the learner. In one transaction, lock the request and proposal, insert the match, and transition the request to `MATCHED`; V5 uniqueness and composite foreign keys protect the relationship even outside the service. Repeating the same selection is idempotent; a different selection conflicts. Retain unselected proposal rows with their original lifecycle status and report selection outcome separately. After selection, freeze the request and all its proposals so the selected offer remains stable. Match details are visible only to the learner and selected developer.
 
 ## 2026-11-18 — Keep the unresolved development-tool advisory visible
-The current full npm audit reports 11 high-severity dependency paths caused by `picomatch@4.0.7` in the Vite/Vitest development toolchain; `npm audit --omit=dev` is clean. The published advisory has no patched release, and npm's suggested automatic fix downgrades Vite across a major version. Keep the compatible Vite 7 baseline, document the finding, and revisit when upstream publishes a patch rather than forcing an unreviewed downgrade.
+The current full npm audit reports 11 high-severity dependency paths caused by `picomatch@4.0.7` in the Vite/Vitest development toolchain; `npm audit --omit=dev` is clean. The registry has no newer 4.x release, and npm's suggested fix downgrades Vitest to 3.1.4. Keep the compatible tested toolchain, document the finding, and revisit when upstream publishes a patch rather than forcing an unreviewed major downgrade.

@@ -31,6 +31,8 @@ Invoke-RestMethod http://localhost:8080/actuator/health | ConvertTo-Json
 
 Open `http://localhost:5173`. Discovery, learner request management, proposal application/review, and CV management call the real API. The health badge is reachability only. Account sessions use an HttpOnly `CMSESSION` cookie and a CSRF token cookie/header; do not store credentials or session IDs in browser storage.
 
+The Vite development server proxies `/api` and `/actuator` to `CODEMATCH_API_PROXY_TARGET` (default `http://127.0.0.1:8080`), so browser calls use the same origin. `.env.example` sets `VITE_API_BASE_URL=/api/v1`. Local demo/sample presentation data, where present, is distinct from API-backed account and request data; the pilot overview reads aggregate values from the live API and displays an honest empty state when no records exist.
+
 In a second PowerShell window, set Java 21 for that shell only, then run backend checks from the repository root:
 
 ```powershell
@@ -50,7 +52,7 @@ To confirm Flyway created the schema history table:
 docker compose exec postgres psql -U codematch -d codematch -c "select version, success from flyway_schema_history order by installed_rank;"
 ```
 
-The Compose database is available on `127.0.0.1:5433` (container port 5432), avoiding the existing Windows PostgreSQL service on port 5432. The API connects over Compose networking at `postgres:5432`. The integration suite uses Testcontainers and the PostgreSQL 17 Alpine image. A skipped Testcontainers test is not a successful database verification. Compose defaults and the sample password are for local development only, and service ports bind to loopback. Set credentials in the ignored `.env` file for local overrides; never commit it.
+The Compose database is available on `127.0.0.1:5433` (container port 5432), avoiding the existing Windows PostgreSQL service on port 5432. The API connects over Compose networking at `postgres:5432`. The integration suite uses Testcontainers and the PostgreSQL 17 Alpine image. A skipped Testcontainers test is not a successful database verification. Copy the placeholder values in `.env.example` to the ignored `.env`, set a local password there, and keep secrets out of Git; local service ports bind to loopback.
 
 ## Database and verification
 
@@ -77,3 +79,9 @@ Learners can select one submitted proposal for an OPEN request. Selection confir
 M5 adds configurable API rate limits, database-backed admin authorization, reports, request hiding, account suspension and security audit events through Flyway V6. Admin accounts require explicit database provisioning; no default credentials are created. GitHub Actions runs browser E2E against an isolated React, Spring Boot and PostgreSQL stack and collects service logs on failure. Rate limits are process-local and audit retention is manual, so production deployment needs shared rate limiting and a retention job.
 
 See [architecture](docs/ARCHITECTURE.md), [API specification](docs/API_SPEC.md), [data model](docs/DATA_MODEL.md), [security model](docs/SECURITY_MODEL.md), and [test strategy](docs/TEST_STRATEGY.md).
+
+### M6 pilot readiness (local preparation only)
+
+M6 adds an admin-only aggregate pilot overview, request correlation and operational metrics, production/staging profile templates, and a candidate Caddy + Spring + PostgreSQL same-origin Compose topology. The topology has not been deployed. Creating paid/public infrastructure, a domain, DNS, certificates or a pilot is blocked on explicit owner approval. CV files and database persistence need independently encrypted off-host backups and a restore-tested recovery procedure before any participant data is accepted. See [pilot runbook](docs/PILOT_RUNBOOK.md), [validation plan](docs/PILOT_VALIDATION_PLAN.md), and [deployment options and cost estimate](docs/M6_DEPLOYMENT_PLAN.md).
+
+For the real frontend-to-backend browser test, start the isolated `docker-compose.e2e.yml` services, then set `$env:CODEMATCH_REAL_E2E='1'`, `$env:CODEMATCH_E2E_COMPOSE_PROJECT='codematch-m6-e2e'`, `$env:VITE_API_BASE_URL='/api/v1'`, and `$env:CODEMATCH_API_PROXY_TARGET='http://127.0.0.1:18080'` before `npm run test:e2e`. This real test validates login/logout, CSRF-backed flows, private-CV download after API restart, and authorization against PostgreSQL. The two `scripts/bounded-*-smoke.mjs` scripts measure small read-only and concurrent marketplace workflows against that isolated stack. Run `scripts/backup-restore-smoke.ps1` only for its disposable synthetic-data restore check.

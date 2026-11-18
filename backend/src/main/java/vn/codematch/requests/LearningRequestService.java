@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.codematch.api.ApiException;
 import vn.codematch.identity.User;
 import vn.codematch.identity.UserRepository;
+import vn.codematch.foundation.PilotMetrics;
 import vn.codematch.profiles.Skill;
 import vn.codematch.profiles.SkillRepository;
 
@@ -22,13 +23,15 @@ public class LearningRequestService {
     private final SkillRepository skills;
     private final UserRepository users;
     private final SavedRequestRepository savedRequests;
+    private final PilotMetrics metrics;
 
     public LearningRequestService(LearningRequestRepository requests, SkillRepository skills,
-            UserRepository users, SavedRequestRepository savedRequests) {
+            UserRepository users, SavedRequestRepository savedRequests, PilotMetrics metrics) {
         this.requests = requests;
         this.skills = skills;
         this.users = users;
         this.savedRequests = savedRequests;
+        this.metrics = metrics;
     }
 
     @Transactional
@@ -58,6 +61,7 @@ public class LearningRequestService {
             throw ApiException.conflict("invalid_transition", "Chỉ có thể đăng yêu cầu đang ở trạng thái nháp.");
         }
         request.publish();
+        metrics.record("learning_request.published");
         return LearningRequestResponse.from(request);
     }
 

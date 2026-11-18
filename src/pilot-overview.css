@@ -1,0 +1,13 @@
+.pilot-overview-page { padding-bottom: 4rem; }
+.pilot-metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 2rem 0; }
+.pilot-metric { min-height: 120px; padding: 1.2rem; border: 1px solid var(--line, #dce3e8); border-radius: 16px; background: var(--surface, #fff); }
+.pilot-metric h2 { margin: 0 0 1rem; color: var(--muted, #5b6870); font-size: .95rem; font-weight: 600; }
+.pilot-metric strong { color: var(--ink, #15212b); font-size: 2rem; }
+.pilot-funnel { max-width: 760px; padding: 1.4rem; border: 1px solid var(--line, #dce3e8); border-radius: 16px; background: var(--surface, #fff); }
+.pilot-funnel h2 { margin-top: 0; }
+.pilot-funnel p { display: flex; justify-content: space-between; gap: 1.5rem; padding: .8rem 0; margin: 0; border-bottom: 1px solid var(--line, #dce3e8); }
+.pilot-funnel p strong { white-space: nowrap; }
+.pilot-funnel small { display: block; margin-top: 1rem; color: var(--muted, #5b6870); line-height: 1.5; }
+.pilot-empty, .pilot-error { padding: 1rem; border-radius: 12px; background: var(--surface-soft, #f2f5f6); }
+.pilot-error { color: var(--danger, #8b2424); }
+@media (max-width: 560px) { .pilot-funnel p { align-items: flex-start; flex-direction: column; gap: .35rem; } }

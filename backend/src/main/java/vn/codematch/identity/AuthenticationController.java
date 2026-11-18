@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import vn.codematch.api.ApiException;
 import vn.codematch.audit.AuditEventService;
+import vn.codematch.foundation.PilotMetrics;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -32,17 +33,19 @@ public class AuthenticationController {
     private final SecurityContextRepository securityContextRepository;
     private final SessionAuthenticationStrategy sessionAuthenticationStrategy;
     private final AuditEventService audit;
+    private final PilotMetrics metrics;
 
     public AuthenticationController(AuthenticationService authenticationService,
                                     AuthenticationManager authenticationManager,
                                     SecurityContextRepository securityContextRepository,
                                     SessionAuthenticationStrategy sessionAuthenticationStrategy,
-                                    AuditEventService audit) {
+                                    AuditEventService audit, PilotMetrics metrics) {
         this.authenticationService = authenticationService;
         this.authenticationManager = authenticationManager;
         this.securityContextRepository = securityContextRepository;
         this.sessionAuthenticationStrategy = sessionAuthenticationStrategy;
         this.audit = audit;
+        this.metrics = metrics;
     }
 
     @GetMapping("/csrf")
@@ -54,7 +57,9 @@ public class AuthenticationController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse register(@Valid @RequestBody RegisterRequest request) {
-        return authenticationService.register(request);
+        UserResponse registered = authenticationService.register(request);
+        metrics.record("account.registered");
+        return registered;
     }
 
     @PostMapping("/login")
@@ -67,6 +72,7 @@ public class AuthenticationController {
                 UsernamePasswordAuthenticationToken.unauthenticated(request.email().trim(), request.password()));
         } catch (AuthenticationException exception) {
             audit.recordFailure(null, "AUTHENTICATION_FAILED", "ACCOUNT", null);
+            metrics.authenticationFailure();
             throw ApiException.unauthorized();
         }
 

@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1'
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
 
 export type Account = { id: string; email: string; displayName: string; status: string; admin?: boolean; createdAt: string; updatedAt: string }
 export type Skill = { id: string; slug: string; name: string }
@@ -54,6 +54,13 @@ export type ModerationReport = {
   id: string; reporterId: string; targetType: ReportTargetType; targetId: string; reason: string
   description: string | null; status: ReportStatus; createdAt: string; reviewedAt: string | null
 }
+export type PilotOverview = {
+  totalRegisteredUsers: number; activeDevelopers: number; openLearningRequests: number
+  submittedProposals: number; confirmedMatches: number; pendingModerationReports: number
+  publishedLearningRequests: number; requestsWithAtLeastOneProposal: number; matchedLearningRequests: number
+  requestProposalCoveragePercent: number; requestMatchConversionPercent: number
+  averageMinutesToFirstProposal: number; averageMinutesToConfirmedMatch: number
+}
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string, public fields: Record<string, string> = {}) {
@@ -86,7 +93,8 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export async function checkApiHealth(): Promise<{ status: string }> {
-  const response = await fetch(new URL('/actuator/health', API_BASE_URL), { headers: { Accept: 'application/json' } })
+  const apiBase = new URL(API_BASE_URL, window.location.origin)
+  const response = await fetch(new URL('/actuator/health', apiBase), { headers: { Accept: 'application/json' } })
   if (!response.ok) throw new Error(`API health returned ${response.status}`)
   const health = await response.json() as { status: string }
   if (health.status !== 'UP') throw new Error(`API health is ${health.status}`)
@@ -149,6 +157,7 @@ export const api = {
   hideRequest: (id: string) => request<void>(`/admin/learning-requests/${encodeURIComponent(id)}/hide`, { method: 'POST' }),
   restoreRequest: (id: string) => request<void>(`/admin/learning-requests/${encodeURIComponent(id)}/restore`, { method: 'POST' }),
   suspendUser: (id: string) => request<void>(`/admin/users/${encodeURIComponent(id)}/suspend`, { method: 'POST' }),
+  adminPilotOverview: () => request<PilotOverview>('/admin/pilot-overview'),
   downloadProposalCv: async (id: string) => {
     const response = await fetch(`${API_BASE_URL}/proposals/${encodeURIComponent(id)}/cv`, { credentials: 'include', headers: { Accept: 'application/pdf' } })
     if (!response.ok) {

@@ -15,6 +15,7 @@ import java.time.Duration;
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
     private final RateLimitService rateLimits;
+    private final PilotMetrics metrics;
     private final boolean enabled;
     private final Bucket login;
     private final Bucket registration;
@@ -22,7 +23,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private final Bucket cvDownload;
     private final Bucket report;
 
-    public RateLimitInterceptor(RateLimitService rateLimits,
+    public RateLimitInterceptor(RateLimitService rateLimits, PilotMetrics metrics,
             @Value("${codematch.rate-limit.enabled:true}") boolean enabled,
             @Value("${codematch.rate-limit.login.limit:12}") int loginLimit,
             @Value("${codematch.rate-limit.login.window-seconds:900}") long loginWindow,
@@ -35,6 +36,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             @Value("${codematch.rate-limit.report.limit:5}") int reportLimit,
             @Value("${codematch.rate-limit.report.window-seconds:3600}") long reportWindow) {
         this.rateLimits = rateLimits;
+        this.metrics = metrics;
         this.enabled = enabled;
         this.login = new Bucket("login", loginLimit, loginWindow);
         this.registration = new Bucket("registration", registrationLimit, registrationWindow);
@@ -55,7 +57,10 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 ? account.id().toString() : authentication.getName();
         String key = bucket.name + ":" + request.getRemoteAddr() + ":" + principal;
         RateLimitService.Decision decision = rateLimits.consume(key, bucket.limit, Duration.ofSeconds(bucket.windowSeconds));
-        if (!decision.allowed()) throw ApiException.tooManyRequests(decision.retryAfterSeconds());
+        if (!decision.allowed()) {
+            metrics.rateLimitedRequest();
+            throw ApiException.tooManyRequests(decision.retryAfterSeconds());
+        }
         return true;
     }
 

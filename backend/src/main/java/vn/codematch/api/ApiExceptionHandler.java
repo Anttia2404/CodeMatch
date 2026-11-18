@@ -12,6 +12,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import jakarta.servlet.http.HttpServletRequest;
+import vn.codematch.foundation.PilotMetrics;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.URI;
@@ -20,8 +22,21 @@ import java.util.TreeMap;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    private final PilotMetrics metrics;
+
+    public ApiExceptionHandler(PilotMetrics metrics) {
+        this.metrics = metrics;
+    }
+
     @ExceptionHandler(ApiException.class)
-    ResponseEntity<ProblemDetail> handleApiException(ApiException exception) {
+    ResponseEntity<ProblemDetail> handleApiException(ApiException exception, HttpServletRequest request) {
+        String path = request.getRequestURI();
+        if ("POST".equals(request.getMethod()) && path.matches("/api/v1/learning-requests/[^/]+/proposals")) {
+            metrics.proposalSubmissionError();
+        }
+        if ("POST".equals(request.getMethod()) && path.matches("/api/v1/me/learning-requests/[^/]+/match")) {
+            metrics.matchConfirmationError();
+        }
         ResponseEntity.BodyBuilder response = ResponseEntity.status(exception.getStatus());
         if (exception.getRetryAfterSeconds() != null) {
             response.header(HttpHeaders.RETRY_AFTER, exception.getRetryAfterSeconds().toString());
