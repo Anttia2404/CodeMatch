@@ -18,6 +18,13 @@ The browser is untrusted. Spring Security authenticates requests; services autho
 - Deletion is refused while a submitted proposal references the CV; after withdrawal, deletion is allowed. Replacement updates the existing owner-held file reference. Request closure prevents new proposals but does not revoke participants' access to existing proposals.
 - Logs exclude CV bytes, storage keys, and private file metadata. Local Docker uses a dedicated private volume and the JVM default is under the user's home directory. No automatic retention deadline is implemented; users should remove files when no longer needed.
 
+## M4 matching controls
+- Selection requires the authenticated owner of the target request. The service locks the request row and selected proposal, verifies the proposal belongs to that request and remains `SUBMITTED`, then records the match and changes the request to `MATCHED` in the same transaction.
+- V5 constrains one match per request and ties the match learner to the request owner and developer profile to the selected proposal for that request with composite foreign keys. Database checks permit only `CONFIRMED` match status.
+- Repeating selection of the same proposal returns the existing match; selecting another proposal returns conflict. Concurrent calls serialize on the request row. A request already CLOSED cannot be matched.
+- Match details are returned only to the owning learner or selected developer. Proposal selection status is visible only to the proposal owner or request owner; unrelated users receive not-found. Other proposals remain intact but are not exposed through match detail.
+- After selection, the request and all its proposals are immutable through normal APIs. The request status prevents new proposals; existing proposal status remains intact for auditability. Cookie-authenticated selection remains CSRF-protected.
+
 ## Controls required before pilot
 - Role and object-level checks on every operation; reject IDOR attempts without disclosing existence.
 - Bean validation and strict request DTOs; safe error mapping; parameterized persistence.
@@ -25,7 +32,7 @@ The browser is untrusted. Spring Security authenticates requests; services autho
 - CSRF protection when cookie authentication is used; secure, HttpOnly, SameSite cookies; restrictive CORS and CSP.
 - CV upload allowlist PDF, 5 MB maximum, server-side signature/content validation, randomized private object keys, malware scanning integration decision before launch, authenticated download authorization, no permanent public links, retention/deletion lifecycle.
 - Audit actor, action, object, timestamp and outcome for sensitive state changes; exclude secrets and file content.
-- Concurrency-safe proposal acceptance and database constraints for duplicates and one match.
+- Concurrency-safe proposal selection and database constraints for one match per request and same-request references.
 - Secret management via environment/deployment secret store; never commit real secrets.
 
-M1–M3 implement identity, profiles, proposals, and private CV controls, but this is not a production security certification. Add login/registration rate limits, operational secret management, HTTPS and Secure cookie deployment, CSP, malware scanning, security event auditing, automated retention policy, and account recovery controls before a public pilot.
+M1–M4 implement identity, profiles, proposals, private CV controls, and participant-scoped match access, but this is not a production security certification. Add login/registration rate limits, operational secret management, HTTPS and Secure cookie deployment, CSP, malware scanning, security event auditing, automated retention policy, and account recovery controls before a public pilot.

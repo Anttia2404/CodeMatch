@@ -1,6 +1,6 @@
 # CodeMatch
 
-CodeMatch is a Vietnamese peer-to-peer marketplace for one-on-one coding instruction. M3 adds teaching proposals, proposal comparison, and private developer CV management to account, profile, discovery, and learning request workflows.
+CodeMatch is a Vietnamese peer-to-peer marketplace for one-on-one coding instruction. The application supports accounts, developer profiles, learning requests, teaching proposals, private CV management, and learner-confirmed matching.
 
 ## Requirements
 
@@ -66,7 +66,9 @@ Learners can save drafts, publish, edit, close, and browse their requests. Disco
 
 ## M3 proposals and private CVs
 
-Developers with a profile can submit one active proposal per OPEN request, edit or withdraw it, and manage private PDF CVs (maximum 5 MB). CV bytes are stored in the Compose-only `private_cvs` volume at `/var/lib/codematch/private-cvs`, outside static resources; a local JVM uses `%USERPROFILE%\\.codematch\\private-cvs` by default. Only the CV owner and the learner who owns an associated proposal may download it through authenticated endpoints. A CV cannot be deleted while a submitted proposal references it. Closing a request prevents new proposals; existing proposals remain reviewable and downloadable by authorized participants. Acceptance and matching are not part of M3.
+Developers with a profile can submit one active proposal per OPEN request, edit or withdraw it before selection, and manage private PDF CVs (maximum 5 MB). CV bytes are stored in the Compose-only `private_cvs` volume at `/var/lib/codematch/private-cvs`, outside static resources; a local JVM uses `%USERPROFILE%\\.codematch\\private-cvs` by default. Only the CV owner and the learner who owns an associated proposal may download it through authenticated endpoints. A CV cannot be deleted while a submitted proposal references it. Closing a request prevents new proposals; existing proposals remain reviewable and downloadable by authorized participants.
+
+Learners can select one submitted proposal for an OPEN request. Selection confirms a match, changes the request status to `MATCHED`, and prevents further proposals or changes to submitted proposals for that request. Other proposals remain stored with their original `SUBMITTED` status; selection status is reported separately as pending, selected, not selected, or withdrawn. Selecting the same proposal again is idempotent; selecting another proposal returns a conflict. Only the request owner and selected developer can view match details.
 
 ## Project documentation
 

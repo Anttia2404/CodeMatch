@@ -114,6 +114,8 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET, "/api/v1/learning-requests", "/api/v1/learning-requests/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/learning-requests").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/v1/learning-requests/*/proposals").authenticated()
+                .requestMatchers("/api/v1/me/matches/**", "/api/v1/me/learning-requests/*/match").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/proposals/*/selection-status").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/api/v1/learning-requests/*").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/v1/learning-requests/*/publish", "/api/v1/learning-requests/*/close").authenticated()
                 .requestMatchers("/api/v1/developer/cvs/**", "/api/v1/proposals/**").authenticated()

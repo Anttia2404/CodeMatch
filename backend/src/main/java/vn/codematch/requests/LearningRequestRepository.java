@@ -21,6 +21,10 @@ public interface LearningRequestRepository extends JpaRepository<LearningRequest
     @EntityGraph(attributePaths = "skills")
     Optional<LearningRequest> findWithSkillsById(UUID id);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select request from LearningRequest request where request.id = :id")
+    Optional<LearningRequest> findLockedWithSkillsById(@Param("id") UUID id);
+
     Page<LearningRequest> findAllByLearnerId(UUID learnerId, Pageable pageable);
 
     Page<LearningRequest> findAllByLearnerIdAndStatus(UUID learnerId, LearningRequestStatus status, Pageable pageable);

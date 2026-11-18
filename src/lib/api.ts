@@ -8,7 +8,7 @@ export type DeveloperProfile = {
   availability: string; skills: Skill[]; createdAt: string; updatedAt: string
 }
 export type ProfileInput = Omit<DeveloperProfile, 'id' | 'developerId' | 'displayName' | 'skills' | 'createdAt' | 'updatedAt'> & { skillIds: string[] }
-export type LearningRequestStatus = 'DRAFT' | 'OPEN' | 'CLOSED'
+export type LearningRequestStatus = 'DRAFT' | 'OPEN' | 'CLOSED' | 'MATCHED'
 export type LearningLevel = 'BEGINNER' | 'BASIC' | 'INTERMEDIATE' | 'ADVANCED'
 export type LearningFormat = 'ONLINE' | 'OFFLINE'
 export type BudgetUnit = 'PER_HOUR' | 'PER_SESSION' | 'TOTAL'
@@ -35,6 +35,14 @@ export type Proposal = {
   developer: ApplicantSummary; introduction: string; teachingApproach: string; relevantExperience: string
   proposedRate: number; rateUnit: BudgetUnit; currency: 'VND'; proposedSchedule: string; estimatedDuration: string
   hasCv: boolean; status: ProposalStatus; createdAt: string; updatedAt: string; withdrawnAt: string | null
+}
+export type MatchStatus = 'CONFIRMED'
+export type ProposalSelectionStatus = 'PENDING' | 'SELECTED' | 'NOT_SELECTED' | 'WITHDRAWN'
+export type ProposalSelection = { learningRequestId: string; requestStatus: LearningRequestStatus; proposalStatus: ProposalStatus; selectionStatus: ProposalSelectionStatus }
+export type ConfirmedMatch = {
+  id: string; learningRequestId: string; learningRequestTitle: string; learnerDisplayName: string
+  selectedProposalId: string; developer: ApplicantSummary; proposal: Proposal; status: MatchStatus
+  createdAt: string; updatedAt: string
 }
 export type ProposalInput = {
   introduction: string; teachingApproach: string; relevantExperience: string; proposedRate: number
@@ -124,6 +132,11 @@ export const api = {
   receivedProposals: (requestId: string) => request<Proposal[]>(`/me/learning-requests/${encodeURIComponent(requestId)}/proposals`),
   updateProposal: (id: string, input: ProposalInput) => request<Proposal>(`/proposals/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(input) }),
   withdrawProposal: (id: string) => request<Proposal>(`/proposals/${encodeURIComponent(id)}/withdraw`, { method: 'POST' }),
+  selectProposal: (requestId: string, proposalId: string) => request<ConfirmedMatch>(`/me/learning-requests/${encodeURIComponent(requestId)}/match`, { method: 'POST', body: JSON.stringify({ proposalId }) }),
+  learnerMatch: (requestId: string) => request<ConfirmedMatch>(`/me/learning-requests/${encodeURIComponent(requestId)}/match`),
+  developerMatches: () => request<ConfirmedMatch[]>('/me/matches'),
+  developerMatch: (matchId: string) => request<ConfirmedMatch>(`/me/matches/${encodeURIComponent(matchId)}`),
+  proposalSelectionStatus: (proposalId: string) => request<ProposalSelection>(`/proposals/${encodeURIComponent(proposalId)}/selection-status`),
   downloadProposalCv: async (id: string) => {
     const response = await fetch(`${API_BASE_URL}/proposals/${encodeURIComponent(id)}/cv`, { credentials: 'include', headers: { Accept: 'application/pdf' } })
     if (!response.ok) {
