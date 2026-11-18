@@ -1,35 +1,46 @@
-import { ArrowRight, Bookmark, Braces, ChevronDown, Clock3, Code2, MapPin, Menu, Search, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, Braces, Code2, MapPin, Menu, ShieldCheck, Sparkles } from 'lucide-react'
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { api, checkApiHealth } from './lib/api'
-import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom'
+import { api, ApiError, checkApiHealth } from './lib/api'
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AccountPage, DeveloperProfileFormPage, LoginPage, PublicDeveloperProfilePage, RegisterPage } from './AuthPages'
-
-const requests = [
-  { title: 'Mình muốn hiểu React hooks qua một project nhỏ', detail: 'Đang làm quen với React, muốn tự tay hoàn thiện một ứng dụng quản lý công việc để hiểu state và effect thực sự hoạt động ra sao.', name: 'Minh Anh', initials: 'MA', color: 'lavender', time: 'Đăng 2 giờ trước', level: 'Mới bắt đầu', budget: '200–350k / buổi', tags: ['React', 'JavaScript', 'Frontend'], sessions: '4–6 buổi' },
-  { title: 'Review giúp lộ trình học backend với Spring Boot', detail: 'Mình đã biết Java cơ bản và đang phân vân nên học gì tiếp theo để có thể tự xây dựng REST API hoàn chỉnh.', name: 'Quốc Bảo', initials: 'QB', color: 'mint', time: 'Đăng hôm qua', level: 'Cơ bản', budget: '250–400k / buổi', tags: ['Java', 'Spring Boot', 'Backend'], sessions: '3–4 buổi' },
-  { title: 'Cùng debug và tối ưu truy vấn PostgreSQL', detail: 'Cần người hướng dẫn đọc execution plan và giúp mình hiểu cách cải thiện vài truy vấn chậm trong side project.', name: 'Thảo Vy', initials: 'TV', color: 'peach', time: 'Đăng 1 ngày trước', level: 'Trung cấp', budget: '300–500k / buổi', tags: ['PostgreSQL', 'SQL', 'Backend'], sessions: '2–3 buổi' },
-]
-
-const filters = ['Tất cả kỹ năng', 'Mức kinh nghiệm', 'Ngân sách', 'Lịch học']
+import { LearningRequestFormPage, LearnerDashboardPage, RequestDetailPage, RequestDiscovery, SavedRequestsPage } from './LearningRequests'
 
 export default function App() {
-  return <BrowserRouter><Routes><Route path="/" element={<HomePage />} /><Route path="/login" element={<LoginPage />} /><Route path="/register" element={<RegisterPage />} /><Route path="/account" element={<AccountPage />} /><Route path="/developer-profile" element={<DeveloperProfileFormPage />} /><Route path="/developers/:profileId" element={<PublicDeveloperProfilePage />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes></BrowserRouter>
+  return <BrowserRouter><Routes>
+    <Route path="/" element={<HomePage />} />
+    <Route path="/login" element={<LoginPage />} /><Route path="/register" element={<RegisterPage />} />
+    <Route path="/account" element={<AccountPage />} /><Route path="/developer-profile" element={<DeveloperProfileFormPage />} />
+    <Route path="/developers/:profileId" element={<PublicDeveloperProfilePage />} />
+    <Route path="/learning-requests/new" element={<RequireAccount><LearningRequestFormPage /></RequireAccount>} />
+    <Route path="/learning-requests/:id/edit" element={<RequireAccount><LearningRequestFormPage /></RequireAccount>} />
+    <Route path="/learning-requests/:id" element={<RequestDetailRoute />} />
+    <Route path="/my/learning-requests" element={<RequireAccount><LearnerDashboardPage /></RequireAccount>} />
+    <Route path="/saved-requests" element={<RequireAccount><SavedRequestsPage /></RequireAccount>} />
+    <Route path="*" element={<Navigate to="/" replace />} />
+  </Routes></BrowserRouter>
+}
+
+function RequireAccount({ children }: { children: ReactNode }) {
+  const location = useLocation()
+  const account = useQuery({ queryKey: ['account'], queryFn: api.current, retry: false })
+  if (account.isLoading) return <main className="learning-page"><p role="status">Đang kiểm tra phiên đăng nhập…</p></main>
+  if (account.isError && !(account.error instanceof ApiError && account.error.status === 401)) return <main className="learning-page"><p role="alert">Không thể xác minh phiên đăng nhập. Hãy thử tải lại trang.</p></main>
+  if (!account.data) return <Navigate to="/login" state={{ from: location }} replace />
+  return children
+}
+
+function RequestDetailRoute() {
+  const account = useQuery({ queryKey: ['account'], queryFn: api.current, retry: false })
+  return <RequestDetailPage authenticated={account.isSuccess && Boolean(account.data)} />
 }
 
 function HomePage() {
-  const [saved, setSaved] = useState<number[]>([])
-  const [query, setQuery] = useState('')
-  const [activeFilter, setActiveFilter] = useState('Tất cả kỹ năng')
   const [mobileOpen, setMobileOpen] = useState(false)
   const apiStatus = useQuery({ queryKey: ['api-health'], queryFn: checkApiHealth, retry: 0, refetchInterval: 60_000 })
   const account = useQuery({ queryKey: ['account'], queryFn: api.current, retry: false })
   const authenticated = account.isSuccess && Boolean(account.data)
-  const visibleRequests = requests.filter((request) => `${request.title} ${request.detail} ${request.tags.join(' ')}`.toLowerCase().includes(query.toLowerCase()))
-
-  function toggleSaved(index: number) {
-    setSaved((current) => current.includes(index) ? current.filter((item) => item !== index) : [...current, index])
-  }
 
   return (
     <div className="app-shell">
@@ -38,9 +49,9 @@ function HomePage() {
         <button className="mobile-menu" aria-label="Mở menu" aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}><Menu /></button>
         <nav className={mobileOpen ? 'main-nav is-open' : 'main-nav'} aria-label="Điều hướng chính">
           <a className="nav-link active" href="#requests">Tìm cơ hội học</a><a className="nav-link" href="#how">Cách hoạt động</a>
-          {authenticated ? <><Link className="nav-link mobile-auth" to="/account">Tài khoản</Link><Link className="button button-outline nav-join" to="/developer-profile">Hồ sơ developer</Link></> : <><Link className="nav-link mobile-auth" to="/login">Đăng nhập</Link><Link className="button button-outline nav-join" to="/register">Tham gia CodeMatch</Link></>}
+          {authenticated ? <><Link className="nav-link mobile-auth" to="/my/learning-requests">Yêu cầu của tôi</Link><Link className="nav-link mobile-auth" to="/saved-requests">Đã lưu</Link><Link className="nav-link mobile-auth" to="/account">Tài khoản</Link><Link className="button button-outline nav-join" to="/learning-requests/new">Đăng yêu cầu học</Link></> : <><Link className="nav-link mobile-auth" to="/login">Đăng nhập</Link><Link className="button button-outline nav-join" to="/register">Tham gia CodeMatch</Link></>}
         </nav>
-        <div className="account-actions">{authenticated ? <><Link className="login-link" to="/account">Tài khoản</Link><Link className="button button-outline" to="/developer-profile">Hồ sơ developer</Link></> : <><Link className="login-link" to="/login">Đăng nhập</Link><Link className="button button-outline" to="/register">Tham gia CodeMatch</Link></>}</div>
+        <div className="account-actions">{authenticated ? <><Link className="login-link" to="/my/learning-requests">Yêu cầu của tôi</Link><Link className="button button-outline" to="/learning-requests/new">Đăng yêu cầu</Link><Link className="login-link" to="/account">Tài khoản</Link></> : <><Link className="login-link" to="/login">Đăng nhập</Link><Link className="button button-outline" to="/register">Tham gia CodeMatch</Link></>}</div>
       </header>
 
       <main id="home">
@@ -49,7 +60,7 @@ function HomePage() {
             <div className="trust-note"><span className="trust-dot" /> Học 1:1 cùng developer độc lập</div>
             <h1>Học code theo cách <span>của bạn.</span></h1>
             <p className="hero-description">Chia sẻ điều bạn muốn học. Tìm một developer phù hợp để cùng bạn đi tiếp, từng buổi một.</p>
-            <div className="hero-actions"><a className="button button-primary" href="#requests">Khám phá yêu cầu học <ArrowRight size={17} /></a><Link className="quiet-link" to="/developer-profile">Bạn là developer? <span>Tạo hồ sơ</span></Link></div>
+            <div className="hero-actions"><a className="button button-primary" href="#requests">Khám phá yêu cầu học <ArrowRight size={17} /></a><Link className="quiet-link" to={authenticated ? '/learning-requests/new' : '/register'}>{authenticated ? 'Bạn muốn học?' : 'Bạn là developer?'} <span>{authenticated ? 'Đăng yêu cầu' : 'Tạo hồ sơ'}</span></Link></div>
           </div>
           <div className="hero-art" aria-label="Minh họa kết nối người học và developer">
             <div className="orbit orbit-one" /><div className="orbit orbit-two" />
@@ -60,16 +71,8 @@ function HomePage() {
         </section>
 
         <section className="discovery" id="requests">
-          <div className="section-heading"><div><span className="section-kicker">CƠ HỘI MỚI</span><h2>Đang cần người đồng hành</h2><p>Những mục tiêu học tập đang chờ một developer phù hợp.</p><p className="demo-note">Yêu cầu bên dưới là dữ liệu minh họa, chưa lấy từ API.</p></div><div className="section-actions"><span className={`api-status ${apiStatus.isSuccess ? 'api-online' : apiStatus.isError ? 'api-offline' : ''}`}><i />{apiStatus.isSuccess ? 'API trực tuyến' : apiStatus.isError ? 'API chưa kết nối' : 'Đang kiểm tra API'}</span><a className="all-link" href="#all">Xem tất cả yêu cầu <ArrowRight size={16} /></a></div></div>
-          <div className="search-row"><label className="search-box"><Search size={18} /><input aria-label="Tìm theo kỹ năng hoặc công nghệ" placeholder="Tìm theo kỹ năng, công nghệ..." value={query} onChange={(event) => setQuery(event.target.value)} /><kbd>⌘ K</kbd></label><div className="filter-list">{filters.map((filter) => <button key={filter} className={`filter-button ${activeFilter === filter ? 'filter-selected' : ''}`} onClick={() => setActiveFilter(filter)}>{filter}<ChevronDown size={14} /></button>)}</div></div>
-          <div className="request-list" aria-live="polite">{visibleRequests.map((request) => {
-            const originalIndex = requests.indexOf(request)
-            return <article className="request-card" key={request.title}>
-              <div className="request-main"><div className="request-title-row"><a className="request-title" href={`#request-${originalIndex}`}>{request.title}</a><button className={`save-button ${saved.includes(originalIndex) ? 'is-saved' : ''}`} onClick={() => toggleSaved(originalIndex)} aria-label={saved.includes(originalIndex) ? 'Bỏ lưu yêu cầu' : 'Lưu yêu cầu'} aria-pressed={saved.includes(originalIndex)}><Bookmark size={18} fill={saved.includes(originalIndex) ? 'currentColor' : 'none'} /></button></div><p className="request-description">{request.detail}</p><div className="tag-list">{request.tags.map((tag) => <span className="skill-tag" key={tag}>{tag}</span>)}</div></div>
-              <div className="request-meta"><div className="requester"><span className={`avatar ${request.color}`}>{request.initials}</span><div><strong>{request.name}</strong><small>{request.time}</small></div></div><div className="meta-grid"><span><Code2 size={14} />{request.level}</span><span><Clock3 size={14} />{request.sessions}</span><span><MapPin size={14} />Online</span></div></div>
-              <div className="request-price"><strong>{request.budget}</strong><span>ngân sách dự kiến</span><a href={`#proposal-${originalIndex}`}>Xem chi tiết <ArrowRight size={14} /></a></div>
-            </article>
-          })}{visibleRequests.length === 0 && <div className="empty-state"><Search size={22} /><strong>Chưa tìm thấy yêu cầu phù hợp</strong><span>Thử một từ khóa khác như React, Java hoặc SQL.</span></div>}</div>
+          <div className="section-heading"><div><span className="section-kicker">CƠ HỘI MỚI</span><h2>Đang cần người đồng hành</h2><p>Yêu cầu đang mở từ người học trên CodeMatch.</p></div><div className="section-actions"><span className={`api-status ${apiStatus.isSuccess ? 'api-online' : apiStatus.isError ? 'api-offline' : ''}`}><i />{apiStatus.isSuccess ? 'API trực tuyến' : apiStatus.isError ? 'API chưa kết nối' : 'Đang kiểm tra API'}</span></div></div>
+          <RequestDiscovery authenticated={authenticated} />
         </section>
         <section className="how-strip" id="how"><span className="how-icon"><Sparkles size={19} /></span><p><strong>Mỗi buổi học bắt đầu từ mục tiêu của bạn.</strong> Bạn chọn người dạy, cùng thống nhất cách học và lịch trình phù hợp.</p><a href="#how-details">Tìm hiểu thêm <ArrowRight size={15} /></a></section>
       </main>

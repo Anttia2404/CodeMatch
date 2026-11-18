@@ -11,10 +11,10 @@ CodeMatch is not a school, course catalog, homework/exam completion service, emp
 - Both parties retain choice over whether to work together and how to arrange sessions.
 
 ## MVP capability scope
-The product milestones are M0 foundation, M1 authentication and profiles, M2 learning requests and discovery, M3 proposals and private CVs, M4 matching, M5 moderation/security/E2E, and M6 pilot preparation. This delivery implements M0 only.
+The product milestones are M0 foundation, M1 authentication and profiles, M2 learning requests and discovery, M3 proposals and private CVs, M4 matching, M5 moderation/security/E2E, and M6 pilot preparation. M0–M2 are implemented; M3 onward remain future milestones.
 
 ## M0 experience
-The frontend establishes Vietnamese language, responsive marketplace visual direction, and a static discovery preview explicitly backed by local demo data. It does not claim live users, ratings, verified status, or operational marketplace behavior. The API and database are structural foundations only.
+The frontend uses Vietnamese and a responsive marketplace layout. M2 request discovery and learner-owned request management use the API and PostgreSQL. No fake ratings, credentials, or verification are shown. Proposals, CV uploads, matching, and messages are not implemented.
 
 ## Product constraints
 - Primary market and language: Vietnam / Vietnamese.

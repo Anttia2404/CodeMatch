@@ -2,9 +2,9 @@
 
 | Milestone | Scope | Status |
 |---|---|---|
-| M0 | Foundation, architecture, domain model, design system, app skeleton, migration baseline, Compose, CI, tests | Implemented in this delivery; checks reported separately |
-| M1 | Authentication and profiles | Proposed next; await approval |
-| M2 | Learning requests and discovery | Not started |
+| M0 | Foundation, architecture, domain model, design system, app skeleton, migration baseline, Compose, CI, tests | Complete |
+| M1 | Authentication and profiles | Complete; merged to develop |
+| M2 | Learning requests and discovery | Implemented and verified on `feature/m2-learning-requests`; ready for review |
 | M3 | Teaching proposals and private CV uploads | Not started |
 | M4 | Matches and applicant comparison | Not started |
 | M5 | Moderation, security hardening, E2E | Not started |

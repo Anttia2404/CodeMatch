@@ -1,6 +1,6 @@
 # CodeMatch
 
-CodeMatch is a Vietnamese peer-to-peer marketplace for one-on-one coding instruction. M1 provides account registration and login, server-side sessions, and developer profiles. Learning requests and proposals remain demo-only/future work.
+CodeMatch is a Vietnamese peer-to-peer marketplace for one-on-one coding instruction. M2 includes account registration/login, developer profiles, learner request creation and lifecycle management, public request discovery, and saved requests. Proposals and CV handling remain future work.
 
 ## Requirements
 
@@ -29,7 +29,7 @@ npm run dev
 Invoke-RestMethod http://localhost:8080/actuator/health | ConvertTo-Json
 ```
 
-Open `http://localhost:5173`. The discovery cards are labeled local illustrative data. Registration, login, account, skill catalog, and developer profile screens call the real API. Account sessions use an HttpOnly `CMSESSION` cookie and a CSRF token cookie/header; do not store credentials or session IDs in browser storage.
+Open `http://localhost:5173`. Request discovery, request details, learner request management, and saved requests call the real API; the health badge is reachability only. Registration, login, account, skill catalog, and developer profile screens also call the real API. Account sessions use an HttpOnly `CMSESSION` cookie and a CSRF token cookie/header; do not store credentials or session IDs in browser storage. Proposals are not implemented yet.
 
 In a second PowerShell window, set Java 21 for that shell only, then run backend checks from the repository root:
 
@@ -38,7 +38,7 @@ Push-Location backend
 $env:JAVA_HOME = 'C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2024.2.4\jbr'
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 .\mvnw.cmd -version
-.\mvnw.cmd -B -DskipTests compile
+.\mvnw.cmd -B compile
 .\mvnw.cmd -B test
 .\mvnw.cmd -B verify
 Pop-Location
@@ -56,13 +56,13 @@ The Compose database is available on `127.0.0.1:5433` (container port 5432), avo
 
 Compose keeps the host PostgreSQL 18 service on port 5432 untouched. Its PostgreSQL 17 development service is available at `127.0.0.1:5433` and the API container reaches it at `postgres:5432`. When running the backend outside Compose, its default datasource points to host port 5433. Set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` in the process environment to override it.
 
-The V2 Flyway migration creates users, developer profiles, a seeded controlled skills catalog, and the JDBC session tables. Run `docker compose up -d --build`, then verify readiness with `docker compose ps` and `docker compose exec postgres pg_isready -U codematch -d codematch`. Use the Java 21 Maven Wrapper commands above; `test` and `verify` run PostgreSQL Testcontainers integration tests and require Docker Desktop's Linux engine. A Docker-less skip is not a passing integration verification.
+The V3 Flyway migration adds learning requests, normalized request skills, and saved requests. V1–V2 create the baseline, users, developer profiles, controlled skills, and JDBC session tables. Run `docker compose up -d --build`, then verify readiness with `docker compose ps` and `docker compose exec postgres pg_isready -U codematch -d codematch`. Use the Java 21 Maven Wrapper commands above; `test` and `verify` run PostgreSQL Testcontainers integration tests and require Docker Desktop's Linux engine. A Docker-less skip is not a passing integration verification.
 
 For local sample credentials, `.env.example` is copied to ignored `.env`; defaults are local-only. Set `CODEMATCH_COOKIE_SECURE=true` behind HTTPS. Keep `.env`, credentials, and tokens out of source control.
 
-## Current UI data
+## M2 request behavior
 
-The discovery cards are static illustrative local demo data. They do not come from the backend API. The UI checks `/actuator/health`; that indicator does not claim the discovery cards are live API results.
+Learners can save drafts, publish, edit, close, and browse their requests. Discovery returns OPEN requests with search, controlled-skill, level, format, VND range/unit, CV requirement, sort, and pagination filters. Budget range filters require a unit so per-hour/per-session/total amounts are not compared as interchangeable. Saved requests are private to the signed-in learner and may still be opened when subsequently closed. Proposals, CV upload, matching, and messaging are not implemented.
 
 ## Project documentation
 

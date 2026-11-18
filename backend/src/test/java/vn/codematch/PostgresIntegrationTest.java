@@ -57,7 +57,7 @@ class PostgresIntegrationTest {
             "select count(*) from flyway_schema_history where success = true", Integer.class);
         String databaseName = jdbcTemplate.queryForObject("select current_database()", String.class);
 
-        assertThat(migrationCount).isEqualTo(2);
+        assertThat(migrationCount).isEqualTo(3);
         assertThat(databaseName).startsWith("test");
         assertThat(jdbcTemplate.queryForObject("select count(*) from skills", Integer.class)).isEqualTo(11);
         assertThat(jdbcTemplate.queryForObject("select count(*) from information_schema.tables where table_name = 'spring_session'", Integer.class)).isEqualTo(1);
