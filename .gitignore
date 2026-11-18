@@ -1,6 +1,8 @@
 node_modules/
 dist/
 backend/target/
+.local-private-data/
+private-cvs/
 .env
 .env.*
 !.env.example

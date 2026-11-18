@@ -34,4 +34,13 @@ Every account may use learner features; one owner-managed developer profile sign
 M1 seeds a normalized skill catalog in Flyway and accepts only known skill identifiers in profile writes; clients cannot create arbitrary catalog entries.
 
 ## 2026-11-17 — Replace demo discovery with persisted learning requests in M2
-Learning request discovery reads OPEN requests from PostgreSQL and uses controlled skill filters. Learners own draft/open/closed lifecycle actions and saved requests. Budget range filtering requires an explicit unit because hourly, per-session, and total VND values are not comparable without conversion. Proposals and CV flows remain out of scope until M3.
+Learning request discovery reads OPEN requests from PostgreSQL and uses controlled skill filters. Learners own draft/open/closed lifecycle actions and saved requests. Budget range filtering requires an explicit unit because hourly, per-session, and total VND values are not comparable without conversion.
+
+## 2026-11-18 — Keep M3 proposals simple and database-enforced
+Proposal status is limited to SUBMITTED and WITHDRAWN; acceptance and matching belong to M4. A partial unique index prevents concurrent duplicate active proposals. Request row locking serializes submission against close. Existing proposals stay available to both authorized participants after request closure, and closure rejects new submissions.
+
+## 2026-11-18 — Store CV bytes privately behind an adapter
+Use a filesystem-backed `PrivateCvStorage` adapter for local development, with opaque UUID storage keys and files outside public static directories. Docker Compose uses a dedicated named volume; local JVM runs use a per-user private directory. Validate PDF bytes through PDFBox in addition to extension and size. The API streams bytes only for the owner or the learner associated with that proposal. No paid object storage is needed for local development; the interface allows a future adapter.
+
+## 2026-11-18 — Protect attached CV deletion
+Reject deletion while a submitted proposal references a CV; after withdrawal, deletion is allowed. CV replacement updates the owner's selected file in place so an existing proposal continues to refer to that developer-controlled CV. No automatic CV retention schedule is implied; developers should remove files when no longer needed.

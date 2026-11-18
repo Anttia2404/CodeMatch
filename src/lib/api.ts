@@ -27,6 +27,20 @@ export type DiscoveryFilters = {
   page?: number; size?: number; sort?: 'NEWEST' | 'OLDEST'
 }
 
+export type DeveloperCv = { id: string; fileName: string; sizeBytes: number; uploadedAt: string; updatedAt: string }
+export type ApplicantSummary = { profileId: string; displayName: string; headline: string; biography: string; yearsExperience: number; skills: Skill[] }
+export type ProposalStatus = 'SUBMITTED' | 'WITHDRAWN'
+export type Proposal = {
+  id: string; learningRequestId: string; learningRequestTitle: string; learningRequestStatus: LearningRequestStatus
+  developer: ApplicantSummary; introduction: string; teachingApproach: string; relevantExperience: string
+  proposedRate: number; rateUnit: BudgetUnit; currency: 'VND'; proposedSchedule: string; estimatedDuration: string
+  hasCv: boolean; status: ProposalStatus; createdAt: string; updatedAt: string; withdrawnAt: string | null
+}
+export type ProposalInput = {
+  introduction: string; teachingApproach: string; relevantExperience: string; proposedRate: number
+  rateUnit: BudgetUnit; proposedSchedule: string; estimatedDuration: string; cvId: string | null; removeCv: boolean
+}
+
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string, public fields: Record<string, string> = {}) {
     super(message)
@@ -41,7 +55,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const method = (init.method ?? 'GET').toUpperCase()
   const headers = new Headers(init.headers)
   headers.set('Accept', 'application/json')
-  if (init.body) headers.set('Content-Type', 'application/json')
+  if (init.body && !(init.body instanceof FormData)) headers.set('Content-Type', 'application/json')
   if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
     await fetch(`${API_BASE_URL}/auth/csrf`, { credentials: 'include' })
     const token = cookie('XSRF-TOKEN')
@@ -101,4 +115,22 @@ export const api = {
   savedRequests: () => request<LearningRequest[]>('/saved-requests'),
   saveRequest: (id: string) => request<void>(`/saved-requests/${encodeURIComponent(id)}`, { method: 'PUT' }),
   unsaveRequest: (id: string) => request<void>(`/saved-requests/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  myCvs: () => request<DeveloperCv[]>('/developer/cvs'),
+  uploadCv: (file: File) => { const body = new FormData(); body.append('file', file); return request<DeveloperCv>('/developer/cvs', { method: 'POST', body }) },
+  replaceCv: (id: string, file: File) => { const body = new FormData(); body.append('file', file); return request<DeveloperCv>(`/developer/cvs/${encodeURIComponent(id)}`, { method: 'PUT', body }) },
+  deleteCv: (id: string) => request<void>(`/developer/cvs/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  submitProposal: (requestId: string, input: ProposalInput) => request<Proposal>(`/learning-requests/${encodeURIComponent(requestId)}/proposals`, { method: 'POST', body: JSON.stringify(input) }),
+  myProposals: () => request<Proposal[]>('/me/proposals'),
+  receivedProposals: (requestId: string) => request<Proposal[]>(`/me/learning-requests/${encodeURIComponent(requestId)}/proposals`),
+  updateProposal: (id: string, input: ProposalInput) => request<Proposal>(`/proposals/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(input) }),
+  withdrawProposal: (id: string) => request<Proposal>(`/proposals/${encodeURIComponent(id)}/withdraw`, { method: 'POST' }),
+  downloadProposalCv: async (id: string) => {
+    const response = await fetch(`${API_BASE_URL}/proposals/${encodeURIComponent(id)}/cv`, { credentials: 'include', headers: { Accept: 'application/pdf' } })
+    if (!response.ok) {
+      let detail = `Không thể tải CV (${response.status}).`
+      try { detail = ((await response.json()) as { detail?: string }).detail ?? detail } catch { /* use safe status text */ }
+      throw new ApiError(response.status, 'cv_download_failed', detail)
+    }
+    return response.blob()
+  },
 }

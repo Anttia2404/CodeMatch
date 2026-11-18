@@ -20,8 +20,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-codematch}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-codematch}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-local-dev-only}
+      CODEMATCH_CV_STORAGE_DIR: /var/lib/codematch/private-cvs
     ports:
       - "127.0.0.1:8080:8080"
+    volumes:
+      - private_cvs:/var/lib/codematch/private-cvs
     depends_on:
       postgres:
         condition: service_healthy
@@ -32,3 +35,4 @@ services:
       retries: 10
 volumes:
   postgres_data:
+  private_cvs:

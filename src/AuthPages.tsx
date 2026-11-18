@@ -50,7 +50,7 @@ export function AccountPage() {
   const client = useQueryClient(); const account = useQuery({ queryKey: ['account'], queryFn: api.current, retry: false })
   if (account.isLoading) return <PageFrame title="Tài khoản"><p role="status">Đang tải thông tin…</p></PageFrame>
   if (account.isError || !account.data) return <Navigate to="/login" replace />
-  return <PageFrame title="Tài khoản"><p>Xin chào, <strong>{account.data.displayName}</strong></p><p>{account.data.email}</p><p>Vai trò hiện tại: người dùng</p><Link className="button button-primary" to="/developer-profile">Hồ sơ developer</Link><button className="button button-outline" onClick={async () => { await api.logout(); client.setQueryData(['account'], null); await client.invalidateQueries({ queryKey: ['account'] }) }}>Đăng xuất</button></PageFrame>
+  return <PageFrame title="Tài khoản"><p>Xin chào, <strong>{account.data.displayName}</strong></p><p>{account.data.email}</p><p>Vai trò hiện tại: người dùng</p><Link className="button button-primary" to="/developer-profile">Hồ sơ developer</Link><Link className="button button-outline" to="/my/proposals">Đề xuất và quản lý CV</Link><button className="button button-outline" onClick={async () => { await api.logout(); client.setQueryData(['account'], null); await client.invalidateQueries({ queryKey: ['account'] }) }}>Đăng xuất</button></PageFrame>
 }
 
 const emptyProfile = { headline: '', biography: '', yearsExperience: 0, githubUrl: '', linkedinUrl: '', portfolioUrl: '', teachingApproach: '', availability: '' }
