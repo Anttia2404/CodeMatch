@@ -10,7 +10,7 @@ import './learning-requests.css'
 const levelLabels: Record<LearningLevel, string> = { BEGINNER: 'Mới bắt đầu', BASIC: 'Cơ bản', INTERMEDIATE: 'Trung cấp', ADVANCED: 'Nâng cao' }
 const formatLabels: Record<LearningFormat, string> = { ONLINE: 'Học online', OFFLINE: 'Học trực tiếp' }
 const unitLabels: Record<BudgetUnit, string> = { PER_HOUR: 'mỗi giờ', PER_SESSION: 'mỗi buổi', TOTAL: 'toàn bộ' }
-const statusLabels: Record<LearningRequestStatus, string> = { DRAFT: 'Bản nháp', OPEN: 'Đang mở', CLOSED: 'Đã đóng' }
+const statusLabels: Record<LearningRequestStatus, string> = { DRAFT: 'Bản nháp', OPEN: 'Đang mở', CLOSED: 'Đã đóng', MATCHED: 'Đã chọn developer' }
 
 function formatMoney(min: number | null, max: number | null, unit: BudgetUnit | null) {
   if (min == null || max == null || unit == null) return 'Thỏa thuận ngân sách'
@@ -163,7 +163,7 @@ export function LearningRequestFormPage() {
 
   useEffect(() => {
     if (!existing.data) return
-    if (existing.data.status === 'CLOSED') { setError('Yêu cầu đã đóng nên không thể chỉnh sửa.'); setReady(true); return }
+    if (existing.data.status === 'CLOSED' || existing.data.status === 'MATCHED') { setError('Yêu cầu đã đóng hoặc đã chọn developer nên không thể chỉnh sửa.'); setReady(true); return }
     const item = existing.data
     setForm({ title: item.title, description: item.description, learningGoal: item.learningGoal, currentLevel: item.currentLevel,
       preferredFormat: item.preferredFormat, city: item.city ?? '', budgetMin: item.budgetMin == null ? '' : String(item.budgetMin),
@@ -321,7 +321,7 @@ function DetailSection({ title, children }: { title: string; children: ReactNode
 }
 
 const dashboardTabs: Array<{ label: string; value: LearningRequestStatus | undefined }> = [
-  { label: 'Tất cả', value: undefined }, { label: 'Bản nháp', value: 'DRAFT' }, { label: 'Đang mở', value: 'OPEN' }, { label: 'Đã đóng', value: 'CLOSED' },
+  { label: 'Tất cả', value: undefined }, { label: 'Bản nháp', value: 'DRAFT' }, { label: 'Đang mở', value: 'OPEN' }, { label: 'Đã đóng', value: 'CLOSED' }, { label: 'Đã chọn developer', value: 'MATCHED' },
 ]
 
 export function LearnerDashboardPage() {
@@ -348,7 +348,7 @@ export function LearnerDashboardPage() {
 
 function DashboardRequest({ item, onAction, busy }: { item: LearningRequest; onAction: (kind: 'publish' | 'close') => void; busy: boolean }) {
   return <article className="dashboard-request"><div className="dashboard-request-main"><span className={`status-pill status-${item.status.toLowerCase()}`}>{statusLabels[item.status]}</span><h2>{item.status === 'CLOSED' ? item.title : <Link to={item.status === 'DRAFT' ? `/learning-requests/${item.id}/edit` : `/learning-requests/${item.id}`}>{item.title}</Link>}</h2><p>{item.description}</p><div className="tag-list">{item.skills.map((skill) => <span className="skill-tag" key={skill.id}>{skill.name}</span>)}</div></div>
-    <div className="dashboard-request-actions">{item.status !== 'CLOSED' && <Link className="button button-outline" to={`/learning-requests/${item.id}/edit`}>Chỉnh sửa</Link>}{item.status === 'DRAFT' && <button className="button button-primary" disabled={busy} onClick={() => onAction('publish')}>Đăng yêu cầu</button>}{item.status === 'OPEN' && <><Link className="button button-outline" to={`/my/learning-requests/${item.id}/proposals`}>Xem đề xuất</Link><Link className="button button-outline" to={`/learning-requests/${item.id}`}>Xem công khai</Link><button className="text-action" disabled={busy} onClick={() => onAction('close')}>Đóng yêu cầu</button></>}{item.status === 'CLOSED' && <Link className="button button-outline" to={`/my/learning-requests/${item.id}/proposals`}>Xem đề xuất</Link>}</div>
+    <div className="dashboard-request-actions">{(item.status === 'DRAFT' || item.status === 'OPEN') && <Link className="button button-outline" to={`/learning-requests/${item.id}/edit`}>Chỉnh sửa</Link>}{item.status === 'DRAFT' && <button className="button button-primary" disabled={busy} onClick={() => onAction('publish')}>Đăng yêu cầu</button>}{item.status === 'OPEN' && <><Link className="button button-outline" to={`/my/learning-requests/${item.id}/proposals`}>Xem đề xuất</Link><Link className="button button-outline" to={`/learning-requests/${item.id}`}>Xem công khai</Link><button className="text-action" disabled={busy} onClick={() => onAction('close')}>Đóng yêu cầu</button></>}{(item.status === 'CLOSED' || item.status === 'MATCHED') && <Link className="button button-outline" to={`/my/learning-requests/${item.id}/proposals`}>Xem đề xuất</Link>}{item.status === 'MATCHED' && <Link className="button button-primary" to={`/my/learning-requests/${item.id}/match`}>Xem developer đã chọn</Link>}</div>
   </article>
 }
 
@@ -359,7 +359,7 @@ export function SavedRequestsPage() {
   return <main className="learning-page"><Link className="form-back" to="/"><ArrowLeft size={15} /> Khám phá yêu cầu</Link><div className="learning-page-heading"><div><span className="section-kicker">DANH SÁCH CỦA BẠN</span><h1>Yêu cầu đã lưu</h1><p>Những yêu cầu bạn muốn xem lại.</p></div></div>
     {saved.isLoading && <p role="status">Đang tải danh sách…</p>}{saved.isError && <ErrorBox error={saved.error} onRetry={() => void saved.refetch()} />}
     {saved.isSuccess && saved.data.length === 0 && <div className="request-message request-empty"><Bookmark size={22} /><strong>Chưa có yêu cầu được lưu</strong><span>Lưu yêu cầu đang mở để xem lại sau.</span><Link className="button button-primary" to="/">Khám phá yêu cầu</Link></div>}
-    {saved.data?.map((item) => <article className="dashboard-request saved-request" key={item.id}><div className="dashboard-request-main"><span className={`status-pill status-${item.status.toLowerCase()}`}>{statusLabels[item.status]}</span><h2>{item.status === 'OPEN' ? <Link to={`/learning-requests/${item.id}`}>{item.title}</Link> : item.title}</h2><p>{item.description}</p><div className="tag-list">{item.skills.map((skill) => <span className="skill-tag" key={skill.id}>{skill.name}</span>)}</div>{item.status === 'CLOSED' && <p className="closed-note">Yêu cầu này đã đóng; bạn vẫn có thể xem thông tin đã lưu.</p>}</div><div className="dashboard-request-actions">{item.status === 'OPEN' && <Link className="button button-outline" to={`/learning-requests/${item.id}`}>Xem chi tiết</Link>}<button className="text-action" disabled={remove.isPending} onClick={() => remove.mutate(item.id)}>Bỏ lưu</button></div></article>)}
+    {saved.data?.map((item) => <article className="dashboard-request saved-request" key={item.id}><div className="dashboard-request-main"><span className={`status-pill status-${item.status.toLowerCase()}`}>{statusLabels[item.status]}</span><h2>{item.status === 'OPEN' ? <Link to={`/learning-requests/${item.id}`}>{item.title}</Link> : item.title}</h2><p>{item.description}</p><div className="tag-list">{item.skills.map((skill) => <span className="skill-tag" key={skill.id}>{skill.name}</span>)}</div>{(item.status === 'CLOSED' || item.status === 'MATCHED') && <p className="closed-note">{item.status === 'MATCHED' ? 'Người học đã chọn developer; yêu cầu không nhận thêm đề xuất.' : 'Yêu cầu này đã đóng; bạn vẫn có thể xem thông tin đã lưu.'}</p>}</div><div className="dashboard-request-actions">{item.status === 'OPEN' && <Link className="button button-outline" to={`/learning-requests/${item.id}`}>Xem chi tiết</Link>}<button className="text-action" disabled={remove.isPending} onClick={() => remove.mutate(item.id)}>Bỏ lưu</button></div></article>)}
     {remove.isError && <p className="form-error" role="alert">{errorMessage(remove.error)}</p>}
   </main>
 }

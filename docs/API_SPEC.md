@@ -1,6 +1,6 @@
 # API specification
 
-The versioned base path is `/api/v1`. M1–M3 endpoints below are implemented; matching and moderation remain planned.
+The versioned base path is `/api/v1`. M1–M4 endpoints below are implemented; moderation remains planned.
 
 ## M1 identity and developer profiles
 - `GET /auth/csrf` returns 204 and initializes the `XSRF-TOKEN` cookie. Send its value in `X-XSRF-TOKEN` for unsafe requests.
@@ -17,7 +17,7 @@ Browser requests must use credentials. CORS allows only the configured frontend 
 ## M2 learning requests and discovery
 - `POST /learning-requests` creates an authenticated learner's DRAFT request (201).
 - `GET /learning-requests` returns paged OPEN requests. Filters: `q`, repeated `skillIds`, `level`, `format`, `minBudget`, `maxBudget`, `budgetUnit`, `requiresCv`, `page`, `size` (1–50), and `sort` (`NEWEST` or `OLDEST`). Budget filters require `budgetUnit`.
-- `GET /learning-requests/{id}` returns an OPEN request publicly; owners can read their own DRAFT/CLOSED requests. Other users receive not-found for private statuses.
+- `GET /learning-requests/{id}` returns an OPEN request publicly; owners can read their own DRAFT/CLOSED/MATCHED requests. Other users receive not-found for private statuses.
 - `GET /me/learning-requests` returns the authenticated owner's paged requests, optionally filtered by status.
 - `PATCH /learning-requests/{id}` updates the owner's DRAFT or OPEN request; CLOSED requests cannot be edited.
 - `POST /learning-requests/{id}/publish` transitions DRAFT → OPEN. `POST /learning-requests/{id}/close` transitions OPEN → CLOSED.
@@ -32,9 +32,17 @@ Browser requests must use credentials. CORS allows only the configured frontend 
 - `POST /developer/cvs` uploads `multipart/form-data` part `file`; `GET /developer/cvs` lists the caller's files; `PUT /developer/cvs/{id}` replaces; `DELETE /developer/cvs/{id}` deletes unless referenced by a submitted proposal; `GET /developer/cvs/{id}/file` downloads an owned CV.
 - `GET /proposals/{id}/cv` downloads a CV only for the proposal owner or the learner who owns its request.
 - CVs are actual-content validated PDFs, at most 5 MiB. DTOs do not expose private storage keys or URLs. Download responses are `application/pdf`, attachment, `no-store`, and `nosniff`.
-- Proposal statuses are `SUBMITTED` and `WITHDRAWN`. Closing a request blocks new proposals but does not change existing proposal status or participant access. Selection/acceptance is deferred to M4.
+- Proposal statuses are `SUBMITTED` and `WITHDRAWN`. Closing a request blocks new proposals but does not change existing proposal status or participant access.
 
-Matching acceptance and moderator-only report/moderation endpoints remain planned.
+## M4 developer selection and matching
+- `POST /me/learning-requests/{requestId}/match` accepts `{proposalId}` and confirms the learner's selection for an OPEN owned request. It returns the confirmed match; repeating the same selection is idempotent, while a different selection conflicts.
+- `GET /me/learning-requests/{requestId}/match` returns the confirmed match only to the request owner.
+- `GET /me/matches` and `GET /me/matches/{matchId}` return matches only to the selected developer profile owner.
+- `GET /proposals/{proposalId}/selection-status` returns `PENDING`, `SELECTED`, `NOT_SELECTED`, or `WITHDRAWN` to the proposal owner or request owner. Other users receive not-found.
+- A match has the single lifecycle state `CONFIRMED`. The learning request transitions from `OPEN` to `MATCHED` in the same transaction. A matched request accepts no proposals and allows no request/proposal edits. Existing proposals remain `SUBMITTED` for historical comparison; their separate selection status becomes `NOT_SELECTED`.
+- Withdrawn, cross-request, and non-submitted proposals cannot be selected. A closed request cannot be selected. Cookie-authenticated writes require the existing CSRF token.
+
+Moderator-only report/moderation endpoints remain planned.
 
 ## Contract conventions
-Use JSON, ISO-8601 timestamps, stable opaque identifiers, field-level validation errors, and safe problem responses without stack traces or sensitive values. All object reads and writes require object-level authorization. CV bytes are returned only through authenticated, authorized endpoints with private/no-store cache policy. Proposal acceptance is idempotent or returns a conflict for an already resolved request.
+Use JSON, ISO-8601 timestamps, stable opaque identifiers, field-level validation errors, and safe problem responses without stack traces or sensitive values. All object reads and writes require object-level authorization. CV bytes are returned only through authenticated, authorized endpoints with private/no-store cache policy. Match selection is idempotent for the same proposal and returns a conflict for a different proposal after resolution.

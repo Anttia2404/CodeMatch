@@ -44,3 +44,6 @@ Use a filesystem-backed `PrivateCvStorage` adapter for local development, with o
 
 ## 2026-11-18 — Protect attached CV deletion
 Reject deletion while a submitted proposal references a CV; after withdrawal, deletion is allowed. CV replacement updates the owner's selected file in place so an existing proposal continues to refer to that developer-controlled CV. No automatic CV retention schedule is implied; developers should remove files when no longer needed.
+
+## 2026-11-18 — Confirm one developer match per learning request
+Keep the match lifecycle to a single `CONFIRMED` state. Selection is allowed only for a submitted proposal on an OPEN request owned by the learner. In one transaction, lock the request and proposal, insert the match, and transition the request to `MATCHED`; V5 uniqueness and composite foreign keys protect the relationship even outside the service. Repeating the same selection is idempotent; a different selection conflicts. Retain unselected proposal rows with their original lifecycle status and report selection outcome separately. After selection, freeze the request and all its proposals so the selected offer remains stable. Match details are visible only to the learner and selected developer.

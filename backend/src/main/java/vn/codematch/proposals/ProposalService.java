@@ -63,6 +63,7 @@ public class ProposalService {
         }
         TeachingProposal proposal = proposals.findLockedById(id).orElseThrow(ApiException::notFound);
         requireProposalOwner(email, proposal);
+        requireRequestNotMatched(proposal);
         if (proposal.getStatus() != ProposalStatus.SUBMITTED) {
             throw ApiException.conflict("proposal_not_editable", "Chỉ có thể sửa đề xuất đang gửi.");
         }
@@ -79,6 +80,7 @@ public class ProposalService {
     public ProposalResponse withdraw(String email, UUID id) {
         TeachingProposal proposal = proposals.findLockedById(id).orElseThrow(ApiException::notFound);
         requireProposalOwner(email, proposal);
+        requireRequestNotMatched(proposal);
         if (proposal.getStatus() != ProposalStatus.SUBMITTED) {
             throw ApiException.conflict("proposal_already_withdrawn", "Đề xuất này đã được rút.");
         }
@@ -128,6 +130,12 @@ public class ProposalService {
     private void requireCvWhenNeeded(LearningRequest request, DeveloperCv cv) {
         if (request.isRequiresCv() && cv == null) {
             throw ApiException.badRequest("Yêu cầu này cần CV. Hãy tải CV lên và đính kèm trước khi gửi.");
+        }
+    }
+
+    private void requireRequestNotMatched(TeachingProposal proposal) {
+        if (proposal.getLearningRequest().getStatus() == LearningRequestStatus.MATCHED) {
+            throw ApiException.conflict("proposal_locked_after_match", "Đề xuất không thể thay đổi sau khi người học đã chọn developer.");
         }
     }
 

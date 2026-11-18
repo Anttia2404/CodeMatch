@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, ArrowRight, FileText, Upload, X } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api, ApiError } from './lib/api'
-import type { BudgetUnit, DeveloperCv, Proposal, ProposalInput } from './lib/api'
+import type { BudgetUnit, ConfirmedMatch, DeveloperCv, Proposal, ProposalInput, ProposalSelectionStatus } from './lib/api'
 import './proposals.css'
 
 const rateLabels: Record<BudgetUnit, string> = { PER_HOUR: 'mỗi giờ', PER_SESSION: 'mỗi buổi', TOTAL: 'toàn bộ chương trình' }
@@ -28,7 +28,7 @@ export function ProposalApplyPage() {
   const upload = useMutation({ mutationFn: (file: File) => api.uploadCv(file), onSuccess: async (cv) => { setForm((old) => ({ ...old, cvId: cv.id })); await cvs.refetch() } })
   if (request.isLoading) return <ProposalFrame title="Gửi đề xuất"><p role="status">Đang tải yêu cầu…</p></ProposalFrame>
   if (request.isError || !request.data) return <ProposalFrame title="Không tìm thấy yêu cầu"><p role="alert">{request.error ? message(request.error) : 'Yêu cầu này hiện không khả dụng.'}</p></ProposalFrame>
-  if (request.data.status !== 'OPEN') return <ProposalFrame title="Yêu cầu đã đóng"><p>Yêu cầu này không nhận đề xuất mới.</p></ProposalFrame>
+  if (request.data.status !== 'OPEN') return <ProposalFrame title={request.data.status === 'MATCHED' ? 'Yêu cầu đã chọn developer' : 'Yêu cầu đã đóng'}><p>{request.data.status === 'MATCHED' ? 'Người học đã chọn developer cho yêu cầu này. Yêu cầu không nhận thêm đề xuất.' : 'Yêu cầu này không nhận đề xuất mới.'}</p></ProposalFrame>
   const item = request.data
   const picked = cvs.data?.find((cv) => cv.id === form.cvId)
   async function send(event: FormEvent) {
@@ -83,7 +83,7 @@ export function MyProposalsPage() {
     <section className="proposal-section"><h2>Đề xuất đã gửi</h2>
       {proposals.isLoading && <p role="status">Đang tải đề xuất…</p>}{proposals.isError && <p role="alert" className="form-error">{message(proposals.error)}</p>}
       {proposals.data?.length === 0 && <p className="proposal-empty">Bạn chưa gửi đề xuất nào. <Link to="/">Khám phá yêu cầu học đang mở</Link></p>}
-      <div className="proposal-list">{proposals.data?.map((proposal) => <article className="proposal-card" key={proposal.id}><div className="proposal-card-head"><div><span className={`proposal-status ${proposal.status.toLowerCase()}`}>{proposal.status === 'SUBMITTED' ? 'Đã gửi' : 'Đã rút'}</span><h3>{proposal.learningRequestTitle}</h3></div><strong>{formatRate(proposal.proposedRate, proposal.rateUnit)}</strong></div><p>{proposal.introduction}</p><div className="proposal-card-actions"><Link className="button button-outline" to={`/my/proposals/${proposal.id}/edit`}>Chỉnh sửa</Link>{proposal.status === 'SUBMITTED' && <button className="button button-outline" disabled={withdraw.isPending} onClick={() => { if (window.confirm('Rút đề xuất này?')) withdraw.mutate(proposal.id) }}>Rút đề xuất</button>}</div></article>)}</div>
+      <div className="proposal-list">{proposals.data?.map((proposal) => <article className="proposal-card" key={proposal.id}><div className="proposal-card-head"><div><span className={`proposal-status ${proposal.status.toLowerCase()}`}>{proposal.status === 'SUBMITTED' ? 'Đã gửi' : 'Đã rút'}</span><h3>{proposal.learningRequestTitle}</h3></div><strong>{formatRate(proposal.proposedRate, proposal.rateUnit)}</strong></div><p>{proposal.introduction}</p><ProposalSelectionNotice proposalId={proposal.id} /><div className="proposal-card-actions">{proposal.learningRequestStatus !== 'MATCHED' && proposal.status === 'SUBMITTED' && <Link className="button button-outline" to={`/my/proposals/${proposal.id}/edit`}>Chỉnh sửa</Link>}{proposal.learningRequestStatus !== 'MATCHED' && proposal.status === 'SUBMITTED' && <button className="button button-outline" disabled={withdraw.isPending} onClick={() => { if (window.confirm('Rút đề xuất này?')) withdraw.mutate(proposal.id) }}>Rút đề xuất</button>}{proposal.learningRequestStatus === 'MATCHED' && <Link className="button button-outline" to="/my/matches">Xem kết quả</Link>}</div></article>)}</div>
       {withdraw.isError && <p role="alert" className="form-error">{message(withdraw.error)}</p>}
     </section>
   </ProposalFrame>
@@ -100,20 +100,54 @@ export function ReceivedProposalsPage() {
     const blob = await api.downloadProposalCv(proposal.id)
     const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'ho-so-ung-vien.pdf'; anchor.click(); URL.revokeObjectURL(url)
   } })
+  const queryClient = useQueryClient()
+  const [candidate, setCandidate] = useState<Proposal | null>(null)
+  const [confirmed, setConfirmed] = useState<ConfirmedMatch | null>(null)
+  const select = useMutation({ mutationFn: (proposal: Proposal) => api.selectProposal(id, proposal.id), onSuccess: async (match) => {
+    setConfirmed(match); setCandidate(null)
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['received-proposals', id] }),
+      queryClient.invalidateQueries({ queryKey: ['learner-match', id] }),
+      queryClient.invalidateQueries({ queryKey: ['my-proposals'] }),
+      queryClient.invalidateQueries({ queryKey: ['proposal-selection-status'] }),
+    ])
+  }, onError: async () => {
+    await queryClient.invalidateQueries({ queryKey: ['received-proposals', id] })
+  } })
   return <ProposalFrame title="So sánh đề xuất">
     <p className="proposal-intro">Xem cách hướng dẫn, kinh nghiệm, lịch và mức phí của từng developer. Mức phí chỉ so sánh trong cùng đơn vị.</p>
     {proposals.isLoading && <p role="status">Đang tải đề xuất…</p>}{proposals.isError && <p role="alert" className="form-error">{message(proposals.error)}</p>}
     {proposals.data?.length === 0 && <div className="proposal-empty">Chưa có developer gửi đề xuất cho yêu cầu này.</div>}
-    <div className="compare-grid">{proposals.data?.map((proposal) => <article className="compare-card" key={proposal.id}>
+    {confirmed && <div className="match-success" role="status"><strong>Đã xác nhận lựa chọn.</strong> <Link to={`/my/learning-requests/${id}/match`}>Xem thông tin developer đã chọn</Link></div>}
+    {proposals.data?.[0]?.learningRequestStatus === 'MATCHED' && !confirmed && <div className="match-success" role="status"><strong>Yêu cầu đã có developer được chọn.</strong> <Link to={`/my/learning-requests/${id}/match`}>Xem kết quả</Link></div>}
+    <div className="compare-grid">{proposals.data?.map((proposal) => <article className={`compare-card ${confirmed?.selectedProposalId === proposal.id ? 'compare-card-selected' : ''}`} key={proposal.id}>
       <div className="compare-heading"><div><span className={`proposal-status ${proposal.status.toLowerCase()}`}>{proposal.status === 'SUBMITTED' ? 'Đã gửi' : 'Đã rút'}</span><h2>{proposal.developer.displayName}</h2><p>{proposal.developer.headline}</p></div><Link to={`/developers/${proposal.developer.profileId}`}>Hồ sơ <ArrowRight size={14} /></Link></div>
       <p className="compare-bio">{proposal.developer.biography}</p><p className="compare-experience">{proposal.developer.yearsExperience} năm kinh nghiệm · {proposal.developer.skills.map((skill) => skill.name).join(', ')}</p>
       <CompareField title="Lời giới thiệu" text={proposal.introduction} /><CompareField title="Cách hướng dẫn" text={proposal.teachingApproach} /><CompareField title="Kinh nghiệm liên quan" text={proposal.relevantExperience} />
       <dl className="compare-facts"><div><dt>Mức phí</dt><dd>{formatRate(proposal.proposedRate, proposal.rateUnit)}</dd></div><div><dt>Lịch đề xuất</dt><dd>{proposal.proposedSchedule}</dd></div><div><dt>Thời lượng</dt><dd>{proposal.estimatedDuration}</dd></div></dl>
       {proposal.hasCv && <button className="button button-outline" disabled={download.isPending} onClick={() => download.mutate(proposal)}>Tải CV riêng tư</button>}
+      <ProposalSelectionNotice proposalId={proposal.id} />
+      {proposal.status === 'SUBMITTED' && proposal.learningRequestStatus === 'OPEN' && !confirmed && <button className="button button-primary select-proposal" disabled={select.isPending} onClick={() => setCandidate(proposal)}>{select.isPending ? 'Đang xác nhận…' : 'Chọn developer này'}</button>}
     </article>)}</div>
     {download.isError && <p role="alert" className="form-error">{message(download.error)}</p>}
-    <p className="form-hint">Đề xuất chưa thể được chọn hoặc chấp nhận trong phiên bản này.</p>
+    {candidate && <div className="selection-dialog-backdrop"><section role="dialog" aria-modal="true" aria-labelledby="selection-dialog-title" className="selection-dialog">
+      <h2 id="selection-dialog-title">Xác nhận lựa chọn</h2><p>Bạn muốn chọn <strong>{candidate.developer.displayName}</strong> cho yêu cầu “{candidate.learningRequestTitle}”?</p><p>Sau khi xác nhận, yêu cầu sẽ dừng nhận đề xuất và các đề xuất khác được giữ lại để tham chiếu.</p>
+      {select.isError && <p role="alert" className="form-error">{message(select.error)}</p>}
+      <div className="proposal-card-actions"><button className="button button-outline" disabled={select.isPending} onClick={() => setCandidate(null)}>Quay lại</button><button className="button button-primary" disabled={select.isPending} onClick={() => select.mutate(candidate)}>{select.isPending ? 'Đang xác nhận…' : 'Xác nhận lựa chọn'}</button></div>
+    </section></div>}
   </ProposalFrame>
+}
+
+function ProposalSelectionNotice({ proposalId }: { proposalId: string }) {
+  const status = useQuery({ queryKey: ['proposal-selection-status', proposalId], queryFn: () => api.proposalSelectionStatus(proposalId), retry: false })
+  if (status.isLoading) return <p className="selection-state" role="status">Đang tải trạng thái lựa chọn…</p>
+  if (status.isError) return <p className="selection-state" role="alert">Không tải được trạng thái lựa chọn.</p>
+  if (!status.data) return null
+  const labels: Record<ProposalSelectionStatus, string> = {
+    PENDING: 'Đang chờ người học lựa chọn', SELECTED: 'Người học đã chọn đề xuất này',
+    NOT_SELECTED: 'Người học đã chọn developer khác', WITHDRAWN: 'Đề xuất đã được rút',
+  }
+  return <p className={`selection-state selection-${status.data.selectionStatus.toLowerCase()}`} role="status">{labels[status.data.selectionStatus]}</p>
 }
 
 function CompareField({ title, text }: { title: string; text: string }) { return <section className="compare-field"><h3>{title}</h3><p>{text}</p></section> }

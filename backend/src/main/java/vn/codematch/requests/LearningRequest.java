@@ -137,6 +137,12 @@ public class LearningRequest {
         this.updatedAt = this.closedAt;
     }
 
+    public void markMatched() {
+        this.status = LearningRequestStatus.MATCHED;
+        this.closedAt = Instant.now();
+        this.updatedAt = this.closedAt;
+    }
+
     @PreUpdate
     void beforeUpdate() { this.updatedAt = Instant.now(); }
 

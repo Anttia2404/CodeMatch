@@ -42,9 +42,10 @@ public class LearningRequestService {
     @Transactional
     public LearningRequestResponse update(String email, UUID id, LearningRequestCommand command) {
         validate(command);
-        LearningRequest request = ownedRequest(email, id);
-        if (request.getStatus() == LearningRequestStatus.CLOSED) {
-            throw ApiException.conflict("request_closed", "Yêu cầu đã đóng không thể chỉnh sửa.");
+        LearningRequest request = requests.findLockedWithSkillsById(id).orElseThrow(ApiException::notFound);
+        if (!owns(email, request)) throw ApiException.notFound();
+        if (request.getStatus() == LearningRequestStatus.CLOSED || request.getStatus() == LearningRequestStatus.MATCHED) {
+            throw ApiException.conflict("request_closed", "Yêu cầu đã đóng hoặc đã chọn developer nên không thể chỉnh sửa.");
         }
         request.updateDetails(command, resolveSkills(command.skillIds()));
         return LearningRequestResponse.from(request);
