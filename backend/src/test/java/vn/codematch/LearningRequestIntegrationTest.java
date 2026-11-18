@@ -43,8 +43,8 @@ class LearningRequestIntegrationTest {
     @Autowired JdbcTemplate jdbcTemplate;
 
     @Test
-    void flywayV5PreservesLearningProposalAndPrivateCvSchema() {
-        assertThat(jdbcTemplate.queryForObject("select version from flyway_schema_history where success = true order by installed_rank desc limit 1", String.class)).isEqualTo("5");
+    void flywayV6PreservesLearningProposalAndPrivateCvSchema() {
+        assertThat(jdbcTemplate.queryForObject("select version from flyway_schema_history where success = true order by installed_rank desc limit 1", String.class)).isEqualTo("6");
         assertThat(jdbcTemplate.queryForObject("select count(*) from information_schema.tables where table_name in ('learning_requests', 'learning_request_skills', 'saved_requests')", Integer.class)).isEqualTo(3);
         assertThat(jdbcTemplate.queryForList("select indexname from pg_indexes where tablename = 'learning_requests'", String.class))
             .contains("learning_requests_open_published_idx", "learning_requests_owner_status_updated_idx");

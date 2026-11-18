@@ -12,4 +12,5 @@ public interface SavedRequestRepository extends JpaRepository<SavedRequest, UUID
     void deleteByUserIdAndLearningRequestId(UUID userId, UUID learningRequestId);
     @EntityGraph(attributePaths = {"learningRequest", "learningRequest.skills"})
     List<SavedRequest> findAllByUserIdOrderByCreatedAtDesc(UUID userId);
+    List<SavedRequest> findAllByUserIdAndLearningRequestHiddenAtIsNullOrderByCreatedAtDesc(UUID userId);
 }

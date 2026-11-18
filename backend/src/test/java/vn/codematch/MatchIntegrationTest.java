@@ -49,13 +49,15 @@ class MatchIntegrationTest {
     @Autowired ObjectMapper objectMapper;
 
     @Test
-    void flywayV5CreatesConfirmedMatchConstraintsAndIndexes() {
+    void flywayV5AndV6CreateConfirmedMatchModerationAndAuditSchema() {
         assertThat(jdbc.queryForObject("select count(*) from flyway_schema_history where version='5' and success", Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("select count(*) from information_schema.tables where table_name='matches'", Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForList("select indexname from pg_indexes where tablename='matches'", String.class))
             .contains("matches_one_per_request", "matches_selected_proposal_unique", "matches_developer_created_idx");
         assertThat(jdbc.queryForObject("select pg_get_constraintdef(oid) from pg_constraint where conname='matches_selected_proposal_fk'", String.class))
             .contains("selected_proposal_id, learning_request_id, developer_profile_id");
+        assertThat(jdbc.queryForObject("select count(*) from flyway_schema_history where version='6' and success", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select count(*) from information_schema.tables where table_name in ('moderation_reports','audit_events')", Integer.class)).isEqualTo(2);
     }
 
     @Test
@@ -74,10 +76,12 @@ class MatchIntegrationTest {
             .andExpect(jsonPath("$.developer.displayName").value("Account other"))
             .andReturn();
         String matchId = objectMapper.readTree(selection.getResponse().getContentAsString()).get("id").asText();
+        UUID learnerId = jdbc.queryForObject("select id from users where email = ?", UUID.class, learner.email());
 
         mockMvc.perform(get("/api/v1/learning-requests/{id}", requestId).cookie(learner.cookie()))
             .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("MATCHED"));
         assertThat(jdbc.queryForObject("select count(*) from matches where learning_request_id=?::uuid", Integer.class, requestId)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select count(*) from audit_events where actor_id=? and event_type='MATCH_CONFIRMED' and target_id=?", Integer.class, learnerId, UUID.fromString(matchId))).isEqualTo(1);
         assertThat(jdbc.queryForObject("select status from teaching_proposals where id=?::uuid", String.class, otherProposal)).isEqualTo("SUBMITTED");
         select(learner, requestId, otherProposal).andExpect(status().isConflict())
             .andExpect(jsonPath("$.code").value("request_already_matched"));

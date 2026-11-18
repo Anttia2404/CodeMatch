@@ -10,6 +10,8 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 import vn.codematch.api.ApiException;
+import vn.codematch.audit.AuditEventService;
+import vn.codematch.identity.UserRepository;
 import vn.codematch.profiles.DeveloperProfile;
 import vn.codematch.profiles.DeveloperProfileRepository;
 
@@ -24,13 +26,17 @@ public class CvService {
     private final DeveloperCvRepository cvs;
     private final PrivateCvStorage storage;
     private final JdbcTemplate jdbcTemplate;
+    private final UserRepository users;
+    private final AuditEventService audit;
 
     public CvService(DeveloperProfileRepository profiles, DeveloperCvRepository cvs, PrivateCvStorage storage,
-                     JdbcTemplate jdbcTemplate) {
+                     JdbcTemplate jdbcTemplate, UserRepository users, AuditEventService audit) {
         this.profiles = profiles;
         this.cvs = cvs;
         this.storage = storage;
         this.jdbcTemplate = jdbcTemplate;
+        this.users = users;
+        this.audit = audit;
     }
 
     @Transactional(readOnly = true)
@@ -94,10 +100,15 @@ public class CvService {
 
     @Transactional(readOnly = true)
     public CvDownload downloadOwned(String email, UUID id) {
-        DeveloperProfile profile = profiles.findWithOwnerAndSkillsByOwnerEmailIgnoreCase(email)
-            .orElseThrow(ApiException::notFound);
-        DeveloperCv cv = owned(id, profile);
-        return download(cv);
+        try {
+            DeveloperProfile profile = profiles.findWithOwnerAndSkillsByOwnerEmailIgnoreCase(email)
+                .orElseThrow(ApiException::notFound);
+            DeveloperCv cv = owned(id, profile);
+            return download(cv);
+        } catch (ApiException denied) {
+            users.findByEmailIgnoreCase(email).ifPresent(user -> audit.recordFailure(user.getId(), "CV_ACCESS_DENIED", "CV", id));
+            throw denied;
+        }
     }
 
     @Transactional(readOnly = true)

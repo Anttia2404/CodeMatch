@@ -20,6 +20,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private final Bucket registration;
     private final Bucket proposal;
     private final Bucket cvDownload;
+    private final Bucket report;
 
     public RateLimitInterceptor(RateLimitService rateLimits,
             @Value("${codematch.rate-limit.enabled:true}") boolean enabled,
@@ -30,13 +31,16 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             @Value("${codematch.rate-limit.proposal.limit:8}") int proposalLimit,
             @Value("${codematch.rate-limit.proposal.window-seconds:60}") long proposalWindow,
             @Value("${codematch.rate-limit.cv-download.limit:30}") int cvDownloadLimit,
-            @Value("${codematch.rate-limit.cv-download.window-seconds:60}") long cvDownloadWindow) {
+            @Value("${codematch.rate-limit.cv-download.window-seconds:60}") long cvDownloadWindow,
+            @Value("${codematch.rate-limit.report.limit:5}") int reportLimit,
+            @Value("${codematch.rate-limit.report.window-seconds:3600}") long reportWindow) {
         this.rateLimits = rateLimits;
         this.enabled = enabled;
         this.login = new Bucket("login", loginLimit, loginWindow);
         this.registration = new Bucket("registration", registrationLimit, registrationWindow);
         this.proposal = new Bucket("proposal", proposalLimit, proposalWindow);
         this.cvDownload = new Bucket("cv-download", cvDownloadLimit, cvDownloadWindow);
+        this.report = new Bucket("report", reportLimit, reportWindow);
     }
 
     @Override
@@ -60,6 +64,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         String path = request.getRequestURI().substring(request.getContextPath().length());
         if ("POST".equals(method) && "/api/v1/auth/login".equals(path)) return login;
         if ("POST".equals(method) && "/api/v1/auth/register".equals(path)) return registration;
+        if ("POST".equals(method) && "/api/v1/reports".equals(path)) return report;
         if ("POST".equals(method) && path.matches("/api/v1/learning-requests/[^/]+/proposals")) return proposal;
         if ("GET".equals(method) && (path.matches("/api/v1/developer/cvs/[^/]+/file")
                 || path.matches("/api/v1/proposals/[^/]+/cv"))) return cvDownload;

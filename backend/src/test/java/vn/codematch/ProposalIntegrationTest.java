@@ -120,6 +120,8 @@ class ProposalIntegrationTest {
         mockMvc.perform(get("/api/v1/proposals/{id}", proposalId).cookie(unrelated.cookie())).andExpect(status().isNotFound());
         mockMvc.perform(get("/api/v1/proposals/{id}/cv", proposalId).cookie(unrelated.cookie())).andExpect(status().isNotFound());
         mockMvc.perform(get("/api/v1/developer/cvs/{id}/file", parsedCvId).cookie(unrelated.cookie())).andExpect(status().isNotFound());
+        UUID unrelatedId = jdbc.queryForObject("select id from users where email = ?", UUID.class, unrelated.email());
+        assertThat(jdbc.queryForObject("select count(*) from audit_events where actor_id = ? and event_type = 'CV_ACCESS_DENIED' and outcome = 'FAILURE'", Integer.class, unrelatedId)).isEqualTo(2);
         mockMvc.perform(get("/api/v1/proposals/{id}", proposalId).cookie(developer.cookie()))
             .andExpect(status().isOk()).andExpect(jsonPath("$.hasCv").value(true));
     }

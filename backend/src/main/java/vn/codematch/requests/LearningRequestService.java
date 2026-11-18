@@ -96,9 +96,10 @@ public class LearningRequestService {
     }
 
     @Transactional(readOnly = true)
-    public LearningRequestResponse get(String email, UUID id) {
+    public LearningRequestResponse get(String email, UUID id, boolean admin) {
         LearningRequest request = requests.findWithSkillsById(id).orElseThrow(ApiException::notFound);
-        if (request.getStatus() != LearningRequestStatus.OPEN && !owns(email, request)) {
+        if ((request.getStatus() != LearningRequestStatus.OPEN || request.getHiddenAt() != null)
+                && !owns(email, request) && !admin) {
             throw ApiException.notFound();
         }
         return LearningRequestResponse.from(request);
@@ -122,7 +123,7 @@ public class LearningRequestService {
     public void save(String email, UUID requestId) {
         User user = owner(email);
         LearningRequest request = requests.findWithSkillsById(requestId).orElseThrow(ApiException::notFound);
-        if (request.getStatus() != LearningRequestStatus.OPEN) {
+        if (request.getStatus() != LearningRequestStatus.OPEN || request.getHiddenAt() != null) {
             throw ApiException.conflict("request_not_open", "Chỉ có thể lưu yêu cầu đang mở.");
         }
         if (!savedRequests.existsByUserIdAndLearningRequestId(user.getId(), requestId)) {
@@ -139,7 +140,7 @@ public class LearningRequestService {
     @Transactional(readOnly = true)
     public List<LearningRequestResponse> saved(String email) {
         User user = owner(email);
-        return savedRequests.findAllByUserIdOrderByCreatedAtDesc(user.getId()).stream()
+        return savedRequests.findAllByUserIdAndLearningRequestHiddenAtIsNullOrderByCreatedAtDesc(user.getId()).stream()
             .map(SavedRequest::getLearningRequest).map(LearningRequestResponse::from).toList();
     }
 

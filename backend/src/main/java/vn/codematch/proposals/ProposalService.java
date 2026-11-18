@@ -4,11 +4,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.codematch.api.ApiException;
+import vn.codematch.audit.AuditEventService;
 import vn.codematch.cvs.CvDownload;
 import vn.codematch.cvs.CvService;
 import vn.codematch.cvs.DeveloperCv;
 import vn.codematch.profiles.DeveloperProfile;
 import vn.codematch.profiles.DeveloperProfileRepository;
+import vn.codematch.identity.UserRepository;
 import vn.codematch.requests.LearningRequest;
 import vn.codematch.requests.LearningRequestRepository;
 import vn.codematch.requests.LearningRequestStatus;
@@ -22,13 +24,17 @@ public class ProposalService {
     private final LearningRequestRepository requests;
     private final DeveloperProfileRepository profiles;
     private final CvService cvs;
+    private final UserRepository users;
+    private final AuditEventService audit;
 
     public ProposalService(TeachingProposalRepository proposals, LearningRequestRepository requests,
-                           DeveloperProfileRepository profiles, CvService cvs) {
+                           DeveloperProfileRepository profiles, CvService cvs, UserRepository users, AuditEventService audit) {
         this.proposals = proposals;
         this.requests = requests;
         this.profiles = profiles;
         this.cvs = cvs;
+        this.users = users;
+        this.audit = audit;
     }
 
     @Transactional
@@ -112,8 +118,14 @@ public class ProposalService {
 
     @Transactional(readOnly = true)
     public CvDownload downloadCv(String email, UUID id) {
-        TeachingProposal proposal = detail(id);
-        if (!isProposalOwner(email, proposal) && !owns(email, proposal.getLearningRequest())) throw ApiException.notFound();
+        TeachingProposal proposal;
+        try {
+            proposal = detail(id);
+            if (!isProposalOwner(email, proposal) && !owns(email, proposal.getLearningRequest())) throw ApiException.notFound();
+        } catch (ApiException denied) {
+            users.findByEmailIgnoreCase(email).ifPresent(user -> audit.recordFailure(user.getId(), "CV_ACCESS_DENIED", "PROPOSAL", id));
+            throw denied;
+        }
         if (proposal.getCv() == null) throw ApiException.notFound();
         return cvs.downloadAttached(proposal.getCv());
     }

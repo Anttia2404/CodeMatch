@@ -8,11 +8,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-public record AccountPrincipal(UUID id, String email, String displayName, String password, AccountStatus status)
+public record AccountPrincipal(UUID id, String email, String displayName, String password, AccountStatus status, boolean admin)
     implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        return admin
+            ? List.of(new SimpleGrantedAuthority("ROLE_USER"), new SimpleGrantedAuthority("ROLE_ADMIN"))
+            : List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override

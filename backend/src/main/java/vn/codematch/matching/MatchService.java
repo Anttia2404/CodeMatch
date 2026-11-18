@@ -4,6 +4,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.codematch.api.ApiException;
+import vn.codematch.audit.AuditEventService;
 import vn.codematch.profiles.DeveloperProfile;
 import vn.codematch.profiles.DeveloperProfileRepository;
 import vn.codematch.proposals.ProposalStatus;
@@ -22,13 +23,15 @@ public class MatchService {
     private final LearningRequestRepository requests;
     private final TeachingProposalRepository proposals;
     private final DeveloperProfileRepository profiles;
+    private final AuditEventService audit;
 
     public MatchService(MatchRepository matches, LearningRequestRepository requests,
-                        TeachingProposalRepository proposals, DeveloperProfileRepository profiles) {
+                        TeachingProposalRepository proposals, DeveloperProfileRepository profiles, AuditEventService audit) {
         this.matches = matches;
         this.requests = requests;
         this.proposals = proposals;
         this.profiles = profiles;
+        this.audit = audit;
     }
 
     @Transactional
@@ -57,6 +60,7 @@ public class MatchService {
         request.markMatched();
         try {
             Match created = matches.saveAndFlush(new Match(UUID.randomUUID(), request, proposal));
+            audit.record(request.getLearner().getId(), "MATCH_CONFIRMED", "MATCH", created.getId(), true);
             return MatchResponse.from(created);
         } catch (DataIntegrityViolationException exception) {
             throw alreadyMatched();

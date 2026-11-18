@@ -53,6 +53,9 @@ codematch:
     cv-download:
       limit: 1000
       window-seconds: 60
+    report:
+      limit: 1000
+      window-seconds: 60
 server:
   servlet:
     session:

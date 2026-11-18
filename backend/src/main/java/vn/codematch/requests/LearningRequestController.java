@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import vn.codematch.identity.AccountPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,7 +51,8 @@ public class LearningRequestController {
 
     @GetMapping("/learning-requests/{id}")
     public LearningRequestResponse get(@AuthenticationPrincipal UserDetails user, @PathVariable UUID id) {
-        return service.get(user == null ? null : user.getUsername(), id);
+        boolean admin = user instanceof AccountPrincipal principal && principal.admin();
+        return service.get(user == null ? null : user.getUsername(), id, admin);
     }
 
     @GetMapping("/me/learning-requests")

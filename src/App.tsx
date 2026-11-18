@@ -8,6 +8,7 @@ import { AccountPage, DeveloperProfileFormPage, LoginPage, PublicDeveloperProfil
 import { LearningRequestFormPage, LearnerDashboardPage, RequestDetailPage, RequestDiscovery, SavedRequestsPage } from './LearningRequests'
 import { EditProposalPage, MyProposalsPage, ProposalApplyPage, ReceivedProposalsPage } from './ProposalPages'
 import { DeveloperMatchesPage, LearnerMatchPage } from './MatchPages'
+import { AdminReportsPage } from './ModerationPages'
 
 export default function App() {
   return <BrowserRouter><Routes>
@@ -26,6 +27,7 @@ export default function App() {
     <Route path="/my/learning-requests/:id/proposals" element={<RequireAccount><ReceivedProposalsPage /></RequireAccount>} />
     <Route path="/my/learning-requests/:id/match" element={<RequireAccount><LearnerMatchPage /></RequireAccount>} />
     <Route path="/my/matches" element={<RequireAccount><DeveloperMatchesPage /></RequireAccount>} />
+    <Route path="/admin/reports" element={<RequireAdmin><AdminReportsPage /></RequireAdmin>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes></BrowserRouter>
 }
@@ -36,6 +38,14 @@ function RequireAccount({ children }: { children: ReactNode }) {
   if (account.isLoading) return <main className="learning-page"><p role="status">Đang kiểm tra phiên đăng nhập…</p></main>
   if (account.isError && !(account.error instanceof ApiError && account.error.status === 401)) return <main className="learning-page"><p role="alert">Không thể xác minh phiên đăng nhập. Hãy thử tải lại trang.</p></main>
   if (!account.data) return <Navigate to="/login" state={{ from: location }} replace />
+  return children
+}
+
+function RequireAdmin({ children }: { children: ReactNode }) {
+  const account = useQuery({ queryKey: ['account'], queryFn: api.current, retry: false })
+  if (account.isLoading) return <main className="learning-page"><p role="status">Đang kiểm tra quyền quản trị…</p></main>
+  if (account.isError) return <main className="learning-page"><p role="alert">Đăng nhập để tiếp tục.</p><Link to="/login">Đăng nhập</Link></main>
+  if (!account.data?.admin) return <main className="learning-page"><p role="alert">Bạn không có quyền truy cập trang này.</p><Link to="/account">Quay lại tài khoản</Link></main>
   return children
 }
 

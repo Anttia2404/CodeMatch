@@ -19,6 +19,6 @@ public class AccountUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) {
         User user = users.findByEmailIgnoreCase(email)
             .orElseThrow(() -> new UsernameNotFoundException("Account not found"));
-        return new AccountPrincipal(user.getId(), user.getEmail(), user.getDisplayName(), user.getPasswordHash(), user.getAccountStatus());
+        return new AccountPrincipal(user.getId(), user.getEmail(), user.getDisplayName(), user.getPasswordHash(), user.getAccountStatus(), user.isAdmin());
     }
 }

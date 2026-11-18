@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import vn.codematch.api.ApiException;
+import vn.codematch.audit.AuditEventService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -30,15 +31,18 @@ public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
     private final SessionAuthenticationStrategy sessionAuthenticationStrategy;
+    private final AuditEventService audit;
 
     public AuthenticationController(AuthenticationService authenticationService,
                                     AuthenticationManager authenticationManager,
                                     SecurityContextRepository securityContextRepository,
-                                    SessionAuthenticationStrategy sessionAuthenticationStrategy) {
+                                    SessionAuthenticationStrategy sessionAuthenticationStrategy,
+                                    AuditEventService audit) {
         this.authenticationService = authenticationService;
         this.authenticationManager = authenticationManager;
         this.securityContextRepository = securityContextRepository;
         this.sessionAuthenticationStrategy = sessionAuthenticationStrategy;
+        this.audit = audit;
     }
 
     @GetMapping("/csrf")
@@ -62,6 +66,7 @@ public class AuthenticationController {
             authentication = authenticationManager.authenticate(
                 UsernamePasswordAuthenticationToken.unauthenticated(request.email().trim(), request.password()));
         } catch (AuthenticationException exception) {
+            audit.recordFailure(null, "AUTHENTICATION_FAILED", "ACCOUNT", null);
             throw ApiException.unauthorized();
         }
 

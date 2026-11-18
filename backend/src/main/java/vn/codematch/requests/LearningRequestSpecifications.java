@@ -17,6 +17,7 @@ public final class LearningRequestSpecifications {
         return (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(builder.equal(root.get("status"), LearningRequestStatus.OPEN));
+            predicates.add(builder.isNull(root.get("hiddenAt")));
             if (keyword != null && !keyword.isBlank()) {
                 String pattern = "%" + keyword.trim().toLowerCase(java.util.Locale.ROOT) + "%";
                 predicates.add(builder.or(

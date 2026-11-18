@@ -108,7 +108,9 @@ public class SecurityConfiguration {
             .securityContext(context -> context.securityContextRepository(contextRepository))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                .requestMatchers("/api/v1/reports", "/api/v1/me/reports").authenticated()
                 .requestMatchers("/api/v1/auth/me", "/api/v1/developers/me").authenticated()
                 .requestMatchers("/api/v1/me/**", "/api/v1/saved-requests/**").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/learning-requests", "/api/v1/learning-requests/*").permitAll()

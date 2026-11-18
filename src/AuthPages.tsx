@@ -4,6 +4,7 @@ import type { FormEvent, ReactNode } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { api, ApiError } from './lib/api'
 import type { DeveloperProfile, ProfileInput, Skill } from './lib/api'
+import { ReportButton } from './ModerationPages'
 
 function PageFrame({ title, children }: { title: string; children: ReactNode }) {
   return <main className="form-page"><section className="form-card"><Link to="/" className="form-back">← CodeMatch</Link><h1>{title}</h1>{children}</section></main>
@@ -50,7 +51,7 @@ export function AccountPage() {
   const client = useQueryClient(); const account = useQuery({ queryKey: ['account'], queryFn: api.current, retry: false })
   if (account.isLoading) return <PageFrame title="Tài khoản"><p role="status">Đang tải thông tin…</p></PageFrame>
   if (account.isError || !account.data) return <Navigate to="/login" replace />
-  return <PageFrame title="Tài khoản"><p>Xin chào, <strong>{account.data.displayName}</strong></p><p>{account.data.email}</p><p>Vai trò hiện tại: người dùng</p><Link className="button button-primary" to="/developer-profile">Hồ sơ developer</Link><Link className="button button-outline" to="/my/proposals">Đề xuất và quản lý CV</Link><button className="button button-outline" onClick={async () => { await api.logout(); client.setQueryData(['account'], null); await client.invalidateQueries({ queryKey: ['account'] }) }}>Đăng xuất</button></PageFrame>
+  return <PageFrame title="Tài khoản"><p>Xin chào, <strong>{account.data.displayName}</strong></p><p>{account.data.email}</p><p>Vai trò hiện tại: {account.data.admin ? 'quản trị viên' : 'người dùng'}</p>{account.data.admin && <Link className="button button-outline" to="/admin/reports">Quản lý báo cáo</Link>}<Link className="button button-primary" to="/developer-profile">Hồ sơ developer</Link><Link className="button button-outline" to="/my/proposals">Đề xuất và quản lý CV</Link><button className="button button-outline" onClick={async () => { await api.logout(); client.setQueryData(['account'], null); await client.invalidateQueries({ queryKey: ['account'] }) }}>Đăng xuất</button></PageFrame>
 }
 
 const emptyProfile = { headline: '', biography: '', yearsExperience: 0, githubUrl: '', linkedinUrl: '', portfolioUrl: '', teachingApproach: '', availability: '' }
@@ -90,8 +91,9 @@ export function ProfileEditor({ existing }: { existing: DeveloperProfile | null 
 
 export function PublicDeveloperProfilePage() {
   const { profileId = '' } = useParams(); const query = useQuery({ queryKey: ['developer-profile', profileId], queryFn: () => api.publicProfile(profileId) })
+  const account = useQuery({ queryKey: ['account'], queryFn: api.current, retry: false })
   if (query.isLoading) return <PageFrame title="Hồ sơ developer"><p role="status">Đang tải hồ sơ…</p></PageFrame>
   if (query.isError || !query.data) return <PageFrame title="Không tìm thấy hồ sơ"><p role="alert">Hồ sơ này không tồn tại hoặc chưa được công khai.</p></PageFrame>
   const profile = query.data
-  return <PageFrame title={profile.headline}><p className="profile-name">{profile.displayName} · {profile.yearsExperience} năm kinh nghiệm</p><p>{profile.biography}</p><h2>Kỹ năng</h2><div className="tag-list">{profile.skills.map((skill) => <span key={skill.id} className="skill-tag">{skill.name}</span>)}</div><h2>Phương pháp hướng dẫn</h2><p>{profile.teachingApproach}</p><h2>Khả năng</h2><p>{profile.availability}</p><div className="profile-links">{profile.githubUrl && <a href={profile.githubUrl} target="_blank" rel="noreferrer">GitHub</a>}{profile.linkedinUrl && <a href={profile.linkedinUrl} target="_blank" rel="noreferrer">LinkedIn</a>}{profile.portfolioUrl && <a href={profile.portfolioUrl} target="_blank" rel="noreferrer">Portfolio</a>}</div></PageFrame>
+  return <PageFrame title={profile.headline}><p className="profile-name">{profile.displayName} · {profile.yearsExperience} năm kinh nghiệm</p><p>{profile.biography}</p><h2>Kỹ năng</h2><div className="tag-list">{profile.skills.map((skill) => <span key={skill.id} className="skill-tag">{skill.name}</span>)}</div><h2>Phương pháp hướng dẫn</h2><p>{profile.teachingApproach}</p><h2>Khả năng</h2><p>{profile.availability}</p><div className="profile-links">{profile.githubUrl && <a href={profile.githubUrl} target="_blank" rel="noreferrer">GitHub</a>}{profile.linkedinUrl && <a href={profile.linkedinUrl} target="_blank" rel="noreferrer">LinkedIn</a>}{profile.portfolioUrl && <a href={profile.portfolioUrl} target="_blank" rel="noreferrer">Portfolio</a>}</div>{account.data && account.data.id !== profile.developerId && <ReportButton targetType="DEVELOPER_PROFILE" targetId={profile.id} />}</PageFrame>
 }

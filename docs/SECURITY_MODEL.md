@@ -35,4 +35,13 @@ The browser is untrusted. Spring Security authenticates requests; services autho
 - Concurrency-safe proposal selection and database constraints for one match per request and same-request references.
 - Secret management via environment/deployment secret store; never commit real secrets.
 
-M1–M4 implement identity, profiles, proposals, private CV controls, and participant-scoped match access, but this is not a production security certification. Add login/registration rate limits, operational secret management, HTTPS and Secure cookie deployment, CSP, malware scanning, security event auditing, automated retention policy, and account recovery controls before a public pilot.
+M1–M5 implement identity, profiles, proposals, private CV controls, participant-scoped match access, rate limits, audit events and moderation, but this is not a production security certification. Shared rate limiting, operational secret management, HTTPS and Secure cookie deployment, CSP, malware scanning, automated audit retention policy, and account recovery controls remain before a public pilot.
+
+## M5 controls
+- API fixed-window rate limits cover login (12/15 min), registration (20/hour), proposals (8/min), and CV downloads (30/min). Rejections return `429 rate_limited` with `Retry-After`. Counters are process-local; multi-instance production requires a shared limiter.
+- Report creation is limited to 5 per hour per client/principal to reduce repeat abuse.
+- V6 adds `users.is_admin` defaulting false. Public registration cannot grant it. Admin endpoints require server-derived `ROLE_ADMIN`; no default admin credential exists.
+- Reports validate target visibility. Proposal reports are participant-only and API responses contain report metadata rather than proposal text/CV content. A database unique constraint prevents duplicate reports by the same reporter for the same target.
+- Moderation decisions, account suspension, request hide/restore, match confirmation, and authentication failures are audited without storing credentials, session identifiers, CV bytes, or file paths. Retention cleanup is manual and must be operationalized before production.
+- Account suspension deletes that account's JDBC-backed sessions. Hidden requests are omitted from public discovery and non-owner reads.
+- `npm audit --omit=dev` reports no production dependency vulnerabilities. The full development dependency tree currently reports 11 high findings through `picomatch@4.0.7` (GHSA-fc5q-39xc-vjpf) via Vite/Vitest. No patched version is published in the advisory; npm's automated fix would downgrade Vite from 7 to 6.2.7. Do not apply that forced major downgrade without compatibility review; update the dependency tree when a compatible upstream patch is available.

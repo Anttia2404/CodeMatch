@@ -17,6 +17,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -57,10 +59,92 @@ class PostgresIntegrationTest {
             "select count(*) from flyway_schema_history where success = true", Integer.class);
         String databaseName = jdbcTemplate.queryForObject("select current_database()", String.class);
 
-        assertThat(migrationCount).isEqualTo(5);
+        assertThat(migrationCount).isEqualTo(6);
         assertThat(databaseName).startsWith("test");
         assertThat(jdbcTemplate.queryForObject("select count(*) from skills", Integer.class)).isEqualTo(11);
         assertThat(jdbcTemplate.queryForObject("select count(*) from information_schema.tables where table_name = 'spring_session'", Integer.class)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from information_schema.tables where table_name = 'moderation_reports'", Integer.class)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject("select count(*) from information_schema.tables where table_name = 'audit_events'", Integer.class)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject("select column_default from information_schema.columns where table_name = 'users' and column_name = 'is_admin'", String.class)).isEqualTo("false");
+    }
+
+    @Test
+    void adminApiRequiresExplicitDatabaseRoleAndAuthenticationFailuresAreAudited() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/reports")).andExpect(status().isUnauthorized());
+
+        String email = registerAccount("moderation");
+        Cookie userSession = login(email);
+        mockMvc.perform(get("/api/v1/admin/reports").cookie(userSession)).andExpect(status().isForbidden());
+        int failuresBefore = jdbcTemplate.queryForObject("select count(*) from audit_events where event_type = 'AUTHENTICATION_FAILED' and outcome = 'FAILURE'", Integer.class);
+        mockMvc.perform(post("/api/v1/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"" + email + "\",\"password\":\"Wrong-Password-83!\"}"))
+            .andExpect(status().isUnauthorized());
+
+        assertThat(jdbcTemplate.queryForObject("select count(*) from audit_events where event_type = 'AUTHENTICATION_FAILED' and outcome = 'FAILURE'", Integer.class)).isEqualTo(failuresBefore + 1);
+        assertThat(jdbcTemplate.queryForObject("select is_admin from users where email = ?", Boolean.class, email)).isFalse();
+        jdbcTemplate.update("update users set is_admin = true where email = ?", email);
+        Cookie adminSession = login(email);
+        mockMvc.perform(get("/api/v1/admin/reports").cookie(adminSession)).andExpect(status().isOk());
+    }
+
+    @Test
+    void reportsRequireVisibleTargetsPreventDuplicatesAndCanBeReviewedAndHidden() throws Exception {
+        String ownerEmail = registerAccount("report-owner");
+        String reporterEmail = registerAccount("reporter");
+        String adminEmail = registerAccount("report-admin");
+        jdbcTemplate.update("update users set is_admin = true where email = ?", adminEmail);
+        Cookie owner = login(ownerEmail);
+        Cookie reporter = login(reporterEmail);
+        Cookie admin = login(adminEmail);
+        String skill = jdbcTemplate.queryForObject("select id from skills where slug = 'react'", String.class);
+        String requestBody = """
+            {"title":"Request to report","description":"I want to practice React by building a small application.","learningGoal":"Practice React",
+             "currentLevel":"BASIC","preferredFormat":"ONLINE","city":null,"budgetMin":null,"budgetMax":null,
+             "budgetUnit":null,"preferredSchedule":"Evenings","expectedDuration":"Four weeks",
+             "teachingExpectations":"Practice React with weekly project tasks.","requiresCv":false,"skillIds":["%s"]}
+            """.formatted(skill);
+        var draft = mockMvc.perform(post("/api/v1/learning-requests").with(csrf()).cookie(owner)
+                .contentType(MediaType.APPLICATION_JSON).content(requestBody))
+            .andExpect(status().isCreated()).andReturn();
+        String requestId = com.jayway.jsonpath.JsonPath.read(draft.getResponse().getContentAsString(), "$.id");
+        mockMvc.perform(post("/api/v1/learning-requests/" + requestId + "/publish").with(csrf()).cookie(owner))
+            .andExpect(status().isOk());
+
+        String reportBody = "{\"targetType\":\"LEARNING_REQUEST\",\"targetId\":\"" + requestId
+            + "\",\"reason\":\"SPAM\",\"description\":\"Please review this listing.\"}";
+        var created = mockMvc.perform(post("/api/v1/reports").with(csrf()).cookie(reporter)
+                .contentType(MediaType.APPLICATION_JSON).content(reportBody))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.status").value("OPEN"))
+            .andExpect(jsonPath("$.description").value("Please review this listing."))
+            .andExpect(jsonPath("$.targetTitle").doesNotExist()).andReturn();
+        String reportId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.id");
+        mockMvc.perform(post("/api/v1/reports").with(csrf()).cookie(reporter)
+                .contentType(MediaType.APPLICATION_JSON).content(reportBody))
+            .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("duplicate_report"));
+        mockMvc.perform(post("/api/v1/reports").with(csrf()).cookie(owner)
+                .contentType(MediaType.APPLICATION_JSON).content(reportBody))
+            .andExpect(status().isNotFound());
+
+        mockMvc.perform(post("/api/v1/admin/reports/" + reportId + "/review").with(csrf()).cookie(admin)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"RESOLVED\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("RESOLVED"));
+        mockMvc.perform(put("/api/v1/saved-requests/" + requestId).with(csrf()).cookie(reporter))
+            .andExpect(status().isNoContent());
+        mockMvc.perform(post("/api/v1/admin/learning-requests/" + requestId + "/hide").with(csrf()).cookie(admin))
+            .andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/v1/learning-requests/" + requestId)).andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/v1/learning-requests/" + requestId).cookie(owner)).andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/learning-requests/" + requestId).cookie(admin)).andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/saved-requests").cookie(reporter)).andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+        mockMvc.perform(post("/api/v1/admin/learning-requests/" + requestId + "/restore").with(csrf()).cookie(admin))
+            .andExpect(status().isNoContent());
+        assertThat(jdbcTemplate.queryForObject("select count(*) from audit_events where target_id = ? and outcome = 'SUCCESS'", Integer.class, java.util.UUID.fromString(requestId))).isEqualTo(2);
+
+        UUID reporterId = jdbcTemplate.queryForObject("select id from users where email = ?", UUID.class, reporterEmail);
+        mockMvc.perform(post("/api/v1/admin/users/" + reporterId + "/suspend").with(csrf()).cookie(admin))
+            .andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/v1/auth/me").cookie(reporter)).andExpect(status().isUnauthorized());
+        assertThat(jdbcTemplate.queryForObject("select count(*) from audit_events where event_type='ACCOUNT_SUSPENDED' and target_id=?", Integer.class, reporterId)).isEqualTo(1);
     }
 
     @Test
