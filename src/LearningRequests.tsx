@@ -69,9 +69,9 @@ export function RequestDiscovery({ authenticated }: { authenticated: boolean }) 
       <label className="search-box"><Search size={18} /><span className="sr-only">Tìm yêu cầu học</span>
         <input value={filters.q ?? ''} onChange={(event) => update({ q: event.target.value })} placeholder="Tìm theo công nghệ, mục tiêu học..." />
       </label>
-      <label className="filter-field"><span>Kỹ năng</span><select multiple value={filters.skillIds ?? []} onChange={(event) => update({ skillIds: Array.from(event.currentTarget.selectedOptions, (option) => option.value) })} aria-label="Lọc theo kỹ năng">
-        {(skills.data ?? []).map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}
-      </select><small>Giữ Ctrl để chọn nhiều</small></label>
+      <fieldset className="filter-field skill-filter"><legend>Kỹ năng</legend><div className="skill-filter-options">
+        {(skills.data ?? []).map((skill) => <label key={skill.id} className="skill-filter-option"><input type="checkbox" checked={(filters.skillIds ?? []).includes(skill.id)} onChange={(event) => update({ skillIds: event.target.checked ? [...(filters.skillIds ?? []), skill.id] : (filters.skillIds ?? []).filter((id) => id !== skill.id) })} /><span>{skill.name}</span></label>)}
+      </div><small>Chọn một hoặc nhiều kỹ năng</small></fieldset>
       <label className="filter-field"><span>Mức hiện tại</span><select value={filters.level ?? ''} onChange={(event) => update({ level: event.target.value as LearningLevel | '' })}>
         <option value="">Tất cả mức độ</option>{Object.entries(levelLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </select></label>

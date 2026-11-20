@@ -74,9 +74,8 @@ describe('learning request creation and management', () => {
     vi.spyOn(api, 'skills').mockResolvedValue([{ id: 'react-id', slug: 'react', name: 'React' }])
     const discover = vi.spyOn(api, 'discoverRequests').mockResolvedValue(page)
     renderAt(<RequestDiscovery authenticated={false} />)
-    await screen.findByRole('option', { name: 'React' })
-    const skillFilter = screen.getByRole('listbox', { name: 'Lọc theo kỹ năng' })
-    await user.selectOptions(skillFilter, 'react-id')
+    const skillFilter = await screen.findByRole('checkbox', { name: 'React' })
+    await user.click(skillFilter)
     await waitFor(() => expect(discover).toHaveBeenLastCalledWith(expect.objectContaining({ skillIds: ['react-id'] })))
   })
 

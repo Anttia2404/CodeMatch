@@ -1,4 +1,4 @@
-import { ArrowRight, Braces, Code2, MapPin, Menu, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, BookOpenCheck, Braces, Compass, Lightbulb, MapPin, Menu, Route as RouteIcon, Sparkles, Target } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -32,6 +32,49 @@ export default function App() {
     <Route path="/admin/pilot" element={<RequireAdmin><AdminPilotOverviewPage /></RequireAdmin>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes></BrowserRouter>
+}
+
+function LearningMapVisual() {
+  return (
+    <div className="learning-visual" role="img" aria-label="Bản đồ học tập kết nối mục tiêu, developer và thực hành">
+      <div className="learning-visual__glow" />
+      <div className="learning-visual__grid" />
+      <div className="learning-visual__topline"><span><i /> Không gian học tập</span><RouteIcon size={18} aria-hidden="true" /></div>
+      <svg className="learning-visual__routes" viewBox="0 0 560 390" fill="none" aria-hidden="true">
+        <path className="route route-main" d="M112 116C166 116 190 163 260 180s120-58 188-58" />
+        <path className="route route-secondary" d="M112 282c61 0 97-45 148-102s111 103 188 102" />
+        <circle cx="112" cy="116" r="4" /><circle cx="448" cy="122" r="4" />
+        <circle cx="112" cy="282" r="4" /><circle cx="448" cy="282" r="4" />
+      </svg>
+
+      <div className="learning-hub">
+        <span className="learning-hub__icon"><BookOpenCheck size={23} strokeWidth={1.8} /></span>
+        <span className="learning-hub__label">Học 1:1</span>
+        <strong>Điều bạn muốn làm được</strong>
+        <small>là điểm bắt đầu</small>
+      </div>
+
+      <div className="learning-node node-goal">
+        <span className="learning-node__icon goal-icon"><Target size={18} /></span>
+        <span><small>Mục tiêu</small><strong>Chọn điều cần học</strong></span>
+      </div>
+      <div className="learning-node node-guide">
+        <span className="learning-node__icon guide-icon"><Compass size={18} /></span>
+        <span><small>Đồng hành</small><strong>Học cùng developer</strong></span>
+      </div>
+      <div className="learning-node node-practice">
+        <span className="learning-node__icon practice-icon"><Lightbulb size={18} /></span>
+        <span><small>Thực hành</small><strong>Tiến từng bước</strong></span>
+      </div>
+      <div className="learning-node node-project">
+        <span className="learning-node__icon project-icon"><RouteIcon size={18} /></span>
+        <span><small>Lộ trình</small><strong>Theo nhịp của bạn</strong></span>
+      </div>
+
+      <div className="learning-visual__skills" aria-hidden="true"><span>React</span><span>Java</span><span>SQL</span></div>
+      <div className="learning-visual__footer"><span className="footer-signal" /> Từ câu hỏi đầu tiên đến lúc tự làm được</div>
+    </div>
+  )
 }
 
 function RequireAccount({ children }: { children: ReactNode }) {
@@ -82,16 +125,11 @@ function HomePage() {
             <p className="hero-description">Chia sẻ điều bạn muốn học. Tìm một developer phù hợp để cùng bạn đi tiếp, từng buổi một.</p>
             <div className="hero-actions"><a className="button button-primary" href="#requests">Khám phá yêu cầu học <ArrowRight size={17} /></a><Link className="quiet-link" to={authenticated ? '/learning-requests/new' : '/register'}>{authenticated ? 'Bạn muốn học?' : 'Bạn là developer?'} <span>{authenticated ? 'Đăng yêu cầu' : 'Tạo hồ sơ'}</span></Link></div>
           </div>
-          <div className="hero-art" aria-label="Minh họa kết nối người học và developer">
-            <div className="orbit orbit-one" /><div className="orbit orbit-two" />
-            <div className="code-window"><div className="window-head"><span /><span /><span /><i>learning.js</i></div><div className="code-lines"><span><b>01</b><em>const</em> nextStep = <strong>learn</strong>();</span><span><b>02</b></span><span><b>03</b><em>await</em> nextStep.<strong>with</strong>(you);</span><span><b>04</b></span><span><b>05</b><small>// tiến bộ, từng buổi một</small></span></div></div>
-            <div className="connection-card"><span className="connection-icon"><Code2 size={18} /></span><div><strong>Đúng người, đúng lúc</strong><small>Học theo mục tiêu của bạn</small></div><span className="connection-check"><ShieldCheck size={17} /></span></div>
-            <span className="spark spark-a"><Sparkles size={18} /></span><span className="spark spark-b">&#123; &#125;</span>
-          </div>
+          <LearningMapVisual />
         </section>
 
         <section className="discovery" id="requests">
-          <div className="section-heading"><div><span className="section-kicker">CƠ HỘI MỚI</span><h2>Đang cần người đồng hành</h2><p>Yêu cầu đang mở từ người học trên CodeMatch.</p></div><div className="section-actions"><span className={`api-status ${apiStatus.isSuccess ? 'api-online' : apiStatus.isError ? 'api-offline' : ''}`}><i />{apiStatus.isSuccess ? 'API trực tuyến' : apiStatus.isError ? 'API chưa kết nối' : 'Đang kiểm tra API'}</span></div></div>
+          <div className="section-heading"><div><span className="section-kicker">Cơ hội học mới</span><h2>Đang cần người đồng hành</h2><p>Yêu cầu đang mở từ người học trên CodeMatch.</p></div><div className="section-actions"><span className={`api-status ${apiStatus.isSuccess ? 'api-online' : apiStatus.isError ? 'api-offline' : ''}`}><i />{apiStatus.isSuccess ? 'API trực tuyến' : apiStatus.isError ? 'API chưa kết nối' : 'Đang kiểm tra API'}</span></div></div>
           <RequestDiscovery authenticated={authenticated} />
         </section>
         <section className="how-strip" id="how"><span className="how-icon"><Sparkles size={19} /></span><p><strong>Mỗi buổi học bắt đầu từ mục tiêu của bạn.</strong> Bạn chọn người dạy, cùng thống nhất cách học và lịch trình phù hợp.</p><a href="#how-details">Tìm hiểu thêm <ArrowRight size={15} /></a></section>
