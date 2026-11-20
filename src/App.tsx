@@ -1,5 +1,5 @@
-import { ArrowRight, BookOpenCheck, Braces, Compass, Lightbulb, MapPin, Menu, Route as RouteIcon, Sparkles, Target } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowRight, Braces, Compass, Lightbulb, MapPin, Menu, Target } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api, ApiError, checkApiHealth } from './lib/api'
@@ -10,6 +10,7 @@ import { EditProposalPage, MyProposalsPage, ProposalApplyPage, ReceivedProposals
 import { DeveloperMatchesPage, LearnerMatchPage } from './MatchPages'
 import { AdminReportsPage } from './ModerationPages'
 import { AdminPilotOverviewPage } from './PilotOverview'
+import { LearningHeroScene } from './LearningHeroScene'
 
 export default function App() {
   return <BrowserRouter><Routes>
@@ -34,47 +35,28 @@ export default function App() {
   </Routes></BrowserRouter>
 }
 
-function LearningMapVisual() {
-  return (
-    <div className="learning-visual" role="img" aria-label="Bản đồ học tập kết nối mục tiêu, developer và thực hành">
-      <div className="learning-visual__glow" />
-      <div className="learning-visual__grid" />
-      <div className="learning-visual__topline"><span><i /> Không gian học tập</span><RouteIcon size={18} aria-hidden="true" /></div>
-      <svg className="learning-visual__routes" viewBox="0 0 560 390" fill="none" aria-hidden="true">
-        <path className="route route-main" d="M112 116C166 116 190 163 260 180s120-58 188-58" />
-        <path className="route route-secondary" d="M112 282c61 0 97-45 148-102s111 103 188 102" />
-        <circle cx="112" cy="116" r="4" /><circle cx="448" cy="122" r="4" />
-        <circle cx="112" cy="282" r="4" /><circle cx="448" cy="282" r="4" />
-      </svg>
+function Reveal({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const [visible, setVisible] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
 
-      <div className="learning-hub">
-        <span className="learning-hub__icon"><BookOpenCheck size={23} strokeWidth={1.8} /></span>
-        <span className="learning-hub__label">Học 1:1</span>
-        <strong>Điều bạn muốn làm được</strong>
-        <small>là điểm bắt đầu</small>
-      </div>
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true)
+      return
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setVisible(true)
+        observer.disconnect()
+      }
+    }, { threshold: 0.12 })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
 
-      <div className="learning-node node-goal">
-        <span className="learning-node__icon goal-icon"><Target size={18} /></span>
-        <span><small>Mục tiêu</small><strong>Chọn điều cần học</strong></span>
-      </div>
-      <div className="learning-node node-guide">
-        <span className="learning-node__icon guide-icon"><Compass size={18} /></span>
-        <span><small>Đồng hành</small><strong>Học cùng developer</strong></span>
-      </div>
-      <div className="learning-node node-practice">
-        <span className="learning-node__icon practice-icon"><Lightbulb size={18} /></span>
-        <span><small>Thực hành</small><strong>Tiến từng bước</strong></span>
-      </div>
-      <div className="learning-node node-project">
-        <span className="learning-node__icon project-icon"><RouteIcon size={18} /></span>
-        <span><small>Lộ trình</small><strong>Theo nhịp của bạn</strong></span>
-      </div>
-
-      <div className="learning-visual__skills" aria-hidden="true"><span>React</span><span>Java</span><span>SQL</span></div>
-      <div className="learning-visual__footer"><span className="footer-signal" /> Từ câu hỏi đầu tiên đến lúc tự làm được</div>
-    </div>
-  )
+  return <div ref={ref} className={`scroll-reveal${visible ? ' is-visible' : ''} ${className}`}>{children}</div>
 }
 
 function RequireAccount({ children }: { children: ReactNode }) {
@@ -118,21 +100,29 @@ function HomePage() {
       </header>
 
       <main id="home">
-        <section className="hero">
+        <section className="hero hero-section">
+          <LearningHeroScene />
           <div className="hero-copy">
-            <div className="trust-note"><span className="trust-dot" /> Học 1:1 cùng developer độc lập</div>
-            <h1>Học code theo cách <span>của bạn.</span></h1>
-            <p className="hero-description">Chia sẻ điều bạn muốn học. Tìm một developer phù hợp để cùng bạn đi tiếp, từng buổi một.</p>
+            <div className="trust-note"><span className="trust-dot" /> Học 1:1 · Theo nhịp của bạn</div>
+            <h1>Học lập trình.<br /><span>Đi xa hơn cùng nhau.</span></h1>
+            <p className="hero-description">Chọn một mục tiêu, tìm developer đồng hành và biến điều đang học thành sản phẩm bạn tự làm được.</p>
             <div className="hero-actions"><a className="button button-primary" href="#requests">Khám phá yêu cầu học <ArrowRight size={17} /></a><Link className="quiet-link" to={authenticated ? '/learning-requests/new' : '/register'}>{authenticated ? 'Bạn muốn học?' : 'Bạn là developer?'} <span>{authenticated ? 'Đăng yêu cầu' : 'Tạo hồ sơ'}</span></Link></div>
           </div>
-          <LearningMapVisual />
+          <a className="hero-scroll" href="#requests"><span /> Cuộn để khám phá</a>
         </section>
 
         <section className="discovery" id="requests">
-          <div className="section-heading"><div><span className="section-kicker">Cơ hội học mới</span><h2>Đang cần người đồng hành</h2><p>Yêu cầu đang mở từ người học trên CodeMatch.</p></div><div className="section-actions"><span className={`api-status ${apiStatus.isSuccess ? 'api-online' : apiStatus.isError ? 'api-offline' : ''}`}><i />{apiStatus.isSuccess ? 'API trực tuyến' : apiStatus.isError ? 'API chưa kết nối' : 'Đang kiểm tra API'}</span></div></div>
+          <Reveal className="section-heading"><div><span className="section-kicker">Cơ hội học mới</span><h2>Đang cần người đồng hành</h2><p>Yêu cầu đang mở từ người học trên CodeMatch.</p></div><div className="section-actions"><span className={`api-status ${apiStatus.isSuccess ? 'api-online' : apiStatus.isError ? 'api-offline' : ''}`}><i />{apiStatus.isSuccess ? 'API trực tuyến' : apiStatus.isError ? 'API chưa kết nối' : 'Đang kiểm tra API'}</span></div></Reveal>
           <RequestDiscovery authenticated={authenticated} />
         </section>
-        <section className="how-strip" id="how"><span className="how-icon"><Sparkles size={19} /></span><p><strong>Mỗi buổi học bắt đầu từ mục tiêu của bạn.</strong> Bạn chọn người dạy, cùng thống nhất cách học và lịch trình phù hợp.</p><a href="#how-details">Tìm hiểu thêm <ArrowRight size={15} /></a></section>
+        <section className="how-section section" id="how" aria-labelledby="how-title">
+          <Reveal className="how-heading"><div><span className="section-kicker">Học theo mục tiêu thật</span><h2 id="how-title">Từ câu hỏi đầu tiên<br />đến điều bạn tự xây.</h2></div><p>Mỗi hành trình bắt đầu từ điều bạn muốn làm được. Bạn chọn người đồng hành và cùng thống nhất cách học phù hợp.</p></Reveal>
+          <div className="learning-steps">
+            <Reveal className="learning-step"><span className="step-index">01</span><Target size={23} /><h3>Nêu mục tiêu</h3><p>Chia sẻ kỹ năng, sản phẩm hoặc vấn đề bạn muốn học.</p></Reveal>
+            <Reveal className="learning-step"><span className="step-index">02</span><Compass size={23} /><h3>Chọn người đồng hành</h3><p>Xem các đề xuất và chọn developer phù hợp với cách học của bạn.</p></Reveal>
+            <Reveal className="learning-step"><span className="step-index">03</span><Lightbulb size={23} /><h3>Cùng thực hành</h3><p>Thống nhất lịch và biến kiến thức thành kỹ năng qua từng buổi.</p></Reveal>
+          </div>
+        </section>
       </main>
       <footer><a className="brand footer-brand" href="#home"><span className="brand-mark"><Braces size={18} /></span><span>code<span className="brand-match">match</span></span></a><span>Học lập trình, theo cách của bạn.</span><span className="footer-location">Việt Nam · <MapPin size={13} /></span></footer>
     </div>

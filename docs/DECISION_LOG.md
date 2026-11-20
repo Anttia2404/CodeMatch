@@ -1,5 +1,8 @@
 # Decision log
 
+## 2026-11-20 — Use a lazy decorative Three.js scene on the landing page
+Use a small custom scene of an open learning book and connected skill nodes to carry the dark, editorial visual language across from TrustAgent while keeping CodeMatch's learning content and API behavior intact. Load Three.js only for the homepage scene, stop rendering when the scene leaves the viewport, honor reduced-motion preferences, and retain a CSS fallback when WebGL is unavailable. The scene is decorative and contains no user or activity data.
+
 ## 2026-11-18 — Keep pilot deployment behind an explicit approval gate
 Document a same-origin Caddy + Spring Boot + PostgreSQL candidate topology, strict staging/production configuration, and operator runbooks without creating cloud resources or deploying. Preserve local Windows PostgreSQL 18 on port 5432; local Docker PostgreSQL uses loopback port 5433. Use isolated synthetic-data tests for real-browser, storage-restart and backup/restore evidence. Off-host encrypted backup, admin provisioning, privacy/retention and malware scanning remain pilot prerequisites.
 

@@ -27,7 +27,7 @@ describe('CodeMatch request discovery', () => {
     vi.spyOn(api, 'discoverRequests').mockResolvedValue(page)
     vi.spyOn(api, 'skills').mockResolvedValue([{ id: 'skill-react', slug: 'react', name: 'React' }])
     renderApp()
-    expect(screen.getByRole('heading', { name: /Học code theo cách/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Học lập trình/ })).toBeInTheDocument()
     expect(await screen.findByRole('link', { name: 'Mình muốn học React hooks' })).toBeInTheDocument()
     fireEvent.change(screen.getByRole('textbox', { name: 'Tìm yêu cầu học' }), { target: { value: 'Spring' } })
     await waitFor(() => expect(api.discoverRequests).toHaveBeenLastCalledWith(expect.objectContaining({ q: 'Spring' })), { timeout: 1200 })
