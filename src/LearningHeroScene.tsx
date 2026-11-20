@@ -202,6 +202,6 @@ export function LearningHeroScene() {
   }, [])
 
   return <div ref={hostRef} className={`learning-scene${ready ? ' is-ready' : ''}`} aria-hidden="true">
-    <div className="learning-scene__fallback"><span className="scene-orbit scene-orbit--one" /><span className="scene-orbit scene-orbit--two" /><span className="scene-book"><i /><i /><i /><i /></span><span className="scene-node scene-node--one" /><span className="scene-node scene-node--two" /><span className="scene-node scene-node--three" /></div>
+    <div className="learning-scene__fallback"><span className="scene-orbit scene-orbit--one" /><span className="scene-orbit scene-orbit--two" /><span className="scene-book"><span className="scene-page scene-page--left"><i /><i /><i /></span><span className="scene-page scene-page--right"><i /><i /><i /></span></span><span className="scene-node scene-node--one" /><span className="scene-node scene-node--two" /><span className="scene-node scene-node--three" /></div>
   </div>
 }
