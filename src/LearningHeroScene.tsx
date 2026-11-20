@@ -38,15 +38,15 @@ export function LearningHeroScene() {
       root.position.y = 1.05
       scene.add(root)
 
-      const warmPage = new THREE.MeshStandardMaterial({ color: '#b6c2b6', roughness: 0.9, transparent: true, opacity: 0.72, depthWrite: false })
-      const pageEdge = new THREE.MeshStandardMaterial({ color: '#78877d', roughness: 0.92 })
-      const sage = new THREE.MeshBasicMaterial({ color: '#9fc7b8', transparent: true, opacity: 0.82 })
-      const sageLine = new THREE.LineBasicMaterial({ color: '#9fc7b8', transparent: true, opacity: 0.3 })
-      const lineBright = new THREE.LineBasicMaterial({ color: '#c4ded2', transparent: true, opacity: 0.68 })
+      const warmPage = new THREE.MeshStandardMaterial({ color: '#eef1fb', roughness: 0.9, transparent: true, opacity: 0.82, depthWrite: false })
+      const pageEdge = new THREE.MeshStandardMaterial({ color: '#8c9fd7', roughness: 0.92 })
+      const sage = new THREE.MeshBasicMaterial({ color: '#3458d4', transparent: true, opacity: 0.78 })
+      const sageLine = new THREE.LineBasicMaterial({ color: '#5574df', transparent: true, opacity: 0.3 })
+      const lineBright = new THREE.LineBasicMaterial({ color: '#aab9ef', transparent: true, opacity: 0.7 })
 
-      const ambient = new THREE.HemisphereLight('#d8e6df', '#18201e', 1.4)
+      const ambient = new THREE.HemisphereLight('#e6ebff', '#26345b', 1.4)
       scene.add(ambient)
-      const keyLight = new THREE.DirectionalLight('#d2e9dd', 1.8)
+      const keyLight = new THREE.DirectionalLight('#e1e8ff', 1.8)
       keyLight.position.set(-3, 7, 5)
       scene.add(keyLight)
 
@@ -85,7 +85,7 @@ export function LearningHeroScene() {
           return new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius)
         })
         const geometry = new THREE.BufferGeometry().setFromPoints(points)
-        const material = new THREE.LineBasicMaterial({ color: '#9fc7b8', transparent: true, opacity })
+        const material = new THREE.LineBasicMaterial({ color: '#3458d4', transparent: true, opacity: opacity * 0.72 })
         ringGroup.add(new THREE.LineLoop(geometry, material))
       }
 
