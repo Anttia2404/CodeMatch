@@ -1,5 +1,8 @@
 # Decision log
 
+## 2026-11-20 — Shape the landing page around learning discovery
+Keep the hero copy and learning illustration balanced as separate visual zones on desktop, while repositioning the same illustration for narrow screens. This direction draws on more than ten tutoring and learning products: surface discovery early, make the learning goal and next action clear, and avoid unsupported social proof or invented learner metrics.
+
 ## 2026-11-20 — Keep CodeMatch's blue palette with a decorative Three.js scene
 Keep CodeMatch's light blue interface palette while borrowing TrustAgent's spatial hero treatment. Use a small custom scene of an open learning book and connected skill nodes; load Three.js only for the homepage scene, stop rendering when it leaves the viewport, honor reduced-motion preferences, and retain a CSS fallback when WebGL is unavailable. The scene is decorative and contains no user or activity data.
 

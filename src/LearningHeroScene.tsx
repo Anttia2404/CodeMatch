@@ -136,7 +136,8 @@ export function LearningHeroScene() {
         camera.aspect = width / height
         camera.position.y = width < 600 ? 7.8 : width < 900 ? 6.2 : 5.6
         camera.position.z = width < 600 ? 13.2 : width < 900 ? 10.2 : 8.7
-        root!.position.y = width < 600 ? 3.7 : width < 900 ? 1.35 : 1.05
+        root!.position.x = width < 900 ? 0 : 2.15
+        root!.position.y = width < 600 ? 0.9 : width < 900 ? 1.35 : 1.05
         root!.scale.setScalar(width < 600 ? 0.68 : 0.78)
         camera.updateProjectionMatrix()
       }
