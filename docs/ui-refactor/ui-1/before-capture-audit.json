@@ -1,0 +1,223 @@
+{
+  "reference": {
+    "header": {
+      "text": "Job Board\nSearch jobs by title or company\nSearch 20 jobs by role, company or skill\n⌘K\nAll 20\nRemote ",
+      "className": "bg-background lg:border-line relative z-30 lg:border-b",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 52
+      },
+      "font": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif 16px/24px 400",
+      "color": "rgb(22, 22, 22)",
+      "background": "rgb(245, 245, 244)",
+      "border": "",
+      "radius": "0px",
+      "shadow": "none",
+      "gap": "normal",
+      "padding": "0px"
+    },
+    "nav": {
+      "text": "All 20\nRemote 20\nSaved",
+      "className": "bg-tag hidden shrink-0 items-center gap-0.5 rounded-[8px] p-0.5 xl:flex",
+      "rect": {
+        "x": 728,
+        "y": 10.5,
+        "width": 204.90625,
+        "height": 30
+      },
+      "font": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif 16px/24px 400",
+      "color": "rgb(22, 22, 22)",
+      "background": "rgb(240, 240, 239)",
+      "border": "0px solid rgb(22, 22, 22)",
+      "radius": "8px",
+      "shadow": "none",
+      "gap": "2px",
+      "padding": "2px"
+    },
+    "main": {
+      "text": "Latest Opportunities\nCategory\n▾\nType\n▾\nLevel\n▾\nSalary\n▾\nLanguage\n▾\nRemote\n\n20 results · updated 8 ho",
+      "className": "flex-1",
+      "rect": {
+        "x": 0,
+        "y": 52,
+        "width": 1440,
+        "height": 1302
+      },
+      "font": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif 16px/24px 400",
+      "color": "rgb(22, 22, 22)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px solid rgb(22, 22, 22)",
+      "radius": "0px",
+      "shadow": "none",
+      "gap": "normal",
+      "padding": "0px"
+    },
+    "h1": {
+      "text": "Latest jobs",
+      "className": "text-foreground text-[15px] leading-5 font-medium",
+      "rect": {
+        "x": 235,
+        "y": 115,
+        "width": 0,
+        "height": 20
+      },
+      "font": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif 15px/20px 500",
+      "color": "rgb(22, 22, 22)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px solid rgb(22, 22, 22)",
+      "radius": "0px",
+      "shadow": "none",
+      "gap": "normal",
+      "padding": "0px"
+    },
+    "h2": {
+      "text": "Latest Opportunities",
+      "className": "sr-only",
+      "rect": {
+        "x": 231,
+        "y": 75,
+        "width": 1,
+        "height": 1
+      },
+      "font": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif 16px/24px 400",
+      "color": "rgb(22, 22, 22)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px solid rgb(22, 22, 22)",
+      "radius": "0px",
+      "shadow": "none",
+      "gap": "normal",
+      "padding": "0px"
+    },
+    "input": {
+      "text": "",
+      "className": "text-foreground placeholder:text-subtle peer h-full min-w-0 flex-1 bg-transparent pr-3 text-[15px] outline-none lg:pr-2 lg:text-[14px] lg:placeholder:text-transparent [&::-webkit-s",
+      "rect": {
+        "x": 264,
+        "y": 9.5,
+        "width": 410.625,
+        "height": 32
+      },
+      "font": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif 14px/21px 400",
+      "color": "rgb(22, 22, 22)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px solid rgb(22, 22, 22)",
+      "radius": "0px",
+      "shadow": "none",
+      "gap": "normal",
+      "padding": "0px 8px 0px 0px"
+    },
+    "button": {
+      "text": "Search",
+      "className": "text-subtle hover:text-foreground flex h-full w-10 shrink-0 items-center justify-center rounded-l-[10px] lg:w-8 lg:rounded-l-[8px]",
+      "rect": {
+        "x": 232,
+        "y": 9.5,
+        "width": 32,
+        "height": 32
+      },
+      "font": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif 16px/24px 400",
+      "color": "rgb(107, 107, 107)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px solid rgb(107, 107, 107)",
+      "radius": "8px 0px 0px 8px",
+      "shadow": "none",
+      "gap": "normal",
+      "padding": "0px"
+    },
+    "[data-testid=\"job-row\"]": {
+      "text": "Associate Account Executive – Greece (Greek Speaking)\nNew\n\nCanary Technologies Corp·Remote·Full-time",
+      "className": "group/row",
+      "rect": {
+        "x": 224,
+        "y": 108,
+        "width": 808,
+        "height": 60
+      },
+      "font": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif 16px/24px 400",
+      "color": "rgb(22, 22, 22)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px solid rgb(22, 22, 22)",
+      "radius": "0px",
+      "shadow": "none",
+      "gap": "normal",
+      "padding": "0px"
+    },
+    "[data-testid=\"job-detail\"]": null,
+    "aside": {
+      "text": "ResetFiltersDoneCategorySales & RetailComputer & ITCustomer ServiceManagementJob typeFull-timeLevelE",
+      "className": "bg-card text-foreground fixed inset-x-0 top-auto bottom-0 m-0 max-h-[85dvh] w-full max-w-none overflow-y-auto overscroll-contain rounded-t-2xl border-0 p-0 shadow-[0_0_0_1px_rgb(0_",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "font": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif 16px/24px 400",
+      "color": "rgb(22, 22, 22)",
+      "background": "rgb(255, 255, 255)",
+      "border": "0px solid rgb(22, 22, 22)",
+      "radius": "16px 16px 0px 0px",
+      "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px, rgba(0, 0, 0, 0.16) 0px -16px 48px 0px",
+      "gap": "normal",
+      "padding": "0px"
+    }
+  },
+  "reference-desktop-1440x900": {
+    "title": "Jobs | Job Board",
+    "scrollWidth": 1440,
+    "viewportWidth": 1440,
+    "bodyText": "For the complete documentation index, see llms.txt.\nSkip to content\nJob Board\nSearch jobs by title or company\nSearch 20 jobs by role, company or skill\n⌘K\nAll 20\nRemote 20\nSaved\nCompanies\nPricing\nShowcase\nChangelog\nLatest Opportunities\nCategory\n▾\nType\n▾\nLevel\n▾\nSalary\n▾\nLanguage\n▾\nRemote\n\n20 results · updated 8 hours ago\n\n20 per page\n▾\nNewest\n▾\nLatest jobs\n20\nSaved\n0\nApplied\n0\nCategories\nSales & Retail\n7\nComputer & IT\n5\nCustomer Service\n5\nManagement\n3\nLatest jobs\nAssociate Account Executive – Greece (Greek Speaking)\nNew\n\nCanary Technologies Corp·Remote·Full-time\n\n€50k-65k (EUR)\n\n8h\nSenior Data Engineer\nNew\n\nBluesight·Remote (US Only)·Full-time\n\n$130k-155k\n\n13h\nData Engineer\nNew\n\nBluesight·Remote (US Only)·Full-time\n\n$110k-130k\n\n14h\nPatient Engagement Specialist\nNew\n\nProfound Research·Remote·Full-time\n\n15h\nCare Team Intake Specialist\nNew\n\nSynapticure·Remote (US Only)·Full-time\n\n$24-25\n\n15h\nHead of Professional Services, NICE\nNew\n\nTTEC Digital·Remote·Full-time\n\n$180k-225k\n\n17h\nAdvisory En",
+    "pageErrors": []
+  },
+  "before-desktop-1440x900": {
+    "title": "CodeMatch — Học cùng developer phù hợp",
+    "scrollWidth": 1440,
+    "viewportWidth": 1440,
+    "bodyText": "codematch\nTìm cơ hội học\nCách hoạt động\nTham gia CodeMatch\nĐăng nhập\nTham gia CodeMatch\nHọc 1:1 cùng developer độc lập\nHọc code theo cách của bạn.\n\nChia sẻ điều bạn muốn học. Tìm một developer phù hợp để cùng bạn đi tiếp, từng buổi một.\n\nKhám phá yêu cầu học\nBạn là developer? Tạo hồ sơ\nlearning.js\n01const nextStep = learn();\n02\n03await nextStep.with(you);\n04\n05// tiến bộ, từng buổi một\nĐúng người, đúng lúc\nHọc theo mục tiêu của bạn\n{ }\nCƠ HỘI MỚI\nĐang cần người đồng hành\n\nYêu cầu đang mở từ người học trên CodeMatch.\n\nAPI chưa kết nối\nTìm yêu cầu học\nKỹ năng\nGiữ Ctrl để chọn nhiều\nMức hiện tại\nTất cả mức độ\nMới bắt đầu\nCơ bản\nTrung cấp\nNâng cao\nHình thức\nOnline và trực tiếp\nOnline\nTrực tiếp\nNgân sách từ (₫)\nĐến (₫)\nĐơn vị ngân sách\nTất cả đơn vị\nmỗi giờ\nmỗi buổi\ntoàn bộ\nYêu cầu CV\nKhông lọc\nCần CV\nKhông cần CV\nSắp xếp\nMới nhất\nCũ nhất\nXóa bộ lọc\nChưa tải được yêu cầu học\nYêu cầu thất bại (500).\nThử lại\n\nMỗi buổi học bắt đầu từ mục tiêu của bạn. Bạn chọn người dạy, cùng thống nhất cách h",
+    "pageErrors": []
+  },
+  "reference-laptop-1280x800": {
+    "title": "Jobs | Job Board",
+    "scrollWidth": 1280,
+    "viewportWidth": 1280,
+    "bodyText": "For the complete documentation index, see llms.txt.\nSkip to content\nJob Board\nSearch jobs by title or company\nSearch 20 jobs by role, company or skill\n⌘K\nAll 20\nRemote 20\nSaved\nCompanies\nPricing\nShowcase\nChangelog\nLatest Opportunities\nCategory\n▾\nType\n▾\nLevel\n▾\nSalary\n▾\nLanguage\n▾\nRemote\n\n20 results · updated 8 hours ago\n\n20 per page\n▾\nNewest\n▾\nLatest jobs\n20\nSaved\n0\nApplied\n0\nCategories\nSales & Retail\n7\nComputer & IT\n5\nCustomer Service\n5\nManagement\n3\nLatest jobs\nAssociate Account Executive – Greece (Greek Speaking)\nNew\n\nCanary Technologies Corp·Remote·Full-time\n\n€50k-65k (EUR)\n\n8h\nSenior Data Engineer\nNew\n\nBluesight·Remote (US Only)·Full-time\n\n$130k-155k\n\n13h\nData Engineer\nNew\n\nBluesight·Remote (US Only)·Full-time\n\n$110k-130k\n\n14h\nPatient Engagement Specialist\nNew\n\nProfound Research·Remote·Full-time\n\n15h\nCare Team Intake Specialist\nNew\n\nSynapticure·Remote (US Only)·Full-time\n\n$24-25\n\n15h\nHead of Professional Services, NICE\nNew\n\nTTEC Digital·Remote·Full-time\n\n$180k-225k\n\n17h\nAdvisory En",
+    "pageErrors": []
+  },
+  "before-laptop-1280x800": {
+    "title": "CodeMatch — Học cùng developer phù hợp",
+    "scrollWidth": 1280,
+    "viewportWidth": 1280,
+    "bodyText": "codematch\nTìm cơ hội học\nCách hoạt động\nTham gia CodeMatch\nĐăng nhập\nTham gia CodeMatch\nHọc 1:1 cùng developer độc lập\nHọc code theo cách của bạn.\n\nChia sẻ điều bạn muốn học. Tìm một developer phù hợp để cùng bạn đi tiếp, từng buổi một.\n\nKhám phá yêu cầu học\nBạn là developer? Tạo hồ sơ\nlearning.js\n01const nextStep = learn();\n02\n03await nextStep.with(you);\n04\n05// tiến bộ, từng buổi một\nĐúng người, đúng lúc\nHọc theo mục tiêu của bạn\n{ }\nCƠ HỘI MỚI\nĐang cần người đồng hành\n\nYêu cầu đang mở từ người học trên CodeMatch.\n\nAPI chưa kết nối\nTìm yêu cầu học\nKỹ năng\nGiữ Ctrl để chọn nhiều\nMức hiện tại\nTất cả mức độ\nMới bắt đầu\nCơ bản\nTrung cấp\nNâng cao\nHình thức\nOnline và trực tiếp\nOnline\nTrực tiếp\nNgân sách từ (₫)\nĐến (₫)\nĐơn vị ngân sách\nTất cả đơn vị\nmỗi giờ\nmỗi buổi\ntoàn bộ\nYêu cầu CV\nKhông lọc\nCần CV\nKhông cần CV\nSắp xếp\nMới nhất\nCũ nhất\nXóa bộ lọc\nChưa tải được yêu cầu học\nYêu cầu thất bại (500).\nThử lại\n\nMỗi buổi học bắt đầu từ mục tiêu của bạn. Bạn chọn người dạy, cùng thống nhất cách h",
+    "pageErrors": []
+  },
+  "reference-tablet-768x1024": {
+    "title": "Jobs | Job Board",
+    "scrollWidth": 768,
+    "viewportWidth": 768,
+    "bodyText": "For the complete documentation index, see llms.txt.\nSkip to content\nJob Board\nSearch jobs by title or company\nJobs\nCompanies\nPricing\nShowcase\nChangelog\nLatest Opportunities\nCategory\nType\nLevel\nSalary\nLanguage\nRemote\n\n20 results · updated 8 hours ago\n\nNewest\n▾\nLatest jobs\nAssociate Account Executive – Greece (Greek Speaking)\nNew\n\nCanary Technologies Corp·Remote·Full-time\n\n€50k-65k (EUR)\n\n8h\nSenior Data Engineer\nNew\n\nBluesight·Remote (US Only)·Full-time\n\n$130k-155k\n\n13h\nData Engineer\nNew\n\nBluesight·Remote (US Only)·Full-time\n\n$110k-130k\n\n14h\nPatient Engagement Specialist\nNew\n\nProfound Research·Remote·Full-time\n\n15h\nCare Team Intake Specialist\nNew\n\nSynapticure·Remote (US Only)·Full-time\n\n$24-25\n\n15h\nHead of Professional Services, NICE\nNew\n\nTTEC Digital·Remote·Full-time\n\n$180k-225k\n\n17h\nAdvisory Enterprise Account Manager - North Carolina\nNew\n\nNutanix·Remote·Full-time\n\n$300k-450k\n\n1d\nI\nB2B Sales Manager, Canada\nNew\n\nInogen·Remote (US Only)·Full-time\n\n$109k-137k\n\n1d\nBusiness Development Man",
+    "pageErrors": []
+  },
+  "before-tablet-768x1024": {
+    "title": "CodeMatch — Học cùng developer phù hợp",
+    "scrollWidth": 768,
+    "viewportWidth": 768,
+    "bodyText": "codematch\nTìm cơ hội học\nCách hoạt động\nTham gia CodeMatch\nĐăng nhập\nTham gia CodeMatch\nHọc 1:1 cùng developer độc lập\nHọc code theo cách của bạn.\n\nChia sẻ điều bạn muốn học. Tìm một developer phù hợp để cùng bạn đi tiếp, từng buổi một.\n\nKhám phá yêu cầu học\nBạn là developer? Tạo hồ sơ\nlearning.js\n01const nextStep = learn();\n02\n03await nextStep.with(you);\n04\n05// tiến bộ, từng buổi một\nĐúng người, đúng lúc\nHọc theo mục tiêu của bạn\n{ }\nCƠ HỘI MỚI\nĐang cần người đồng hành\n\nYêu cầu đang mở từ người học trên CodeMatch.\n\nAPI chưa kết nối\nTìm yêu cầu học\nKỹ năng\nGiữ Ctrl để chọn nhiều\nMức hiện tại\nTất cả mức độ\nMới bắt đầu\nCơ bản\nTrung cấp\nNâng cao\nHình thức\nOnline và trực tiếp\nOnline\nTrực tiếp\nNgân sách từ (₫)\nĐến (₫)\nĐơn vị ngân sách\nTất cả đơn vị\nmỗi giờ\nmỗi buổi\ntoàn bộ\nYêu cầu CV\nKhông lọc\nCần CV\nKhông cần CV\nSắp xếp\nMới nhất\nCũ nhất\nXóa bộ lọc\nChưa tải được yêu cầu học\nYêu cầu thất bại (500).\nThử lại\n\nMỗi buổi học bắt đầu từ mục tiêu của bạn. Bạn chọn người dạy, cùng thống nhất cách h",
+    "pageErrors": []
+  },
+  "reference-mobile-390x844": {
+    "title": "Jobs | Job Board",
+    "scrollWidth": 390,
+    "viewportWidth": 390,
+    "bodyText": "For the complete documentation index, see llms.txt.\nSkip to content\nJob Board\nSearch jobs by title or company\nLatest Opportunities\nCategory\nType\nLevel\nSalary\nLanguage\nRemote\n\n20 results · updated 8 hours ago\n\nNewest\n▾\nLatest jobs\nAssociate Account Executive – Greece (Greek Speaking)\nNew\n\nCanary Technologies Corp·Remote·Full-time\n\n€50k-65k (EUR)\n\n8h\nSenior Data Engineer\nNew\n\nBluesight·Remote (US Only)·Full-time\n\n$130k-155k\n\n13h\nData Engineer\nNew\n\nBluesight·Remote (US Only)·Full-time\n\n$110k-130k\n\n14h\nPatient Engagement Specialist\nNew\n\nProfound Research·Remote·Full-time\n\n15h\nCare Team Intake Specialist\nNew\n\nSynapticure·Remote (US Only)·Full-time\n\n$24-25\n\n15h\nHead of Professional Services, NICE\nNew\n\nTTEC Digital·Remote·Full-time\n\n$180k-225k\n\n17h\nAdvisory Enterprise Account Manager - North Carolina\nNew\n\nNutanix·Remote·Full-time\n\n$300k-450k\n\n1d\nI\nB2B Sales Manager, Canada\nNew\n\nInogen·Remote (US Only)·Full-time\n\n$109k-137k\n\n1d\nBusiness Development Manager - Utilities T&D\nNew\n\nRES·Remote (US O",
+    "pageErrors": []
+  },
+  "before-mobile-390x844": {
+    "title": "CodeMatch — Học cùng developer phù hợp",
+    "scrollWidth": 390,
+    "viewportWidth": 390,
+    "bodyText": "codematch\nHọc 1:1 cùng developer độc lập\nHọc code theo cách của bạn.\n\nChia sẻ điều bạn muốn học. Tìm một developer phù hợp để cùng bạn đi tiếp, từng buổi một.\n\nKhám phá yêu cầu học\nBạn là developer? Tạo hồ sơ\nlearning.js\n01const nextStep = learn();\n02\n03await nextStep.with(you);\n04\n05// tiến bộ, từng buổi một\nĐúng người, đúng lúc\nHọc theo mục tiêu của bạn\n{ }\nCƠ HỘI MỚI\nĐang cần người đồng hành\n\nYêu cầu đang mở từ người học trên CodeMatch.\n\nAPI chưa kết nối\nTìm yêu cầu học\nKỹ năng\nGiữ Ctrl để chọn nhiều\nMức hiện tại\nTất cả mức độ\nMới bắt đầu\nCơ bản\nTrung cấp\nNâng cao\nHình thức\nOnline và trực tiếp\nOnline\nTrực tiếp\nNgân sách từ (₫)\nĐến (₫)\nĐơn vị ngân sách\nTất cả đơn vị\nmỗi giờ\nmỗi buổi\ntoàn bộ\nYêu cầu CV\nKhông lọc\nCần CV\nKhông cần CV\nSắp xếp\nMới nhất\nCũ nhất\nXóa bộ lọc\nChưa tải được yêu cầu học\nYêu cầu thất bại (500).\nThử lại\n\nMỗi buổi học bắt đầu từ mục tiêu của bạn. Bạn chọn người dạy, cùng thống nhất cách học và lịch trình phù hợp.\n\nTìm hiểu thêm\ncodematch\nHọc lập trình, theo cách củ",
+    "pageErrors": []
+  }
+}

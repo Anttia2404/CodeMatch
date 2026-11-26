@@ -23,7 +23,7 @@ services:
       SPRING_DATASOURCE_USERNAME: codematch_e2e
       SPRING_DATASOURCE_PASSWORD: e2e-local-only
       CODEMATCH_CV_STORAGE_DIR: /var/lib/codematch/private-cvs
-      CODEMATCH_CORS_ALLOWED_ORIGIN: http://127.0.0.1:5173
+      CODEMATCH_CORS_ALLOWED_ORIGIN: ${CODEMATCH_E2E_CORS_ORIGIN:-http://127.0.0.1:5173}
     ports:
       - "127.0.0.1:18080:8080"
     volumes:

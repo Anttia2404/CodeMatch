@@ -69,14 +69,19 @@ describe('learning request creation and management', () => {
     expect(screen.queryByRole('button', { name: /đề xuất|ứng tuyển/i })).not.toBeInTheDocument()
   })
 
+  it('renders a selected request using the discovery detail panel layout', async () => {
+    vi.spyOn(api, 'learningRequest').mockResolvedValue(item)
+    renderAt(<RequestDetailPage authenticated={false} panel />, '/learning-requests/request-1')
+    expect(await screen.findByRole('heading', { name: item.title })).toBeInTheDocument()
+    expect(document.querySelector('.bordful-detail-content')).toBeInTheDocument()
+  })
+
   it('loads discovery filters from the skill catalog and sends selected skills to the API', async () => {
     const user = userEvent.setup()
     vi.spyOn(api, 'skills').mockResolvedValue([{ id: 'react-id', slug: 'react', name: 'React' }])
     const discover = vi.spyOn(api, 'discoverRequests').mockResolvedValue(page)
     renderAt(<RequestDiscovery authenticated={false} />)
-    await screen.findByRole('option', { name: 'React' })
-    const skillFilter = screen.getByRole('listbox', { name: 'Lọc theo kỹ năng' })
-    await user.selectOptions(skillFilter, 'react-id')
+    await user.click(await screen.findByLabelText('React'))
     await waitFor(() => expect(discover).toHaveBeenLastCalledWith(expect.objectContaining({ skillIds: ['react-id'] })))
   })
 

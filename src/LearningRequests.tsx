@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, ArrowRight, Bookmark, Check, ChevronLeft, ChevronRight, Clock3, MapPin, Search, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Bookmark, Check, ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { api, ApiError } from './lib/api'
 import type { BudgetUnit, DiscoveryFilters, LearningFormat, LearningLevel, LearningRequest, LearningRequestInput, LearningRequestStatus, Skill } from './lib/api'
@@ -27,7 +27,9 @@ function errorMessage(error: unknown) {
   return error instanceof ApiError ? error.message : 'Không thể kết nối máy chủ. Kiểm tra kết nối rồi thử lại.'
 }
 
-export function RequestDiscovery({ authenticated }: { authenticated: boolean }) {
+export function RequestDiscovery({ authenticated, searchValue = '', onSearchChange = () => undefined, selectedId, detailPanel = null }: {
+  authenticated: boolean; searchValue?: string; onSearchChange?: (value: string) => void; selectedId?: string; detailPanel?: ReactNode
+}) {
   const client = useQueryClient()
   const [filters, setFilters] = useState<DiscoveryFilters>({ q: '', skillIds: [], page: 0, size: 12, sort: 'NEWEST' })
   const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -64,73 +66,59 @@ export function RequestDiscovery({ authenticated }: { authenticated: boolean }) 
     setFilters((current) => ({ ...current, ...patch, page: patch.page ?? 0 }))
   }
 
-  return <div className="discovery-panel">
-    <div className="discovery-controls">
-      <label className="search-box"><Search size={18} /><span className="sr-only">Tìm yêu cầu học</span>
-        <input value={filters.q ?? ''} onChange={(event) => update({ q: event.target.value })} placeholder="Tìm theo công nghệ, mục tiêu học..." />
-      </label>
-      <label className="filter-field"><span>Kỹ năng</span><select multiple value={filters.skillIds ?? []} onChange={(event) => update({ skillIds: Array.from(event.currentTarget.selectedOptions, (option) => option.value) })} aria-label="Lọc theo kỹ năng">
-        {(skills.data ?? []).map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}
-      </select><small>Giữ Ctrl để chọn nhiều</small></label>
-      <label className="filter-field"><span>Mức hiện tại</span><select value={filters.level ?? ''} onChange={(event) => update({ level: event.target.value as LearningLevel | '' })}>
-        <option value="">Tất cả mức độ</option>{Object.entries(levelLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-      </select></label>
-      <label className="filter-field"><span>Hình thức</span><select value={filters.format ?? ''} onChange={(event) => update({ format: event.target.value as LearningFormat | '' })}>
-        <option value="">Online và trực tiếp</option><option value="ONLINE">Online</option><option value="OFFLINE">Trực tiếp</option>
-      </select></label>
-      <label className="filter-field"><span>Ngân sách từ (₫)</span><input type="number" min="0" step="1000" value={filters.minBudget ?? ''} onChange={(event) => update({ minBudget: event.target.value })} /></label>
-      <label className="filter-field"><span>Đến (₫)</span><input type="number" min="0" step="1000" value={filters.maxBudget ?? ''} onChange={(event) => update({ maxBudget: event.target.value })} /></label>
-      <label className="filter-field"><span>Đơn vị ngân sách</span><select value={filters.budgetUnit ?? ''} onChange={(event) => update({ budgetUnit: event.target.value as BudgetUnit | '' })}>
-        <option value="">Tất cả đơn vị</option>{Object.entries(unitLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-      </select></label>
-      <label className="filter-field"><span>Yêu cầu CV</span><select value={filters.requiresCv === true ? 'true' : filters.requiresCv === false ? 'false' : ''} onChange={(event) => update({ requiresCv: event.target.value === '' ? '' : event.target.value === 'true' })}>
-        <option value="">Không lọc</option><option value="true">Cần CV</option><option value="false">Không cần CV</option>
-      </select></label>
-      <label className="filter-field"><span>Sắp xếp</span><select value={filters.sort} onChange={(event) => update({ sort: event.target.value as 'NEWEST' | 'OLDEST' })}>
-        <option value="NEWEST">Mới nhất</option><option value="OLDEST">Cũ nhất</option>
-      </select></label>
-      <button className="clear-filters" type="button" onClick={() => { setFilters({ q: '', skillIds: [], page: 0, size: 12, sort: 'NEWEST' }); setDebouncedQuery('') }}><X size={15} /> Xóa bộ lọc</button>
-    </div>
-    {budgetNeedsUnit && <p className="filter-hint" role="status">Chọn đơn vị ngân sách để áp dụng khoảng giá.</p>}
+  useEffect(() => update({ q: searchValue }), [searchValue])
 
-    <div className="discovery-results" aria-live="polite" aria-busy={requests.isLoading}>
-      {requests.isLoading && <div className="request-skeletons" aria-label="Đang tải yêu cầu">{Array.from({ length: 4 }, (_, index) => <div className="request-skeleton" key={index}><span /><span /><span /></div>)}</div>}
-      {requests.isError && <div className="request-message request-error" role="alert"><strong>Chưa tải được yêu cầu học</strong><span>{errorMessage(requests.error)}</span><button className="button button-outline" onClick={() => void requests.refetch()}>Thử lại</button></div>}
-      {requests.isSuccess && requests.data.content.length === 0 && <div className="request-message request-empty"><Search size={24} /><strong>Chưa có yêu cầu phù hợp</strong><span>Thử bỏ bớt bộ lọc hoặc tìm bằng từ khóa khác.</span></div>}
-      {requests.isSuccess && requests.data.content.map((request) => {
-        const isSaved = saved.data?.some((item) => item.id === request.id) ?? false
-        return <RequestCard key={request.id} request={request} authenticated={authenticated} isSaved={isSaved}
-          onToggleSave={() => { setMessage(''); saveMutation.mutate(request) }} saving={saveMutation.isPending} />
-      })}
-    </div>
+  return <div className="discovery-panel bordful-board-grid">
+    <aside className="board-rail" aria-label="Danh sách yêu cầu và kỹ năng">
+      <Link className="rail-current" to="/">Yêu cầu mới <span>{requests.data?.totalElements ?? '—'}</span></Link>
+      <Link to="/saved-requests">Đã lưu</Link>
+      <Link to={authenticated ? '/my/learning-requests' : '/login'}>Yêu cầu của tôi</Link>
+      <h2>Kỹ năng</h2>
+      {skills.data?.map((skill) => <label className="rail-skill" key={skill.id}><input type="checkbox" checked={(filters.skillIds ?? []).includes(skill.id)} onChange={(event) => update({ skillIds: event.target.checked ? [...(filters.skillIds ?? []), skill.id] : (filters.skillIds ?? []).filter((id) => id !== skill.id) })} /><span>{skill.name}</span></label>)}
+      {skills.isError && <span className="rail-note">Không tải được kỹ năng.</span>}
+      <div className="rail-budget"><label>Ngân sách từ<input aria-label="Ngân sách từ (₫)" type="number" min="0" step="1000" value={filters.minBudget ?? ''} onChange={(event) => update({ minBudget: event.target.value })} /></label><label>Đến<input aria-label="Ngân sách đến (₫)" type="number" min="0" step="1000" value={filters.maxBudget ?? ''} onChange={(event) => update({ maxBudget: event.target.value })} /></label></div>
+    </aside>
+    <section className="board-center" aria-label="Yêu cầu học">
+      <div className="board-filterbar">
+        <label className="filter-chip"><span>Trình độ</span><select aria-label="Mức hiện tại" value={filters.level ?? ''} onChange={(event) => update({ level: event.target.value as LearningLevel | '' })}><option value="">Tất cả</option>{Object.entries(levelLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label className="filter-chip"><span>Hình thức</span><select aria-label="Hình thức" value={filters.format ?? ''} onChange={(event) => update({ format: event.target.value as LearningFormat | '' })}><option value="">Tất cả</option><option value="ONLINE">Online</option><option value="OFFLINE">Trực tiếp</option></select></label>
+        <label className="filter-chip"><span>Ngân sách</span><select aria-label="Đơn vị ngân sách" value={filters.budgetUnit ?? ''} onChange={(event) => update({ budgetUnit: event.target.value as BudgetUnit | '' })}><option value="">Tất cả</option>{Object.entries(unitLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label className="filter-chip"><span>CV</span><select aria-label="Yêu cầu CV" value={filters.requiresCv === true ? 'true' : filters.requiresCv === false ? 'false' : ''} onChange={(event) => update({ requiresCv: event.target.value === '' ? '' : event.target.value === 'true' })}><option value="">Không lọc</option><option value="true">Cần CV</option><option value="false">Không cần CV</option></select></label>
+        <button className="clear-filters" type="button" onClick={() => { setFilters({ q: '', skillIds: [], page: 0, size: 12, sort: 'NEWEST' }); onSearchChange(''); setDebouncedQuery('') }}><X size={14} /><span>Xóa lọc</span></button>
+      </div>
+      {budgetNeedsUnit && <p className="filter-hint" role="status">Chọn đơn vị ngân sách để áp dụng khoảng giá.</p>}
+      <div className="board-resultsbar"><span className="live-dot" />{requests.isSuccess ? `${requests.data.totalElements} yêu cầu` : 'Đang tải yêu cầu'}<label>Sắp xếp<select aria-label="Sắp xếp" value={filters.sort} onChange={(event) => update({ sort: event.target.value as 'NEWEST' | 'OLDEST' })}><option value="NEWEST">Mới nhất</option><option value="OLDEST">Cũ nhất</option></select></label></div>
+      <div className="discovery-results" aria-live="polite" aria-busy={requests.isLoading}>
+        {requests.isLoading && <div className="request-skeletons" aria-label="Đang tải yêu cầu">{Array.from({ length: 5 }, (_, index) => <div className="request-skeleton" key={index}><span /><span /><span /></div>)}</div>}
+        {requests.isError && <div className="request-message request-error" role="alert"><strong>Chưa tải được yêu cầu học</strong><span>{errorMessage(requests.error)}</span><button className="button button-outline" onClick={() => void requests.refetch()}>Thử lại</button></div>}
+        {requests.isSuccess && requests.data.content.length === 0 && <div className="request-message request-empty"><Search size={22} /><strong>Chưa có yêu cầu phù hợp</strong><span>Thử bỏ bớt bộ lọc hoặc tìm bằng từ khóa khác.</span></div>}
+        {requests.isSuccess && requests.data.content.map((request) => {
+          const isSaved = saved.data?.some((item) => item.id === request.id) ?? false
+          return <RequestCard key={request.id} request={request} authenticated={authenticated} isSaved={isSaved} selected={request.id === selectedId}
+            onToggleSave={() => { setMessage(''); saveMutation.mutate(request) }} saving={saveMutation.isPending} />
+        })}
+      </div>
+      {requests.data && requests.data.totalPages > 1 && <nav className="pagination" aria-label="Phân trang yêu cầu học"><button disabled={requests.data.page === 0} onClick={() => update({ page: requests.data!.page - 1 })}><ChevronLeft size={16} /> Trước</button><span>{requests.data.page + 1} / {requests.data.totalPages}</span><button disabled={requests.data.page + 1 >= requests.data.totalPages} onClick={() => update({ page: requests.data!.page + 1 })}>Sau <ChevronRight size={16} /></button></nav>}
+    </section>
+    <aside className="board-detail" aria-label="Chi tiết yêu cầu">{detailPanel}</aside>
     {message && <p className="inline-success" role="status"><Check size={16} />{message}</p>}
     {saveMutation.isError && <p className="form-error" role="alert">{errorMessage(saveMutation.error)}</p>}
-    {requests.data && requests.data.totalPages > 1 && <nav className="pagination" aria-label="Phân trang yêu cầu học">
-      <button disabled={requests.data.page === 0} onClick={() => update({ page: requests.data!.page - 1 })}><ChevronLeft size={16} /> Trang trước</button>
-      <span>Trang {requests.data.page + 1} / {requests.data.totalPages} · {requests.data.totalElements} yêu cầu</span>
-      <button disabled={requests.data.page + 1 >= requests.data.totalPages} onClick={() => update({ page: requests.data!.page + 1 })}>Trang sau <ChevronRight size={16} /></button>
-    </nav>}
   </div>
 }
 
-function RequestCard({ request, authenticated, isSaved, onToggleSave, saving }: {
-  request: LearningRequest; authenticated: boolean; isSaved: boolean; onToggleSave: () => void; saving: boolean
+function RequestCard({ request, authenticated, isSaved, onToggleSave, saving, selected }: {
+  request: LearningRequest; authenticated: boolean; isSaved: boolean; onToggleSave: () => void; saving: boolean; selected: boolean
 }) {
-  return <article className="request-card live-request-card">
+  return <article className={`request-card live-request-card bordful-request-row ${selected ? 'is-selected' : ''}`}>
+    <span className="request-mark" aria-hidden="true">{request.skills[0]?.name.slice(0, 2).toUpperCase() ?? '↗'}</span>
     <div className="request-main">
       <div className="request-title-row"><Link className="request-title" to={`/learning-requests/${request.id}`}>{request.title}</Link>
         {authenticated ? <button className={`save-button ${isSaved ? 'is-saved' : ''}`} onClick={onToggleSave} disabled={saving} aria-label={isSaved ? 'Bỏ lưu yêu cầu' : 'Lưu yêu cầu'} aria-pressed={isSaved}><Bookmark size={18} fill={isSaved ? 'currentColor' : 'none'} /></button>
           : <Link className="save-login-link" to="/login" aria-label="Đăng nhập để lưu yêu cầu"><Bookmark size={18} /></Link>}
       </div>
-      <p className="request-description">{request.description}</p>
-      <div className="tag-list">{request.skills.map((skill) => <span className="skill-tag" key={skill.id}>{skill.name}</span>)}</div>
+      <p className="request-description">{request.skills.map((skill) => skill.name).join(' · ')}{request.skills.length ? ' · ' : ''}{request.preferredFormat === 'ONLINE' ? 'Online' : request.city}</p>
     </div>
-    <div className="request-meta"><div className="requester"><span className="request-status-dot" /><div><strong>{levelLabels[request.currentLevel]}</strong><small>{dateLabel(request.publishedAt)}</small></div></div>
-      <div className="meta-grid"><span><Clock3 size={14} />{request.expectedDuration}</span><span><MapPin size={14} />{request.preferredFormat === 'ONLINE' ? 'Online' : request.city}</span></div>
-    </div>
-    <div className="request-price"><strong>{formatMoney(request.budgetMin, request.budgetMax, request.budgetUnit)}</strong><span>{request.requiresCv ? 'Cần CV developer' : 'Không yêu cầu CV'}</span>
-      <Link to={`/learning-requests/${request.id}`}>Xem chi tiết <ArrowRight size={14} /></Link>
-    </div>
+    <div className="request-price"><strong>{formatMoney(request.budgetMin, request.budgetMax, request.budgetUnit)}</strong><span>{dateLabel(request.publishedAt)}</span></div>
   </article>
 }
 
@@ -281,7 +269,7 @@ function FormShell({ title, children }: { title: string; children: ReactNode }) 
   return <main className="learning-page"><Link className="form-back" to="/"><ArrowLeft size={15} /> CodeMatch</Link><div className="learning-page-heading"><div><span className="section-kicker">HỌC THEO MỤC TIÊU CỦA BẠN</span><h1>{title}</h1><p>Mô tả rõ điều bạn muốn học để developer phù hợp có thể đồng hành.</p></div></div>{children}</main>
 }
 
-export function RequestDetailPage({ authenticated }: { authenticated: boolean }) {
+export function RequestDetailPage({ authenticated, panel = false }: { authenticated: boolean; panel?: boolean }) {
   const { id = '' } = useParams()
   const client = useQueryClient()
   const location = useLocation()
@@ -290,11 +278,14 @@ export function RequestDetailPage({ authenticated }: { authenticated: boolean })
   const toggle = useMutation({ mutationFn: async () => saved.data?.some((item) => item.id === id) ? api.unsaveRequest(id) : api.saveRequest(id),
     onSuccess: () => void client.invalidateQueries({ queryKey: ['saved-requests'] }) })
   const notice = (location.state as { notice?: string } | null)?.notice
+  if (panel && request.isLoading) return <div className="bordful-detail-content detail-panel-state" role="status">Đang tải yêu cầu…</div>
+  if (panel && request.isError) return <div className="bordful-detail-content detail-panel-state"><ErrorBox error={request.error} onRetry={() => void request.refetch()} /></div>
+  if (panel && !request.data) return <div className="bordful-detail-content detail-panel-state">Yêu cầu này hiện không khả dụng.</div>
   if (request.isLoading) return <FormShell title="Chi tiết yêu cầu"><p role="status">Đang tải yêu cầu…</p></FormShell>
   if (request.isError) return <FormShell title="Không tìm thấy yêu cầu"><ErrorBox error={request.error} onRetry={() => void request.refetch()} /></FormShell>
   if (!request.data) return <FormShell title="Không tìm thấy yêu cầu"><p>Yêu cầu này hiện không khả dụng.</p></FormShell>
   const item = request.data
-  return <main className="learning-page request-detail-page"><Link className="form-back" to="/"><ArrowLeft size={15} /> Khám phá yêu cầu</Link>
+  return <main className={panel ? 'request-detail-page bordful-detail-content' : 'learning-page request-detail-page'}>{!panel && <Link className="form-back" to="/"><ArrowLeft size={15} /> Khám phá yêu cầu</Link>}
     {notice && <p className="inline-success" role="status"><Check size={16} />{notice}</p>}
     <div className="detail-header"><div><span className="detail-status">{statusLabels[item.status]}</span><h1>{item.title}</h1><p className="detail-published">Đăng ngày {dateLabel(item.publishedAt)}</p></div>
       {item.status === 'OPEN' && (authenticated ? <button className="button button-outline" onClick={() => toggle.mutate()} disabled={toggle.isPending}><Bookmark size={16} fill={saved.data?.some((savedItem) => savedItem.id === id) ? 'currentColor' : 'none'} />{saved.data?.some((savedItem) => savedItem.id === id) ? 'Đã lưu' : 'Lưu yêu cầu'}</button>

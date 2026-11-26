@@ -1,15 +1,16 @@
-import { ArrowRight, Braces, Code2, MapPin, Menu, ShieldCheck, Sparkles } from 'lucide-react'
+import { Braces, Bookmark, Menu } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { api, ApiError, checkApiHealth } from './lib/api'
-import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { api, ApiError } from './lib/api'
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { AccountPage, DeveloperProfileFormPage, LoginPage, PublicDeveloperProfilePage, RegisterPage } from './AuthPages'
 import { LearningRequestFormPage, LearnerDashboardPage, RequestDetailPage, RequestDiscovery, SavedRequestsPage } from './LearningRequests'
 import { EditProposalPage, MyProposalsPage, ProposalApplyPage, ReceivedProposalsPage } from './ProposalPages'
 import { DeveloperMatchesPage, LearnerMatchPage } from './MatchPages'
 import { AdminReportsPage } from './ModerationPages'
 import { AdminPilotOverviewPage } from './PilotOverview'
+import './bordful-board.css'
 
 export default function App() {
   return <BrowserRouter><Routes>
@@ -53,50 +54,30 @@ function RequireAdmin({ children }: { children: ReactNode }) {
 
 function RequestDetailRoute() {
   const account = useQuery({ queryKey: ['account'], queryFn: api.current, retry: false })
-  return <RequestDetailPage authenticated={account.isSuccess && Boolean(account.data)} />
+  const { id } = useParams()
+  return <HomePage authenticated={account.isSuccess && Boolean(account.data)} selectedId={id} />
 }
 
-function HomePage() {
+function HomePage({ authenticated: authenticatedProp, selectedId }: { authenticated?: boolean; selectedId?: string }) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const apiStatus = useQuery({ queryKey: ['api-health'], queryFn: checkApiHealth, retry: 0, refetchInterval: 60_000 })
+  const [search, setSearch] = useState('')
   const account = useQuery({ queryKey: ['account'], queryFn: api.current, retry: false })
-  const authenticated = account.isSuccess && Boolean(account.data)
+  const authenticated = authenticatedProp ?? (account.isSuccess && Boolean(account.data))
 
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <a className="brand" href="#home" aria-label="CodeMatch trang chủ"><span className="brand-mark"><Braces size={21} strokeWidth={2.5} /></span><span>code<span className="brand-match">match</span></span></a>
+    <div className="app-shell bordful-shell">
+      <header className="topbar bordful-topbar">
+        <Link className="brand" to="/" aria-label="CodeMatch - khám phá yêu cầu học"><span className="brand-mark"><Braces size={18} strokeWidth={2.5} /></span><span>CodeMatch</span></Link>
+        <label className="header-search"><span className="sr-only">Tìm yêu cầu học</span><input aria-label="Tìm yêu cầu học" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm yêu cầu học theo kỹ năng hoặc mục tiêu" /><kbd>⌘ K</kbd></label>
+        <nav className={mobileOpen ? 'main-nav is-open' : 'main-nav'} aria-label="Điều hướng chính"><Link className="nav-current" to="/">Khám phá</Link><Link to="/saved-requests"><Bookmark size={14} /> Đã lưu</Link><Link className="mobile-menu-link" to={authenticated ? '/my/learning-requests' : '/login'}>{authenticated ? 'Yêu cầu của tôi' : 'Đăng nhập'}</Link></nav>
         <button className="mobile-menu" aria-label="Mở menu" aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}><Menu /></button>
-        <nav className={mobileOpen ? 'main-nav is-open' : 'main-nav'} aria-label="Điều hướng chính">
-          <a className="nav-link active" href="#requests">Tìm cơ hội học</a><a className="nav-link" href="#how">Cách hoạt động</a>
-          {authenticated ? <><Link className="nav-link mobile-auth" to="/my/learning-requests">Yêu cầu của tôi</Link><Link className="nav-link mobile-auth" to="/my/proposals">Đề xuất và CV</Link><Link className="nav-link mobile-auth" to="/my/matches">Kết quả đã chọn</Link><Link className="nav-link mobile-auth" to="/saved-requests">Đã lưu</Link><Link className="nav-link mobile-auth" to="/account">Tài khoản</Link><Link className="button button-outline nav-join" to="/learning-requests/new">Đăng yêu cầu học</Link></> : <><Link className="nav-link mobile-auth" to="/login">Đăng nhập</Link><Link className="button button-outline nav-join" to="/register">Tham gia CodeMatch</Link></>}
-        </nav>
-        <div className="account-actions">{authenticated ? <><Link className="login-link" to="/my/learning-requests">Yêu cầu của tôi</Link><Link className="login-link" to="/my/proposals">Đề xuất và CV</Link><Link className="login-link" to="/my/matches">Kết quả đã chọn</Link><Link className="button button-outline" to="/learning-requests/new">Đăng yêu cầu</Link><Link className="login-link" to="/account">Tài khoản</Link></> : <><Link className="login-link" to="/login">Đăng nhập</Link><Link className="button button-outline" to="/register">Tham gia CodeMatch</Link></>}</div>
+        <div className="account-actions">{authenticated ? <><Link to="/my/learning-requests">Yêu cầu của tôi</Link><Link to="/account">Tài khoản</Link><Link className="button button-outline" to="/learning-requests/new">Đăng yêu cầu</Link></> : <><Link to="/login">Đăng nhập</Link><Link className="button button-outline" to="/register">Tham gia</Link></>}</div>
       </header>
-
-      <main id="home">
-        <section className="hero">
-          <div className="hero-copy">
-            <div className="trust-note"><span className="trust-dot" /> Học 1:1 cùng developer độc lập</div>
-            <h1>Học code theo cách <span>của bạn.</span></h1>
-            <p className="hero-description">Chia sẻ điều bạn muốn học. Tìm một developer phù hợp để cùng bạn đi tiếp, từng buổi một.</p>
-            <div className="hero-actions"><a className="button button-primary" href="#requests">Khám phá yêu cầu học <ArrowRight size={17} /></a><Link className="quiet-link" to={authenticated ? '/learning-requests/new' : '/register'}>{authenticated ? 'Bạn muốn học?' : 'Bạn là developer?'} <span>{authenticated ? 'Đăng yêu cầu' : 'Tạo hồ sơ'}</span></Link></div>
-          </div>
-          <div className="hero-art" aria-label="Minh họa kết nối người học và developer">
-            <div className="orbit orbit-one" /><div className="orbit orbit-two" />
-            <div className="code-window"><div className="window-head"><span /><span /><span /><i>learning.js</i></div><div className="code-lines"><span><b>01</b><em>const</em> nextStep = <strong>learn</strong>();</span><span><b>02</b></span><span><b>03</b><em>await</em> nextStep.<strong>with</strong>(you);</span><span><b>04</b></span><span><b>05</b><small>// tiến bộ, từng buổi một</small></span></div></div>
-            <div className="connection-card"><span className="connection-icon"><Code2 size={18} /></span><div><strong>Đúng người, đúng lúc</strong><small>Học theo mục tiêu của bạn</small></div><span className="connection-check"><ShieldCheck size={17} /></span></div>
-            <span className="spark spark-a"><Sparkles size={18} /></span><span className="spark spark-b">&#123; &#125;</span>
-          </div>
-        </section>
-
-        <section className="discovery" id="requests">
-          <div className="section-heading"><div><span className="section-kicker">CƠ HỘI MỚI</span><h2>Đang cần người đồng hành</h2><p>Yêu cầu đang mở từ người học trên CodeMatch.</p></div><div className="section-actions"><span className={`api-status ${apiStatus.isSuccess ? 'api-online' : apiStatus.isError ? 'api-offline' : ''}`}><i />{apiStatus.isSuccess ? 'API trực tuyến' : apiStatus.isError ? 'API chưa kết nối' : 'Đang kiểm tra API'}</span></div></div>
-          <RequestDiscovery authenticated={authenticated} />
-        </section>
-        <section className="how-strip" id="how"><span className="how-icon"><Sparkles size={19} /></span><p><strong>Mỗi buổi học bắt đầu từ mục tiêu của bạn.</strong> Bạn chọn người dạy, cùng thống nhất cách học và lịch trình phù hợp.</p><a href="#how-details">Tìm hiểu thêm <ArrowRight size={15} /></a></section>
+      <main className="bordful-main" id="home">
+        <h1 className="sr-only">Học code theo cách của bạn</h1>
+        <RequestDiscovery authenticated={authenticated} searchValue={search} onSearchChange={setSearch} selectedId={selectedId} detailPanel={selectedId ? <RequestDetailPage authenticated={authenticated} panel /> : <div className="detail-placeholder"><strong>Chọn một yêu cầu để xem thông tin</strong><p>Chi tiết sẽ mở tại đây để bạn có thể xem nhanh lịch học, kỹ năng và ngân sách.</p></div>} />
       </main>
-      <footer><a className="brand footer-brand" href="#home"><span className="brand-mark"><Braces size={18} /></span><span>code<span className="brand-match">match</span></span></a><span>Học lập trình, theo cách của bạn.</span><span className="footer-location">Việt Nam · <MapPin size={13} /></span></footer>
+      <nav className="mobile-bottom-nav" aria-label="Điều hướng nhanh"><Link className="is-current" to="/">Khám phá</Link><Link to="/saved-requests">Đã lưu</Link><Link to={authenticated ? '/account' : '/login'}>{authenticated ? 'Tài khoản' : 'Đăng nhập'}</Link></nav>
     </div>
   )
 }
