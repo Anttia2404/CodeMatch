@@ -1,0 +1,822 @@
+{
+  "generatedAt": "2026-11-26T12:01:21.218Z",
+  "dataset": "Synthetic visual testing data only; isolated codematch_e2e PostgreSQL",
+  "viewports": [
+    {
+      "name": "desktop-1440x900",
+      "reference": {
+        "title": "Jobs | Job Board",
+        "url": "https://bordful.com/jobs",
+        "width": 1440,
+        "jobs": 80
+      },
+      "referenceDetail": {
+        "url": "https://bordful.com/jobs",
+        "selected": true
+      },
+      "requestCount": 15,
+      "selectedDetailVisible": true,
+      "selectedMetrics": {
+        "horizontalOverflow": false,
+        "layout": {
+          ".board-rail": {
+            "x": 0,
+            "y": 52,
+            "width": 216,
+            "height": 986,
+            "display": "flex"
+          },
+          ".board-center": {
+            "x": 216,
+            "y": 52,
+            "width": 520,
+            "height": 986,
+            "display": "block"
+          },
+          ".board-detail": {
+            "x": 736,
+            "y": 52,
+            "width": 704,
+            "height": 986,
+            "display": "block"
+          },
+          ".bordful-detail-content": {
+            "x": 737,
+            "y": 107,
+            "width": 703,
+            "height": 836,
+            "display": "block"
+          }
+        }
+      },
+      "searchCount": 1,
+      "activeFilterCount": 5,
+      "emptyStateVisible": true,
+      "mobile": null,
+      "metrics": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "documentWidth": 1440,
+        "horizontalOverflow": false,
+        "fontFamily": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif",
+        "geistLoaded": true,
+        "requestCount": 15,
+        "layout": {
+          ".topbar": {
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 52,
+            "display": "grid",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-filterbar": {
+            "x": 216,
+            "y": 52,
+            "width": 824,
+            "height": 48,
+            "display": "flex",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-rail": {
+            "x": 0,
+            "y": 52,
+            "width": 216,
+            "height": 986,
+            "display": "flex",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-center": {
+            "x": 216,
+            "y": 52,
+            "width": 824,
+            "height": 986,
+            "display": "block",
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "0px"
+          },
+          ".board-detail": {
+            "x": 1040,
+            "y": 52,
+            "width": 400,
+            "height": 986,
+            "display": "block",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".request-card": {
+            "x": 224,
+            "y": 108,
+            "width": 808,
+            "height": 60,
+            "display": "grid",
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "10px"
+          }
+        }
+      },
+      "apiResponses": [
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests/cfcb1112-e7de-4e90-b5f6-3eee384e03d3",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?q=Spring+Boot&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?level=BEGINNER&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?q=khong-co-ket-qua-ui-1-1&page=0&size=20&sort=NEWEST",
+          "status": 200
+        }
+      ],
+      "browserErrors": []
+    },
+    {
+      "name": "laptop-1280x800",
+      "reference": {
+        "title": "Jobs | Job Board",
+        "url": "https://bordful.com/jobs",
+        "width": 1280,
+        "jobs": 80
+      },
+      "referenceDetail": {
+        "url": "https://bordful.com/jobs",
+        "selected": true
+      },
+      "requestCount": 15,
+      "selectedDetailVisible": true,
+      "selectedMetrics": {
+        "horizontalOverflow": false,
+        "layout": {
+          ".board-rail": {
+            "x": 0,
+            "y": 52,
+            "width": 216,
+            "height": 986,
+            "display": "flex"
+          },
+          ".board-center": {
+            "x": 216,
+            "y": 52,
+            "width": 520,
+            "height": 986,
+            "display": "block"
+          },
+          ".board-detail": {
+            "x": 736,
+            "y": 52,
+            "width": 544,
+            "height": 986,
+            "display": "block"
+          },
+          ".bordful-detail-content": {
+            "x": 737,
+            "y": 107,
+            "width": 543,
+            "height": 858,
+            "display": "block"
+          }
+        }
+      },
+      "searchCount": 1,
+      "activeFilterCount": 5,
+      "emptyStateVisible": true,
+      "mobile": null,
+      "metrics": {
+        "viewport": {
+          "width": 1280,
+          "height": 800
+        },
+        "documentWidth": 1280,
+        "horizontalOverflow": false,
+        "fontFamily": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif",
+        "geistLoaded": true,
+        "requestCount": 15,
+        "layout": {
+          ".topbar": {
+            "x": 0,
+            "y": 0,
+            "width": 1280,
+            "height": 52,
+            "display": "grid",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-filterbar": {
+            "x": 216,
+            "y": 52,
+            "width": 664,
+            "height": 48,
+            "display": "flex",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-rail": {
+            "x": 0,
+            "y": 52,
+            "width": 216,
+            "height": 986,
+            "display": "flex",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-center": {
+            "x": 216,
+            "y": 52,
+            "width": 664,
+            "height": 986,
+            "display": "block",
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "0px"
+          },
+          ".board-detail": {
+            "x": 880,
+            "y": 52,
+            "width": 400,
+            "height": 986,
+            "display": "block",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".request-card": {
+            "x": 224,
+            "y": 108,
+            "width": 648,
+            "height": 60,
+            "display": "grid",
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "10px"
+          }
+        }
+      },
+      "apiResponses": [
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests/cfcb1112-e7de-4e90-b5f6-3eee384e03d3",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?q=Spring+Boot&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?level=BEGINNER&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?q=khong-co-ket-qua-ui-1-1&page=0&size=20&sort=NEWEST",
+          "status": 200
+        }
+      ],
+      "browserErrors": []
+    },
+    {
+      "name": "tablet-768x1024",
+      "reference": {
+        "title": "Jobs | Job Board",
+        "url": "https://bordful.com/jobs",
+        "width": 768,
+        "jobs": 80
+      },
+      "referenceDetail": {
+        "url": "https://bordful.com/jobs/associate-account-executive-greece-greek-speaking-canary-technologies-corp-f1cd6a82",
+        "selected": true
+      },
+      "requestCount": 15,
+      "selectedDetailVisible": true,
+      "selectedMetrics": {
+        "horizontalOverflow": false,
+        "layout": {
+          ".board-rail": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none"
+          },
+          ".board-center": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none"
+          },
+          ".board-detail": {
+            "x": 0,
+            "y": 52,
+            "width": 768,
+            "height": 972,
+            "display": "block"
+          },
+          ".bordful-detail-content": {
+            "x": 18,
+            "y": 107,
+            "width": 732,
+            "height": 810,
+            "display": "block"
+          }
+        }
+      },
+      "searchCount": 1,
+      "activeFilterCount": 5,
+      "emptyStateVisible": true,
+      "mobile": null,
+      "metrics": {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "documentWidth": 768,
+        "horizontalOverflow": false,
+        "fontFamily": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif",
+        "geistLoaded": true,
+        "requestCount": 15,
+        "layout": {
+          ".topbar": {
+            "x": 0,
+            "y": 0,
+            "width": 768,
+            "height": 52,
+            "display": "grid",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-filterbar": {
+            "x": 0,
+            "y": 52,
+            "width": 468,
+            "height": 48,
+            "display": "flex",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-rail": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-center": {
+            "x": 0,
+            "y": 52,
+            "width": 768,
+            "height": 1436,
+            "display": "block",
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "0px"
+          },
+          ".board-detail": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".request-card": {
+            "x": 8,
+            "y": 108,
+            "width": 752,
+            "height": 90,
+            "display": "grid",
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "10px"
+          }
+        }
+      },
+      "apiResponses": [
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests/cfcb1112-e7de-4e90-b5f6-3eee384e03d3",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?q=Spring+Boot&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?level=BEGINNER&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?q=khong-co-ket-qua-ui-1-1&page=0&size=20&sort=NEWEST",
+          "status": 200
+        }
+      ],
+      "browserErrors": []
+    },
+    {
+      "name": "mobile-390x844",
+      "reference": {
+        "title": "Jobs | Job Board",
+        "url": "https://bordful.com/jobs",
+        "width": 390,
+        "jobs": 80
+      },
+      "referenceDetail": {
+        "url": "https://bordful.com/jobs/associate-account-executive-greece-greek-speaking-canary-technologies-corp-f1cd6a82",
+        "selected": true
+      },
+      "requestCount": 15,
+      "selectedDetailVisible": true,
+      "selectedMetrics": {
+        "horizontalOverflow": false,
+        "layout": {
+          ".board-rail": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none"
+          },
+          ".board-center": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none"
+          },
+          ".board-detail": {
+            "x": 0,
+            "y": 98,
+            "width": 390,
+            "height": 842,
+            "display": "block"
+          },
+          ".bordful-detail-content": {
+            "x": 12,
+            "y": 110,
+            "width": 366,
+            "height": 818,
+            "display": "block"
+          }
+        }
+      },
+      "searchCount": 1,
+      "activeFilterCount": 5,
+      "emptyStateVisible": true,
+      "mobile": {
+        "menuExpanded": "true",
+        "filterCount": 5,
+        "filterClearWorks": true
+      },
+      "metrics": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "documentWidth": 390,
+        "horizontalOverflow": false,
+        "fontFamily": "Geist, \"Geist Fallback\", ui-sans-serif, system-ui, sans-serif",
+        "geistLoaded": true,
+        "requestCount": 15,
+        "layout": {
+          ".topbar": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 98,
+            "display": "grid",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-filterbar": {
+            "x": 0,
+            "y": 98,
+            "width": 390,
+            "height": 44,
+            "display": "flex",
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "0px"
+          },
+          ".board-rail": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".board-center": {
+            "x": 0,
+            "y": 98,
+            "width": 390,
+            "height": 1400,
+            "display": "block",
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "0px"
+          },
+          ".board-detail": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "border": "",
+            "borderRadius": "0px"
+          },
+          ".request-card": {
+            "x": 8,
+            "y": 180,
+            "width": 374,
+            "height": 86,
+            "display": "grid",
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "12px"
+          }
+        }
+      },
+      "apiResponses": [
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests/cfcb1112-e7de-4e90-b5f6-3eee384e03d3",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?q=Spring+Boot&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?level=BEGINNER&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?q=khong-co-ket-qua-ui-1-1&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/auth/me",
+          "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?level=INTERMEDIATE&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        }
+      ],
+      "browserErrors": []
+    }
+  ]
+}

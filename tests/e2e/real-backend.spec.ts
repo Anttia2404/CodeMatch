@@ -1,11 +1,14 @@
 import { expect, test, type Page } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
 
+const frontendBaseUrl = process.env.CODEMATCH_E2E_BASE_URL ?? 'http://127.0.0.1:5173'
+const apiBaseUrl = process.env.CODEMATCH_E2E_API_URL ?? 'http://127.0.0.1:18080'
+
 test.skip(!process.env.CODEMATCH_REAL_E2E, 'Enable with CODEMATCH_REAL_E2E=1 and the isolated E2E Compose stack.')
 
 test('real browser completes request, CV proposal, match and denied access against PostgreSQL', async ({ browser }) => {
   test.setTimeout(120_000)
-  const learnerContext = await browser.newContext({ baseURL: 'http://127.0.0.1:5173' })
+  const learnerContext = await browser.newContext({ baseURL: frontendBaseUrl })
   const learnerPage = await learnerContext.newPage()
   const password = `M6-${crypto.randomUUID()}-Aa1!`
   const learnerEmail = `m6-learner-${crypto.randomUUID()}@example.test`
@@ -15,7 +18,7 @@ test('real browser completes request, CV proposal, match and denied access again
   await expect(learnerPage.getByText(learnerEmail)).toBeVisible()
   await learnerPage.getByRole('button', { name: 'Đăng xuất' }).click()
   await expect(learnerPage).toHaveURL(/\/login$/)
-  const loggedOut = await learnerPage.request.get('http://127.0.0.1:5173/api/v1/auth/me')
+  const loggedOut = await learnerPage.request.get(`${frontendBaseUrl}/api/v1/auth/me`)
   expect(loggedOut.status()).toBe(401)
   await learnerPage.getByLabel('Email', { exact: true }).fill(learnerEmail)
   await learnerPage.getByLabel('Mật khẩu', { exact: true }).fill(password)
@@ -37,7 +40,7 @@ test('real browser completes request, CV proposal, match and denied access again
   await learnerPage.getByRole('link', { name: requestTitle, exact: true }).click()
   await expect(learnerPage.getByRole('heading', { name: requestTitle })).toBeVisible()
 
-  const developerContext = await browser.newContext({ baseURL: 'http://127.0.0.1:5173' })
+  const developerContext = await browser.newContext({ baseURL: frontendBaseUrl })
   const developerPage = await developerContext.newPage()
   await register(developerPage, `m5-developer-${crypto.randomUUID()}@example.test`, 'M5 Developer', password)
   await developerPage.goto('/developer-profile')
@@ -65,7 +68,7 @@ test('real browser completes request, CV proposal, match and denied access again
   const composeProject = process.env.CODEMATCH_E2E_COMPOSE_PROJECT ?? 'codematch-m5-e2e-local'
   execFileSync('docker', ['compose', '--project-name', composeProject, '-f', 'docker-compose.e2e.yml', 'restart', 'api'], { stdio: 'inherit' })
   await expect.poll(async () => {
-    const response = await learnerPage.request.get('http://127.0.0.1:5173/actuator/health')
+    const response = await learnerPage.request.get(`${frontendBaseUrl}/actuator/health`)
     return response.ok() ? (await response.json()).status : 'DOWN'
   }, { timeout: 60_000, intervals: [1000, 2000, 5000] }).toBe('UP')
 
@@ -82,21 +85,21 @@ test('real browser completes request, CV proposal, match and denied access again
   await developerPage.goto('/my/matches')
   await expect(developerPage.getByRole('heading', { name: requestTitle })).toBeVisible()
 
-  const unrelatedContext = await browser.newContext({ baseURL: 'http://127.0.0.1:5173' })
+  const unrelatedContext = await browser.newContext({ baseURL: frontendBaseUrl })
   const unrelatedPage = await unrelatedContext.newPage()
   await register(unrelatedPage, `m5-unrelated-${crypto.randomUUID()}@example.test`, 'M5 Unrelated', password)
-  const denied = await unrelatedPage.request.get(`http://127.0.0.1:18080/api/v1/me/learning-requests/${requestId}/proposals`)
+  const denied = await unrelatedPage.request.get(`${apiBaseUrl}/api/v1/me/learning-requests/${requestId}/proposals`)
   expect(denied.status()).toBe(404)
   const csrfDenied = await unrelatedPage.evaluate(async () => (await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' })).status)
   expect(csrfDenied).toBe(403)
-  const stillAuthenticated = await unrelatedPage.request.get('http://127.0.0.1:5173/api/v1/auth/me')
+  const stillAuthenticated = await unrelatedPage.request.get(`${frontendBaseUrl}/api/v1/auth/me`)
   expect(stillAuthenticated.status()).toBe(200)
-  const moderationDenied = await unrelatedPage.request.get('http://127.0.0.1:5173/api/v1/admin/reports')
+  const moderationDenied = await unrelatedPage.request.get(`${frontendBaseUrl}/api/v1/admin/reports`)
   expect(moderationDenied.status()).toBe(403)
-  const adminDenied = await unrelatedPage.request.get('http://127.0.0.1:5173/api/v1/admin/pilot-overview')
+  const adminDenied = await unrelatedPage.request.get(`${frontendBaseUrl}/api/v1/admin/pilot-overview`)
   expect(adminDenied.status()).toBe(403)
 
-  const apiHealth = await learnerPage.request.get('http://127.0.0.1:18080/actuator/health')
+  const apiHealth = await learnerPage.request.get(`${apiBaseUrl}/actuator/health`)
   expect(apiHealth.ok()).toBeTruthy()
   await expect(apiHealth.json()).resolves.toMatchObject({ status: 'UP' })
   await Promise.all([learnerContext.close(), developerContext.close(), unrelatedContext.close()])

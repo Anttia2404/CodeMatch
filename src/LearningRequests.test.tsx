@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { LearningRequestFormPage, LearnerDashboardPage, RequestDetailPage, RequestDiscovery, SavedRequestsPage } from './LearningRequests'
-import { api } from './lib/api'
+import { ApiError, api } from './lib/api'
 import type { LearningRequest, PageResult } from './lib/api'
 
 const item: LearningRequest = {
@@ -69,14 +69,54 @@ describe('learning request creation and management', () => {
     expect(screen.queryByRole('button', { name: /đề xuất|ứng tuyển/i })).not.toBeInTheDocument()
   })
 
+  it('renders a selected request using the discovery detail panel layout', async () => {
+    vi.spyOn(api, 'learningRequest').mockResolvedValue(item)
+    renderAt(<RequestDetailPage authenticated={false} panel />, '/learning-requests/request-1')
+    expect(await screen.findByRole('heading', { name: item.title })).toBeInTheDocument()
+    expect(document.querySelector('.bordful-detail-content')).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toHaveTextContent('Khám phá')
+    expect(screen.getByRole('link', { name: 'Đăng nhập để gửi đề xuất' })).toHaveAttribute('href', '/login')
+    expect(document.querySelector('.request-detail-facts')).toBeInTheDocument()
+  })
+
+  it('shows proposal actions to an authenticated developer who does not own the request', async () => {
+    vi.spyOn(api, 'learningRequest').mockResolvedValue(item)
+    vi.spyOn(api, 'myLearningRequests').mockResolvedValue({ ...page, content: [], totalElements: 0 })
+    vi.spyOn(api, 'myProfile').mockResolvedValue({
+      id: 'profile-1', developerId: 'developer-1', displayName: 'Dev', headline: 'Developer', biography: '', yearsExperience: 1,
+      githubUrl: null, linkedinUrl: null, portfolioUrl: null, teachingApproach: 'Pair programming', availability: 'EVENINGS', skills: [], createdAt: '', updatedAt: '',
+    })
+    vi.spyOn(api, 'savedRequests').mockResolvedValue([])
+    renderAt(<RequestDetailPage authenticated panel />, '/learning-requests/request-1')
+    expect(await screen.findByRole('link', { name: 'Gửi đề xuất' })).toHaveAttribute('href', '/learning-requests/request-1/proposals/new')
+    expect(screen.getByRole('button', { name: 'Lưu yêu cầu' })).toBeInTheDocument()
+  })
+
+  it('shows proposal management only to the request owner', async () => {
+    vi.spyOn(api, 'learningRequest').mockResolvedValue(item)
+    vi.spyOn(api, 'myLearningRequests').mockResolvedValue(page)
+    vi.spyOn(api, 'savedRequests').mockResolvedValue([])
+    renderAt(<RequestDetailPage authenticated panel />, '/learning-requests/request-1')
+    expect(await screen.findByRole('link', { name: 'Xem đề xuất' })).toHaveAttribute('href', '/my/learning-requests/request-1/proposals')
+    expect(screen.queryByRole('link', { name: 'Gửi đề xuất' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Lưu yêu cầu' })).not.toBeInTheDocument()
+  })
+
+  it('routes an authenticated learner without a developer profile to profile setup', async () => {
+    vi.spyOn(api, 'learningRequest').mockResolvedValue(item)
+    vi.spyOn(api, 'myLearningRequests').mockResolvedValue({ ...page, content: [], totalElements: 0 })
+    vi.spyOn(api, 'myProfile').mockRejectedValue(new ApiError(404, 'profile_not_found', 'Profile not found'))
+    vi.spyOn(api, 'savedRequests').mockResolvedValue([])
+    renderAt(<RequestDetailPage authenticated panel />, '/learning-requests/request-1')
+    expect(await screen.findByRole('link', { name: 'Tạo hồ sơ developer' })).toHaveAttribute('href', '/developer-profile')
+  })
+
   it('loads discovery filters from the skill catalog and sends selected skills to the API', async () => {
     const user = userEvent.setup()
     vi.spyOn(api, 'skills').mockResolvedValue([{ id: 'react-id', slug: 'react', name: 'React' }])
     const discover = vi.spyOn(api, 'discoverRequests').mockResolvedValue(page)
     renderAt(<RequestDiscovery authenticated={false} />)
-    await screen.findByRole('option', { name: 'React' })
-    const skillFilter = screen.getByRole('listbox', { name: 'Lọc theo kỹ năng' })
-    await user.selectOptions(skillFilter, 'react-id')
+    await user.click(await screen.findByLabelText('React'))
     await waitFor(() => expect(discover).toHaveBeenLastCalledWith(expect.objectContaining({ skillIds: ['react-id'] })))
   })
 
