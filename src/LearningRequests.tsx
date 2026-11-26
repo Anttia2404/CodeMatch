@@ -23,6 +23,18 @@ function dateLabel(value: string | null) {
   return value ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' }).format(new Date(value)) : 'Chưa đăng'
 }
 
+function relativeDateLabel(value: string | null) {
+  if (!value) return 'Chưa đăng'
+  const timestamp = new Date(value).getTime()
+  if (!Number.isFinite(timestamp)) return dateLabel(value)
+  const age = Math.max(0, Date.now() - timestamp)
+  if (age < 60_000) return 'vừa đăng'
+  if (age < 60 * 60_000) return `${Math.floor(age / 60_000)} phút`
+  if (age < 24 * 60 * 60_000) return `${Math.floor(age / (60 * 60_000))} giờ`
+  if (age < 30 * 24 * 60 * 60_000) return `${Math.floor(age / (24 * 60 * 60_000))} ngày`
+  return dateLabel(value)
+}
+
 function errorMessage(error: unknown) {
   return error instanceof ApiError ? error.message : 'Không thể kết nối máy chủ. Kiểm tra kết nối rồi thử lại.'
 }
@@ -80,10 +92,18 @@ export function RequestDiscovery({ authenticated, searchValue = '', onSearchChan
     </aside>
     <section className="board-center" aria-label="Yêu cầu học">
       <div className="board-filterbar">
-        <label className="filter-chip"><span>Trình độ</span><select aria-label="Mức hiện tại" value={filters.level ?? ''} onChange={(event) => update({ level: event.target.value as LearningLevel | '' })}><option value="">Tất cả</option>{Object.entries(levelLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label className="filter-chip"><span>Hình thức</span><select aria-label="Hình thức" value={filters.format ?? ''} onChange={(event) => update({ format: event.target.value as LearningFormat | '' })}><option value="">Tất cả</option><option value="ONLINE">Online</option><option value="OFFLINE">Trực tiếp</option></select></label>
-        <label className="filter-chip"><span>Ngân sách</span><select aria-label="Đơn vị ngân sách" value={filters.budgetUnit ?? ''} onChange={(event) => update({ budgetUnit: event.target.value as BudgetUnit | '' })}><option value="">Tất cả</option>{Object.entries(unitLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label className="filter-chip"><span>CV</span><select aria-label="Yêu cầu CV" value={filters.requiresCv === true ? 'true' : filters.requiresCv === false ? 'false' : ''} onChange={(event) => update({ requiresCv: event.target.value === '' ? '' : event.target.value === 'true' })}><option value="">Không lọc</option><option value="true">Cần CV</option><option value="false">Không cần CV</option></select></label>
+        <FilterChip label="Trình độ" activeLabel={filters.level ? levelLabels[filters.level] : ''} onClear={() => update({ level: '' })}>
+          <select aria-label="Mức hiện tại" value={filters.level ?? ''} onChange={(event) => update({ level: event.target.value as LearningLevel | '' })}><option value="">Tất cả</option>{Object.entries(levelLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
+        </FilterChip>
+        <FilterChip label="Hình thức" activeLabel={filters.format ? formatLabels[filters.format] : ''} onClear={() => update({ format: '' })}>
+          <select aria-label="Hình thức" value={filters.format ?? ''} onChange={(event) => update({ format: event.target.value as LearningFormat | '' })}><option value="">Tất cả</option><option value="ONLINE">Online</option><option value="OFFLINE">Trực tiếp</option></select>
+        </FilterChip>
+        <FilterChip label="Ngân sách" activeLabel={filters.budgetUnit ? unitLabels[filters.budgetUnit] : ''} onClear={() => update({ budgetUnit: '' })}>
+          <select aria-label="Đơn vị ngân sách" value={filters.budgetUnit ?? ''} onChange={(event) => update({ budgetUnit: event.target.value as BudgetUnit | '' })}><option value="">Tất cả</option>{Object.entries(unitLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
+        </FilterChip>
+        <FilterChip label="CV" activeLabel={filters.requiresCv === true ? 'Cần CV' : filters.requiresCv === false ? 'Không cần CV' : ''} onClear={() => update({ requiresCv: '' })}>
+          <select aria-label="Yêu cầu CV" value={filters.requiresCv === true ? 'true' : filters.requiresCv === false ? 'false' : ''} onChange={(event) => update({ requiresCv: event.target.value === '' ? '' : event.target.value === 'true' })}><option value="">Không lọc</option><option value="true">Cần CV</option><option value="false">Không cần CV</option></select>
+        </FilterChip>
         <button className="clear-filters" type="button" onClick={() => { setFilters({ q: '', skillIds: [], page: 0, size: 20, sort: 'NEWEST' }); onSearchChange(''); setDebouncedQuery('') }}><X size={14} /><span>Xóa lọc</span></button>
       </div>
       {budgetNeedsUnit && <p className="filter-hint" role="status">Chọn đơn vị ngân sách để áp dụng khoảng giá.</p>}
@@ -106,6 +126,18 @@ export function RequestDiscovery({ authenticated, searchValue = '', onSearchChan
   </div>
 }
 
+function FilterChip({ label, activeLabel, onClear, children }: {
+  label: string; activeLabel: string; onClear: () => void; children: ReactNode
+}) {
+  return <div className="filter-chip" data-active={Boolean(activeLabel)}>
+    <span className="filter-chip-name">{label}</span>
+    {activeLabel && <span className="filter-chip-active-value">{activeLabel}</span>}
+    {children}
+    {activeLabel && <button className="filter-chip-clear" type="button" aria-label={`Xóa lọc ${label}`} onClick={onClear}><X size={12} /></button>}
+    <span className="filter-chip-caret" aria-hidden="true">▾</span>
+  </div>
+}
+
 function RequestCard({ request, authenticated, isSaved, onToggleSave, saving, selected }: {
   request: LearningRequest; authenticated: boolean; isSaved: boolean; onToggleSave: () => void; saving: boolean; selected: boolean
 }) {
@@ -118,7 +150,7 @@ function RequestCard({ request, authenticated, isSaved, onToggleSave, saving, se
       </div>
       <p className="request-description">{request.skills.map((skill) => skill.name).join(' · ')}{request.skills.length ? ' · ' : ''}{request.preferredFormat === 'ONLINE' ? 'Online' : request.city}</p>
     </div>
-    <div className="request-price"><strong>{formatMoney(request.budgetMin, request.budgetMax, request.budgetUnit)}</strong><span>{dateLabel(request.publishedAt)}</span></div>
+    <div className="request-price"><strong>{formatMoney(request.budgetMin, request.budgetMax, request.budgetUnit)}</strong><span>{relativeDateLabel(request.publishedAt)}</span></div>
   </article>
 }
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-26T07:20:07.308Z",
+  "generatedAt": "2026-11-26T12:01:21.218Z",
   "dataset": "Synthetic visual testing data only; isolated codematch_e2e PostgreSQL",
   "viewports": [
     {
@@ -23,21 +23,21 @@
             "x": 0,
             "y": 52,
             "width": 216,
-            "height": 896,
+            "height": 986,
             "display": "flex"
           },
           ".board-center": {
             "x": 216,
             "y": 52,
             "width": 520,
-            "height": 896,
+            "height": 986,
             "display": "block"
           },
           ".board-detail": {
             "x": 736,
             "y": 52,
             "width": 704,
-            "height": 896,
+            "height": 986,
             "display": "block"
           },
           ".bordful-detail-content": {
@@ -86,7 +86,7 @@
             "x": 0,
             "y": 52,
             "width": 216,
-            "height": 896,
+            "height": 986,
             "display": "flex",
             "border": "",
             "borderRadius": "0px"
@@ -95,7 +95,7 @@
             "x": 216,
             "y": 52,
             "width": 824,
-            "height": 896,
+            "height": 986,
             "display": "block",
             "border": "0px none rgb(22, 22, 22)",
             "borderRadius": "0px"
@@ -104,19 +104,19 @@
             "x": 1040,
             "y": 52,
             "width": 400,
-            "height": 896,
+            "height": 986,
             "display": "block",
             "border": "",
             "borderRadius": "0px"
           },
           ".request-card": {
-            "x": 216,
+            "x": 224,
             "y": 108,
-            "width": 824,
-            "height": 56,
+            "width": 808,
+            "height": 60,
             "display": "grid",
-            "border": "",
-            "borderRadius": "0px"
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "10px"
           }
         }
       },
@@ -142,7 +142,7 @@
           "status": 200
         },
         {
-          "url": "http://127.0.0.1:5175/api/v1/learning-requests/e7c0bd98-d153-4d0f-ad5d-8a80c6849a32",
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests/cfcb1112-e7de-4e90-b5f6-3eee384e03d3",
           "status": 200
         },
         {
@@ -166,12 +166,12 @@
           "status": 200
         },
         {
-          "url": "http://127.0.0.1:5175/api/v1/skills",
-          "status": 200
-        },
-        {
           "url": "http://127.0.0.1:5175/api/v1/auth/me",
           "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
         },
         {
           "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
@@ -221,21 +221,21 @@
             "x": 0,
             "y": 52,
             "width": 216,
-            "height": 913,
+            "height": 986,
             "display": "flex"
           },
           ".board-center": {
             "x": 216,
             "y": 52,
             "width": 520,
-            "height": 913,
+            "height": 986,
             "display": "block"
           },
           ".board-detail": {
             "x": 736,
             "y": 52,
             "width": 544,
-            "height": 913,
+            "height": 986,
             "display": "block"
           },
           ".bordful-detail-content": {
@@ -284,7 +284,7 @@
             "x": 0,
             "y": 52,
             "width": 216,
-            "height": 896,
+            "height": 986,
             "display": "flex",
             "border": "",
             "borderRadius": "0px"
@@ -293,7 +293,7 @@
             "x": 216,
             "y": 52,
             "width": 664,
-            "height": 896,
+            "height": 986,
             "display": "block",
             "border": "0px none rgb(22, 22, 22)",
             "borderRadius": "0px"
@@ -302,19 +302,19 @@
             "x": 880,
             "y": 52,
             "width": 400,
-            "height": 896,
+            "height": 986,
             "display": "block",
             "border": "",
             "borderRadius": "0px"
           },
           ".request-card": {
-            "x": 216,
+            "x": 224,
             "y": 108,
-            "width": 664,
-            "height": 56,
+            "width": 648,
+            "height": 60,
             "display": "grid",
-            "border": "",
-            "borderRadius": "0px"
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "10px"
           }
         }
       },
@@ -340,7 +340,7 @@
           "status": 200
         },
         {
-          "url": "http://127.0.0.1:5175/api/v1/learning-requests/e7c0bd98-d153-4d0f-ad5d-8a80c6849a32",
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests/cfcb1112-e7de-4e90-b5f6-3eee384e03d3",
           "status": 200
         },
         {
@@ -491,7 +491,7 @@
             "x": 0,
             "y": 52,
             "width": 768,
-            "height": 1697,
+            "height": 1436,
             "display": "block",
             "border": "0px none rgb(22, 22, 22)",
             "borderRadius": "0px"
@@ -506,13 +506,13 @@
             "borderRadius": "0px"
           },
           ".request-card": {
-            "x": 0,
+            "x": 8,
             "y": 108,
-            "width": 768,
-            "height": 109,
+            "width": 752,
+            "height": 90,
             "display": "grid",
-            "border": "",
-            "borderRadius": "0px"
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "10px"
           }
         }
       },
@@ -538,7 +538,7 @@
           "status": 200
         },
         {
-          "url": "http://127.0.0.1:5175/api/v1/learning-requests/e7c0bd98-d153-4d0f-ad5d-8a80c6849a32",
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests/cfcb1112-e7de-4e90-b5f6-3eee384e03d3",
           "status": 200
         },
         {
@@ -562,12 +562,12 @@
           "status": 200
         },
         {
-          "url": "http://127.0.0.1:5175/api/v1/skills",
-          "status": 200
-        },
-        {
           "url": "http://127.0.0.1:5175/api/v1/auth/me",
           "status": 401
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
         },
         {
           "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
@@ -629,14 +629,14 @@
           },
           ".board-detail": {
             "x": 0,
-            "y": 109,
+            "y": 98,
             "width": 390,
             "height": 842,
             "display": "block"
           },
           ".bordful-detail-content": {
             "x": 12,
-            "y": 121,
+            "y": 110,
             "width": 366,
             "height": 818,
             "display": "block"
@@ -648,7 +648,8 @@
       "emptyStateVisible": true,
       "mobile": {
         "menuExpanded": "true",
-        "filterCount": 5
+        "filterCount": 5,
+        "filterClearWorks": true
       },
       "metrics": {
         "viewport": {
@@ -665,18 +666,18 @@
             "x": 0,
             "y": 0,
             "width": 390,
-            "height": 109,
-            "display": "flex",
+            "height": 98,
+            "display": "grid",
             "border": "",
             "borderRadius": "0px"
           },
           ".board-filterbar": {
             "x": 0,
-            "y": 109,
+            "y": 98,
             "width": 390,
-            "height": 43,
+            "height": 44,
             "display": "flex",
-            "border": "",
+            "border": "0px none rgb(22, 22, 22)",
             "borderRadius": "0px"
           },
           ".board-rail": {
@@ -690,9 +691,9 @@
           },
           ".board-center": {
             "x": 0,
-            "y": 109,
+            "y": 98,
             "width": 390,
-            "height": 1401,
+            "height": 1400,
             "display": "block",
             "border": "0px none rgb(22, 22, 22)",
             "borderRadius": "0px"
@@ -707,13 +708,13 @@
             "borderRadius": "0px"
           },
           ".request-card": {
-            "x": 0,
-            "y": 190,
-            "width": 390,
-            "height": 88,
+            "x": 8,
+            "y": 180,
+            "width": 374,
+            "height": 86,
             "display": "grid",
-            "border": "",
-            "borderRadius": "0px"
+            "border": "0px none rgb(22, 22, 22)",
+            "borderRadius": "12px"
           }
         }
       },
@@ -731,19 +732,19 @@
           "status": 200
         },
         {
-          "url": "http://127.0.0.1:5175/api/v1/skills",
-          "status": 200
-        },
-        {
-          "url": "http://127.0.0.1:5175/api/v1/learning-requests/e7c0bd98-d153-4d0f-ad5d-8a80c6849a32",
-          "status": 200
-        },
-        {
           "url": "http://127.0.0.1:5175/api/v1/auth/me",
           "status": 401
         },
         {
+          "url": "http://127.0.0.1:5175/api/v1/skills",
+          "status": 200
+        },
+        {
           "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests/cfcb1112-e7de-4e90-b5f6-3eee384e03d3",
           "status": 200
         },
         {
@@ -808,6 +809,10 @@
         },
         {
           "url": "http://127.0.0.1:5175/api/v1/learning-requests?level=INTERMEDIATE&page=0&size=20&sort=NEWEST",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:5175/api/v1/learning-requests?page=0&size=20&sort=NEWEST",
           "status": 200
         }
       ],

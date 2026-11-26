@@ -111,7 +111,10 @@ for (const [name, width, height] of sizes) {
     await page.getByRole('combobox', { name: 'Mức hiện tại' }).selectOption('INTERMEDIATE')
     await page.waitForTimeout(500)
     await page.screenshot({ path: join(dir, `populated-mobile-filters-${name}.png`), fullPage: false })
-    mobile = { menuExpanded, filterCount: await page.locator('.request-card').count() }
+    const filterCount = await page.locator('.request-card').count()
+    await page.getByRole('button', { name: 'Xóa lọc Trình độ' }).click()
+    await page.waitForFunction(() => document.querySelectorAll('.request-card').length === 15, null, { timeout: 15000 })
+    mobile = { menuExpanded, filterCount, filterClearWorks: await page.locator('.request-card').count() === 15 }
   }
 
   report.viewports.push({ name, reference: referenceInfo, referenceDetail, requestCount, selectedDetailVisible: detailVisible, selectedMetrics, searchCount, activeFilterCount: filterCount, emptyStateVisible: emptyShown, mobile, metrics, apiResponses, browserErrors: errors })

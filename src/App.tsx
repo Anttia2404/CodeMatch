@@ -1,4 +1,4 @@
-import { Braces, Bookmark, Menu } from 'lucide-react'
+import { Braces, Bookmark, Compass, Menu, UserRound } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -75,9 +75,13 @@ function HomePage({ authenticated: authenticatedProp, selectedId }: { authentica
       </header>
       <main className="bordful-main" id="home">
         <h1 className="sr-only">Học code theo cách của bạn</h1>
-        <RequestDiscovery authenticated={authenticated} searchValue={search} onSearchChange={setSearch} selectedId={selectedId} detailPanel={selectedId ? <RequestDetailPage authenticated={authenticated} panel /> : <div className="detail-placeholder"><strong>Chọn một yêu cầu để xem thông tin</strong><p>Chi tiết sẽ mở tại đây để bạn có thể xem nhanh lịch học, kỹ năng và ngân sách.</p></div>} />
+        <RequestDiscovery authenticated={authenticated} searchValue={search} onSearchChange={setSearch} selectedId={selectedId} detailPanel={selectedId ? <RequestDetailPage authenticated={authenticated} panel /> : <div className="detail-placeholder"><strong>Chọn yêu cầu để xem chi tiết</strong><p>Thông tin mục tiêu, kỹ năng, ngân sách và lịch học sẽ hiển thị tại đây.</p></div>} />
       </main>
-      <nav className="mobile-bottom-nav" aria-label="Điều hướng nhanh"><Link className="is-current" to="/">Khám phá</Link><Link to="/saved-requests">Đã lưu</Link><Link to={authenticated ? '/account' : '/login'}>{authenticated ? 'Tài khoản' : 'Đăng nhập'}</Link></nav>
+      <nav className="mobile-bottom-nav" aria-label="Điều hướng nhanh">
+        <Link className="is-current" aria-current="page" to="/"><Compass size={18} strokeWidth={1.8} /><span>Khám phá</span></Link>
+        <Link to="/saved-requests"><Bookmark size={18} strokeWidth={1.8} /><span>Đã lưu</span></Link>
+        <Link to={authenticated ? '/account' : '/login'}><UserRound size={18} strokeWidth={1.8} /><span>{authenticated ? 'Tài khoản' : 'Đăng nhập'}</span></Link>
+      </nav>
     </div>
   )
 }
