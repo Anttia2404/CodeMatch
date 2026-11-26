@@ -14,7 +14,6 @@ private-cvs/
 .idea/
 .vscode/
 .agents/
-**/.mvn/wrapper/maven-wrapper.jar
 .codematch-backups/
 *.dump
 *.dump.age
