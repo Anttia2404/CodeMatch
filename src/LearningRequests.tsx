@@ -31,7 +31,7 @@ export function RequestDiscovery({ authenticated, searchValue = '', onSearchChan
   authenticated: boolean; searchValue?: string; onSearchChange?: (value: string) => void; selectedId?: string; detailPanel?: ReactNode
 }) {
   const client = useQueryClient()
-  const [filters, setFilters] = useState<DiscoveryFilters>({ q: '', skillIds: [], page: 0, size: 12, sort: 'NEWEST' })
+  const [filters, setFilters] = useState<DiscoveryFilters>({ q: '', skillIds: [], page: 0, size: 20, sort: 'NEWEST' })
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [message, setMessage] = useState('')
   const skills = useQuery({ queryKey: ['skills'], queryFn: api.skills, staleTime: 300_000 })
@@ -84,7 +84,7 @@ export function RequestDiscovery({ authenticated, searchValue = '', onSearchChan
         <label className="filter-chip"><span>Hình thức</span><select aria-label="Hình thức" value={filters.format ?? ''} onChange={(event) => update({ format: event.target.value as LearningFormat | '' })}><option value="">Tất cả</option><option value="ONLINE">Online</option><option value="OFFLINE">Trực tiếp</option></select></label>
         <label className="filter-chip"><span>Ngân sách</span><select aria-label="Đơn vị ngân sách" value={filters.budgetUnit ?? ''} onChange={(event) => update({ budgetUnit: event.target.value as BudgetUnit | '' })}><option value="">Tất cả</option>{Object.entries(unitLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <label className="filter-chip"><span>CV</span><select aria-label="Yêu cầu CV" value={filters.requiresCv === true ? 'true' : filters.requiresCv === false ? 'false' : ''} onChange={(event) => update({ requiresCv: event.target.value === '' ? '' : event.target.value === 'true' })}><option value="">Không lọc</option><option value="true">Cần CV</option><option value="false">Không cần CV</option></select></label>
-        <button className="clear-filters" type="button" onClick={() => { setFilters({ q: '', skillIds: [], page: 0, size: 12, sort: 'NEWEST' }); onSearchChange(''); setDebouncedQuery('') }}><X size={14} /><span>Xóa lọc</span></button>
+        <button className="clear-filters" type="button" onClick={() => { setFilters({ q: '', skillIds: [], page: 0, size: 20, sort: 'NEWEST' }); onSearchChange(''); setDebouncedQuery('') }}><X size={14} /><span>Xóa lọc</span></button>
       </div>
       {budgetNeedsUnit && <p className="filter-hint" role="status">Chọn đơn vị ngân sách để áp dụng khoảng giá.</p>}
       <div className="board-resultsbar"><span className="live-dot" />{requests.isSuccess ? `${requests.data.totalElements} yêu cầu` : 'Đang tải yêu cầu'}<label>Sắp xếp<select aria-label="Sắp xếp" value={filters.sort} onChange={(event) => update({ sort: event.target.value as 'NEWEST' | 'OLDEST' })}><option value="NEWEST">Mới nhất</option><option value="OLDEST">Cũ nhất</option></select></label></div>

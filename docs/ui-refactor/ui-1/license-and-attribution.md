@@ -3,7 +3,7 @@
 - Reference website: [Bordful Jobs](https://bordful.com/jobs).
 - Source: [craftled/bordful](https://github.com/craftled/bordful).
 - License checked from the source repository's `LICENSE`: MIT, copyright © 2024 Tomas Laurinavicius.
-- The CodeMatch UI does not vendor Bordful's Next.js/Payload application, assets, or component source files. It reimplements the inspected board layout and interaction pattern in the existing React/Vite application and uses measured visual values and concepts from the reference. Third-party assets and logos were not copied.
+- The CodeMatch UI does not vendor Bordful's Next.js/Payload runtime or job-domain components. The desktop selected-preview grid values (`216px` rail and `520px` list) were taken from `src/components/board/board-listing.tsx`; the relevant dimensions and board-row presentation were adapted into CodeMatch's existing React/Vite CSS. No Bordful logo, company image, or other third-party asset was copied.
 - Lucide icons already present in CodeMatch remain from the existing `lucide-react` dependency; no Bordful asset was added.
 
 The upstream MIT notice is retained here for attribution and license traceability:

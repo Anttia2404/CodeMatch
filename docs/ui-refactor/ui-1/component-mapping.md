@@ -1,16 +1,16 @@
-# UI-1 component mapping
+# UI-1 Bordful Component Mapping
 
-Reference: [Bordful jobs board](https://bordful.com/jobs), inspected at 1440 × 900, 1280 × 800, 768 × 1024 and 390 × 844. The source repository is [craftled/bordful](https://github.com/craftled/bordful).
+Reference source: [craftled/bordful](https://github.com/craftled/bordful), checked under its MIT license. The original source's `src/components/board/board-listing.tsx` defines the listing grid (`216px` rail; selected preview `216px 520px minmax(0,1fr)`) and `board-workspace.tsx` handles row selection. CodeMatch ports the relevant sizing and visual behavior into its existing React/Vite components; it does not port Bordful's Next.js/Payload runtime or job-domain logic.
 
-| Bordful element | CodeMatch implementation | Adaptation |
-| --- | --- | --- |
-| Site header and brand | `src/App.tsx` `HomePage`; `src/bordful-board.css` | Preserves CodeMatch branding and existing account routes; search is wired to backend discovery. |
-| Search input | `HomePage` plus `RequestDiscovery` | Debounced search continues through the existing API contract. |
-| Filter toolbar | `RequestDiscovery` in `src/LearningRequests.tsx` | Level, format, budget unit and CV filters call the existing discovery API. |
-| Left board rail | `RequestDiscovery` | Saved and personal request links use existing routes. Skill options come only from `/api/v1/skills`; no fabricated counts are shown. |
-| Job listing row | `RequestCard` | Recast as a compact request row. Uses actual request skill, format, budget and publish date; no invented learner names, logos, or activity. |
-| Selected item detail | `RequestDetailPage` with `panel` mode | Keeps the existing request query, save/report/proposal actions and details; desktop panel; single-column selected view on narrower screens. |
-| Loading, empty and error states | Existing React Query states in `RequestDiscovery` and `RequestDetailPage` | Empty state is backed by the real API response; retry remains available for failures. |
-| Mobile navigation | `HomePage` and `.mobile-bottom-nav` | Reuses CodeMatch destinations and opens the existing navigation menu. |
+| Bordful element | CodeMatch component | Ported behavior |
+|---|---|---|
+| Board header, search, views, account actions | `App.tsx` `.topbar`, `.header-search`, `.main-nav`, `.account-actions` | Compact 52px desktop header, search field, active navigation state, and mobile menu. Brand and links stay CodeMatch-specific. |
+| Board filters and counts | `LearningRequests.tsx` `RequestDiscovery` `.board-filterbar`, `.board-resultsbar` | Compact horizontal controls, live result count, sort control, and clear-filters action. Filters call existing discovery API query parameters. |
+| Board rail | `RequestDiscovery` `.board-rail`, `.rail-skill`, `.rail-budget` | Bordful's left rail dimensions and row rhythm, mapped to real skill and budget filters. |
+| Job list row | `RequestCard` `.request-card.bordful-request-row` | Flat row with bottom divider, mark, title, metadata, and right-aligned price/date. Mobile wraps price onto its own line. |
+| Selected row state | `RequestCard` `.is-selected` | Quiet selected background; other rows are de-emphasized while the preview is shown. |
+| Empty detail preview | `RequestDiscovery` `.detail-placeholder` | Bordered white panel with CodeMatch's plain prompt. |
+| Selected detail preview | `RequestDetailPage` `.bordful-detail-content` | Existing request detail and authorization-aware actions in a panel that expands to the upstream 520px list plus remaining detail width at desktop sizes. Tablet/mobile retain a full-width detail pane. |
+| Mobile toolbar and navigation | `App.tsx` `.mobile-menu`, `.mobile-bottom-nav` and `RequestDiscovery` filter bar | Responsive header/menu and bottom navigation, with horizontally scrollable filters and no horizontal page overflow. |
 
-No React/Next/Payload architecture was imported. The port is limited to the discovery/detail surface; form, dashboard, profile, proposal, matching and moderation routes retain their existing components.
+CSS port details are in [bordful-board.css](../../../src/bordful-board.css). The source attribution and license text are in [license-and-attribution.md](license-and-attribution.md). The full visual delta is in [visual-comparison-report.md](visual-comparison-report.md) and [remaining-differences.md](remaining-differences.md).

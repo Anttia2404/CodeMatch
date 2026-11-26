@@ -1,58 +1,61 @@
-# UI-1 visual comparison report
+# UI-1.1 Visual Comparison Report
 
-## Evidence
+## Capture setup
 
-Reference and CodeMatch before screenshots are saved beside this report as `reference-*.png` and `before-*.png`. Final screenshots are `after-*.png`. The reference measurement capture is `before-capture-audit.json`; local computed layout, API response and overflow evidence is `after-capture-audit.json`. Recreate local captures with:
+- Reference: [Bordful Jobs](https://bordful.com/jobs), captured live on 2026-11-26 with Playwright.
+- CodeMatch: local React/Vite frontend connected to Spring Boot and the isolated PostgreSQL database through the real API.
+- Dataset: 15 synthetic learning requests created through authenticated API calls in the `codematch-m5-e2e-local` Compose stack. This data is for visual testing only. The development PostgreSQL service and Windows PostgreSQL service were not used.
+- Viewports: 1440 × 900, 1280 × 800, 768 × 1024, and 390 × 844; device scale factor 1.
+- The capture audit records response statuses, visible item counts, selected panel geometry, browser errors, and horizontal overflow in [ui-1-1-capture-audit.json](ui-1-1-capture-audit.json).
 
-```powershell
-$env:CODEMATCH_BASE_URL = 'http://127.0.0.1:5174'
-node docs/ui-refactor/ui-1/capture-after.mjs
-```
+## Side-by-side screenshots
 
-This uses installed Playwright/Chromium and a live Vite server. It does not mock API responses.
+Each image places Bordful on the left and CodeMatch on the right.
 
-## Viewport checks
+| Viewport | Marketplace | Selected detail |
+|---|---|---|
+| Desktop 1440 × 900 | [comparison-marketplace-desktop-1440x900.png](comparison-marketplace-desktop-1440x900.png) | [comparison-selected-detail-desktop-1440x900.png](comparison-selected-detail-desktop-1440x900.png) |
+| Laptop 1280 × 800 | [comparison-marketplace-laptop-1280x800.png](comparison-marketplace-laptop-1280x800.png) | [comparison-selected-detail-laptop-1280x800.png](comparison-selected-detail-laptop-1280x800.png) |
+| Tablet 768 × 1024 | [comparison-marketplace-tablet-768x1024.png](comparison-marketplace-tablet-768x1024.png) | [comparison-selected-detail-tablet-768x1024.png](comparison-selected-detail-tablet-768x1024.png) |
+| Mobile 390 × 844 | [comparison-marketplace-mobile-390x844.png](comparison-marketplace-mobile-390x844.png) | [comparison-selected-detail-mobile-390x844.png](comparison-selected-detail-mobile-390x844.png) |
 
-| Viewport | Bordful reference | CodeMatch after | Horizontal overflow | Layout observation |
-| --- | --- | --- | --- | --- |
-| 1440 × 900 | `reference-desktop-1440x900.png` | `after-desktop-1440x900.png` | No | Three columns; 52px header; filter bar and side panel align closely to the source proportions. |
-| 1280 × 800 | `reference-laptop-1280x800.png` | `after-laptop-1280x800.png` | No | Desktop board retained; columns compress without horizontal scroll. |
-| 768 × 1024 | `reference-tablet-768x1024.png` | `after-tablet-768x1024.png` | No | Rail/detail collapse and request list fills the content width. |
-| 390 × 844 | `reference-mobile-390x844.png` | `after-mobile-390x844.png` | No | Search wraps below the brand; filters scroll horizontally; bottom navigation is fixed. |
+## CodeMatch states captured
 
-## Comparison result
+For each viewport, the populated marketplace, selected request detail, search result, active filter, and empty result have separate screenshots. Mobile navigation and mobile filters were also captured.
 
-The desktop geometry, header/search placement, toolbar height, rail width, list/detail split, neutral background, compact typography and mobile navigation are close to the reference. At the 1440 viewport the implemented header is 52px tall, the left rail is 216px, and the detail panel occupies the rightmost 400px, matching the inspected source layout. Tablet and mobile use the observed single-column pattern. `after-mobile-detail-error-390x844.png` captures a real API 404 for an intentionally unknown UUID to verify the mobile error panel; it does not add test data.
+| State | 1440 × 900 | 1280 × 800 | 768 × 1024 | 390 × 844 |
+|---|---|---|---|---|
+| Populated marketplace | [desktop](populated-marketplace-desktop-1440x900.png) | [laptop](populated-marketplace-laptop-1280x800.png) | [tablet](populated-marketplace-tablet-768x1024.png) | [mobile](populated-marketplace-mobile-390x844.png) |
+| Selected request detail | [desktop](populated-selected-detail-desktop-1440x900.png) | [laptop](populated-selected-detail-laptop-1280x800.png) | [tablet](populated-selected-detail-tablet-768x1024.png) | [mobile](populated-selected-detail-mobile-390x844.png) |
+| Search results (`Spring Boot`) | [desktop](populated-search-results-desktop-1440x900.png) | [laptop](populated-search-results-laptop-1280x800.png) | [tablet](populated-search-results-tablet-768x1024.png) | [mobile](populated-search-results-mobile-390x844.png) |
+| Active level filter | [desktop](populated-active-filter-desktop-1440x900.png) | [laptop](populated-active-filter-laptop-1280x800.png) | [tablet](populated-active-filter-tablet-768x1024.png) | [mobile](populated-active-filter-mobile-390x844.png) |
+| Empty search results | [desktop](populated-empty-results-desktop-1440x900.png) | [laptop](populated-empty-results-laptop-1280x800.png) | [tablet](populated-empty-results-tablet-768x1024.png) | [mobile](populated-empty-results-mobile-390x844.png) |
 
-Screenshot comparison is necessarily limited by the live data difference: the reference displays jobs, while the real CodeMatch API currently returns an empty `content` array and `totalElements: 0`. Therefore there is no honest way to compare populated rows or a real selected-request panel yet. The empty state is styled within the same list region; no fake records were used. See `remaining-differences.md`. This report does not claim pixel-perfect fidelity.
+Mobile-only interaction captures: [navigation menu open](populated-mobile-navigation-mobile-390x844.png) and [filters applied](populated-mobile-filters-mobile-390x844.png).
 
-## Live frontend/backend evidence
+## Findings by visual category
 
-Playwright received HTTP 200 from the real `/api/v1/skills` and `/api/v1/learning-requests` endpoints through the Vite proxy. Typing `React` in the header search issued `/api/v1/learning-requests?q=React&page=0&size=12&sort=NEWEST` and received HTTP 200 with the database's actual empty result. Anonymous `/api/v1/auth/me` returned HTTP 401 as expected; the UI stayed usable. No uncaught page errors were observed.
+| Category | Findings and changes |
+|---|---|
+| Layout | The unselected desktop board uses the same 216px navigation rail and 400px right panel pattern as Bordful. When a request is selected at desktop widths, the list and detail columns now use the upstream `216px / 520px / remaining width` layout. The measured results are 216 / 520 / 704px at 1440px and 216 / 520 / 544px at 1280px. On tablet and mobile, CodeMatch keeps its single-pane selected-detail route. |
+| Typography | Geist is available in the browser and the board uses it with the same sans-serif fallback stack as the source. The desktop request-detail title, section headings, and body copy were enlarged to align more closely with Bordful's hierarchy. |
+| Spacing and dimensions | Request rows now use 56px desktop rows with a single bottom divider, matching the reference's dense list rhythm. Mobile rows reserve a second line for the learning budget and use a 40px mark, following the reference's larger mobile row proportions. Filter and results bars retain the source's 48px desktop and 43px mobile heights. |
+| Colors | The marketplace retains Bordful's neutral gray canvas, white surfaces, subdued divider colors, and restrained green result indicator. CodeMatch's primary blue remains on actions that require product branding or affordance. |
+| Borders and shadows | The previous individually bordered, rounded request cards were removed from the marketplace rows. The list now uses flat rows with thin dividers. The unselected detail placeholder remains a bordered white panel, matching Bordful's empty preview treatment. |
+| Icons and marks | The skill initials remain as CodeMatch request marks; no company logos were fabricated. The mobile mark dimension was increased to the reference's 40px tile size. Existing Lucide controls remain for search, save, menu, and filters. |
+| Visual hierarchy | Selected rows receive the reference's quiet highlight and non-selected rows are visually de-emphasized while the detail preview is open. Vietnamese request title and budget remain the main row information. |
+| Responsive behavior | The four viewports have no horizontal document overflow. Mobile navigation expands from the menu button, filters remain horizontally scrollable, and selected detail occupies the mobile content pane. |
 
-## Quality gate results
+## Interactive-state results
 
-- `npm run build`: passed.
-- `npm run lint`: passed.
-- `npm test`: 26 tests passed across 6 files.
-- Playwright E2E against the running CodeMatch frontend and isolated PostgreSQL stack: 5 passed, 0 skipped. This includes the real-browser flow that creates an account, learning request, developer proposal and synthetic CV, selects a match, checks denied access, restarts the API container and verifies health.
-- Backend commands with Java 21.0.8: `mvnw.cmd -B -ntp compile`, `mvnw.cmd -B -ntp test`, `mvnw.cmd -B -ntp verify`; each passed. The test and verify runs each reported 43 tests, 0 failures, 0 errors, 0 skipped, including PostgreSQL/Testcontainers integration tests.
+- Marketplace: 15 API-backed requests loaded from the isolated database; one page displays all 15 using a page size of 20, matching Bordful's 20-item page density.
+- Selected detail: `GET /api/v1/learning-requests/{id}` returned 200; desktop preview geometry matches the Bordful 216px rail and 520px list.
+- Search: `Spring Boot` returned one request at each viewport.
+- Active filter: `BEGINNER` returned five requests at each viewport; the mobile filter capture uses `INTERMEDIATE` and returned five.
+- Empty search: zero requests and the empty state appeared at each viewport.
+- Mobile navigation: menu button expanded and exposed its navigation links.
+- Browser audit: zero page errors; all discovery, skills, and detail API calls returned 200. Anonymous `/auth/me` returned 401 as expected for the signed-out visual-test browser context.
 
-To reproduce the real backend E2E on Windows PowerShell without using the default Vite port 5173:
+## Confidence and limits
 
-```powershell
-# Terminal 1: isolated test database/API and frontend on a free port
-$env:CODEMATCH_E2E_CORS_ORIGIN = 'http://127.0.0.1:5175'
-docker compose -f docker-compose.e2e.yml up -d --build
-$env:CODEMATCH_API_PROXY_TARGET = 'http://127.0.0.1:18080'
-npm run dev -- --host 127.0.0.1 --port 5175
-
-# Terminal 2: run the complete Playwright suite against that frontend/API
-$env:CODEMATCH_E2E_BASE_URL = 'http://127.0.0.1:5175'
-$env:CODEMATCH_E2E_API_URL = 'http://127.0.0.1:18080'
-$env:CODEMATCH_E2E_COMPOSE_PROJECT = 'codematch-m5-e2e-local'
-$env:CODEMATCH_REAL_E2E = '1'
-npm run test:e2e
-```
-
-The Compose stack uses its own PostgreSQL port 15433 and stores only synthetic integration-test data. `playwright.config.ts` uses the external base URL when set and then does not start another web server.
+The screenshots provide evidence of a close structural match for the board, list density, selected preview, and responsive behavior. They do not establish pixel identity: Bordful contains employment-specific content and logos, while CodeMatch must retain Vietnamese learning-request content, budget/CV fields, and its own identity. Remaining differences are listed in [remaining-differences.md](remaining-differences.md).
