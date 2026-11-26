@@ -1,4 +1,4 @@
-import { Braces, Bookmark, Compass, Menu, UserRound } from 'lucide-react'
+import { Bookmark, Compass, Menu, UserRound } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -11,9 +11,12 @@ import { DeveloperMatchesPage, LearnerMatchPage } from './MatchPages'
 import { AdminReportsPage } from './ModerationPages'
 import { AdminPilotOverviewPage } from './PilotOverview'
 import './bordful-board.css'
+import { LandingPage } from './LandingPage'
+import { CodeMatchMark } from './CodeMatchBrand'
 
 export default function App() {
   return <BrowserRouter><Routes>
+    {import.meta.env.DEV && <Route path="/__preview/landing" element={<LandingPage />} />}
     <Route path="/" element={<HomePage />} />
     <Route path="/login" element={<LoginPage />} /><Route path="/register" element={<RegisterPage />} />
     <Route path="/account" element={<AccountPage />} /><Route path="/developer-profile" element={<DeveloperProfileFormPage />} />
@@ -67,7 +70,7 @@ function HomePage({ authenticated: authenticatedProp, selectedId }: { authentica
   return (
     <div className={`app-shell bordful-shell${selectedId ? ' is-request-detail' : ''}`}>
       <header className="topbar bordful-topbar">
-        <Link className="brand" to="/" aria-label="CodeMatch - khám phá yêu cầu học"><span className="brand-mark"><Braces size={18} strokeWidth={2.5} /></span><span>CodeMatch</span></Link>
+        <Link className="brand" to="/" aria-label="CodeMatch - khám phá yêu cầu học"><CodeMatchMark size={18} /><span>CodeMatch</span></Link>
         <label className="header-search"><span className="sr-only">Tìm yêu cầu học</span><input aria-label="Tìm yêu cầu học" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm yêu cầu học theo kỹ năng hoặc mục tiêu" /><kbd>⌘ K</kbd></label>
         <nav className={mobileOpen ? 'main-nav is-open' : 'main-nav'} aria-label="Điều hướng chính"><Link className="nav-current" to="/">Khám phá</Link><Link to="/saved-requests"><Bookmark size={14} /> Đã lưu</Link><Link className="mobile-menu-link" to={authenticated ? '/my/learning-requests' : '/login'}>{authenticated ? 'Yêu cầu của tôi' : 'Đăng nhập'}</Link></nav>
         <button className="mobile-menu" aria-label="Mở menu" aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}><Menu /></button>

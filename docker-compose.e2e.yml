@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: codematch_e2e
       POSTGRES_PASSWORD: e2e-local-only
     ports:
-      - "127.0.0.1:15433:5432"
+      - "127.0.0.1:${CODEMATCH_E2E_POSTGRES_PORT:-15433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -25,7 +25,7 @@ services:
       CODEMATCH_CV_STORAGE_DIR: /var/lib/codematch/private-cvs
       CODEMATCH_CORS_ALLOWED_ORIGIN: ${CODEMATCH_E2E_CORS_ORIGIN:-http://127.0.0.1:5173}
     ports:
-      - "127.0.0.1:18080:8080"
+      - "127.0.0.1:${CODEMATCH_E2E_API_PORT:-18080}:8080"
     volumes:
       - private_cvs:/var/lib/codematch/private-cvs
     depends_on:

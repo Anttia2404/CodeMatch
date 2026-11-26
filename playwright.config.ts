@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const externalBaseURL = process.env.CODEMATCH_E2E_BASE_URL
+const localPort = process.env.CODEMATCH_E2E_PORT ?? '5174'
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -10,18 +11,18 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
   use: {
-    baseURL: externalBaseURL ?? 'http://127.0.0.1:5173',
+    baseURL: externalBaseURL ?? `http://127.0.0.1:${localPort}`,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     ...devices['Desktop Chrome'],
   },
   webServer: externalBaseURL ? undefined : {
-    command: 'npm run dev -- --host 127.0.0.1',
+    command: `npm run dev -- --host 127.0.0.1 --port ${localPort} --strictPort`,
     env: {
       VITE_API_BASE_URL: process.env.VITE_API_BASE_URL ?? '/api/v1',
       CODEMATCH_API_PROXY_TARGET: process.env.CODEMATCH_API_PROXY_TARGET ?? 'http://127.0.0.1:8080',
     },
-    url: 'http://127.0.0.1:5173',
+    url: `http://127.0.0.1:${localPort}`,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
   },

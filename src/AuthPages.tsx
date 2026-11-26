@@ -5,9 +5,10 @@ import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-route
 import { api, ApiError } from './lib/api'
 import type { DeveloperProfile, ProfileInput, Skill } from './lib/api'
 import { ReportButton } from './ModerationPages'
+import { CodeMatchMark } from './CodeMatchBrand'
 
 function PageFrame({ title, children }: { title: string; children: ReactNode }) {
-  return <main className="form-page"><section className="form-card"><Link to="/" className="form-back">← CodeMatch</Link><h1>{title}</h1>{children}</section></main>
+  return <main className="form-page"><section className="form-card"><Link to="/" className="auth-brand"><CodeMatchMark size={16} /><span>CodeMatch</span></Link><h1>{title}</h1>{children}</section></main>
 }
 
 function problem(error: unknown) { return error instanceof ApiError ? error.message : 'Không thể kết nối máy chủ. Vui lòng thử lại.' }

@@ -62,3 +62,6 @@ Keep the match lifecycle to a single `CONFIRMED` state. Selection is allowed onl
 
 ## 2026-11-18 — Keep the unresolved development-tool advisory visible
 The current full npm audit reports 11 high-severity dependency paths caused by `picomatch@4.0.7` in the Vite/Vitest development toolchain; `npm audit --omit=dev` is clean. The registry has no newer 4.x release, and npm's suggested fix downgrades Vitest to 3.1.4. Keep the compatible tested toolchain, document the finding, and revisit when upstream publishes a patch rather than forcing an unreviewed major downgrade.
+
+## 2026-11-26 — Preview the approved landing page only in development
+Keep `/` and request detail URLs unchanged for UI-2.2. Expose the approved Landing Page at `/__preview/landing` only when Vite runs in development; production builds must not include this route. Its marketplace preview reads public OPEN Learning Requests through the existing `api.discoverRequests` client and keeps loading, empty, and error states distinct. The product illustration is static and explicitly identified as a process illustration; it does not use synthetic people or marketplace activity.

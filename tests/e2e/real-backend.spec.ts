@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
 
-const frontendBaseUrl = process.env.CODEMATCH_E2E_BASE_URL ?? 'http://127.0.0.1:5173'
+const frontendBaseUrl = process.env.CODEMATCH_E2E_BASE_URL ?? 'http://127.0.0.1:5174'
 const apiBaseUrl = process.env.CODEMATCH_E2E_API_URL ?? 'http://127.0.0.1:18080'
 
 test.skip(!process.env.CODEMATCH_REAL_E2E, 'Enable with CODEMATCH_REAL_E2E=1 and the isolated E2E Compose stack.')
@@ -36,6 +36,11 @@ test('real browser completes request, CV proposal, match and denied access again
   await expect(learnerPage).toHaveURL(/\/learning-requests\/[0-9a-f-]+$/)
   await expect(learnerPage.getByRole('heading', { name: requestTitle })).toBeVisible()
   const requestId = new URL(learnerPage.url()).pathname.split('/').at(-1)!
+  await learnerPage.goto('/__preview/landing')
+  await expect(learnerPage.getByRole('link', { name: requestTitle, exact: true })).toBeVisible()
+  await learnerPage.getByRole('link', { name: requestTitle, exact: true }).click()
+  await expect(learnerPage.getByRole('heading', { name: requestTitle })).toBeVisible()
+  await expect(learnerPage.getByRole('link', { name: 'Xem đề xuất' })).toHaveAttribute('href', `/my/learning-requests/${requestId}/proposals`)
   await learnerPage.goto('/')
   await learnerPage.getByRole('link', { name: requestTitle, exact: true }).click()
   await expect(learnerPage.getByRole('heading', { name: requestTitle })).toBeVisible()
@@ -52,6 +57,12 @@ test('real browser completes request, CV proposal, match and denied access again
   await developerPage.getByLabel('React', { exact: true }).check()
   await developerPage.getByRole('button', { name: 'Lưu hồ sơ' }).click()
   await expect(developerPage).toHaveURL(/\/developers\/[0-9a-f-]+$/)
+
+  await developerPage.goto('/__preview/landing')
+  await expect(developerPage.getByRole('link', { name: requestTitle, exact: true })).toBeVisible()
+  await developerPage.getByRole('link', { name: requestTitle, exact: true }).click()
+  await expect(developerPage.getByRole('heading', { name: requestTitle })).toBeVisible()
+  await expect(developerPage.getByRole('link', { name: 'Gửi đề xuất' })).toHaveAttribute('href', `/learning-requests/${requestId}/proposals/new`)
 
   await developerPage.goto(`/learning-requests/${requestId}/proposals/new`)
   await developerPage.getByLabel('Lời giới thiệu').fill('Tôi sẽ đồng hành để bạn hoàn thiện ứng dụng React theo mục tiêu đã nêu.')

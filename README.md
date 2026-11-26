@@ -62,6 +62,21 @@ The V3 migration adds learning requests, normalized request skills, and saved re
 
 For local sample credentials, `.env.example` is copied to ignored `.env`; defaults are local-only. Set `CODEMATCH_COOKIE_SECURE=true` behind HTTPS. Keep `.env`, credentials, and tokens out of source control.
 
+## UI-2.2 Landing Page preview
+
+The approved Concept A implementation is available at the development-only route `/__preview/landing`; the production root and Marketplace routes are unchanged pending visual review. To preview against an isolated PostgreSQL-backed application without colliding with the regular local stack, start the E2E Compose project on separate loopback ports, then run Vite:
+
+```powershell
+$env:CODEMATCH_E2E_API_PORT = '18081'
+$env:CODEMATCH_E2E_POSTGRES_PORT = '15434'
+docker compose --project-name codematch-ui22-e2e -f docker-compose.e2e.yml up -d --build
+$env:CODEMATCH_API_PROXY_TARGET = 'http://127.0.0.1:18081'
+$env:VITE_API_BASE_URL = '/api/v1'
+npm run dev -- --host 127.0.0.1 --port 5174 --strictPort
+```
+
+Open `http://127.0.0.1:5174/__preview/landing`. The API preview uses actual public Learning Request responses. Screenshot test data is synthetic and confined to the `codematch-ui22-e2e` PostgreSQL volume; the capture utility is `scripts/capture-ui22.mjs`. See [`docs/ui-refactor/ui-2/ui-2.2/IMPLEMENTATION_EVIDENCE.md`](docs/ui-refactor/ui-2/ui-2.2/IMPLEMENTATION_EVIDENCE.md) for screenshots and verification results.
+
 ## M2 request behavior
 
 Learners can save drafts, publish, edit, close, and browse their requests. Discovery returns OPEN requests with search, controlled-skill, level, format, VND range/unit, CV requirement, sort, and pagination filters. Budget range filters require a unit so per-hour/per-session/total amounts are not compared as interchangeable. Saved requests are private to the signed-in learner and may still be opened when subsequently closed.
