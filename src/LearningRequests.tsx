@@ -307,38 +307,75 @@ export function RequestDetailPage({ authenticated, panel = false }: { authentica
   const location = useLocation()
   const request = useQuery({ queryKey: ['learning-request', id], queryFn: () => api.learningRequest(id), enabled: Boolean(id) })
   const saved = useQuery({ queryKey: ['saved-requests'], queryFn: api.savedRequests, enabled: authenticated })
+  const ownership = useQuery({
+    queryKey: ['learning-request-ownership', id],
+    queryFn: async () => {
+      let page = 0
+      while (true) {
+        const owned = await api.myLearningRequests(undefined, page)
+        if (owned.content.some((entry) => entry.id === id)) return true
+        if (page + 1 >= owned.totalPages) return false
+        page += 1
+      }
+    },
+    enabled: authenticated && request.data?.status === 'OPEN',
+    retry: false,
+    staleTime: 60_000,
+  })
+  const developerProfile = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: api.myProfile,
+    enabled: authenticated && ownership.data === false && request.data?.status === 'OPEN',
+    retry: false,
+    staleTime: 60_000,
+  })
   const toggle = useMutation({ mutationFn: async () => saved.data?.some((item) => item.id === id) ? api.unsaveRequest(id) : api.saveRequest(id),
     onSuccess: () => void client.invalidateQueries({ queryKey: ['saved-requests'] }) })
   const notice = (location.state as { notice?: string } | null)?.notice
-  if (panel && request.isLoading) return <div className="bordful-detail-content detail-panel-state" role="status">Đang tải yêu cầu…</div>
-  if (panel && request.isError) return <div className="bordful-detail-content detail-panel-state"><ErrorBox error={request.error} onRetry={() => void request.refetch()} /></div>
-  if (panel && !request.data) return <div className="bordful-detail-content detail-panel-state">Yêu cầu này hiện không khả dụng.</div>
+  if (panel && request.isLoading) return <div className="request-detail-document detail-panel-state" role="status">Đang tải yêu cầu…</div>
+  if (panel && request.isError) return <div className="request-detail-document detail-panel-state"><ErrorBox error={request.error} onRetry={() => void request.refetch()} /></div>
+  if (panel && !request.data) return <div className="request-detail-document detail-panel-state">Yêu cầu này hiện không khả dụng.</div>
   if (request.isLoading) return <FormShell title="Chi tiết yêu cầu"><p role="status">Đang tải yêu cầu…</p></FormShell>
   if (request.isError) return <FormShell title="Không tìm thấy yêu cầu"><ErrorBox error={request.error} onRetry={() => void request.refetch()} /></FormShell>
   if (!request.data) return <FormShell title="Không tìm thấy yêu cầu"><p>Yêu cầu này hiện không khả dụng.</p></FormShell>
   const item = request.data
-  return <main className={panel ? 'request-detail-page bordful-detail-content' : 'learning-page request-detail-page'}>{!panel && <Link className="form-back" to="/"><ArrowLeft size={15} /> Khám phá yêu cầu</Link>}
+  const owner = authenticated && ownership.data === true
+  const ownershipPending = authenticated && item.status === 'OPEN' && ownership.isPending
+  const ownershipFailed = authenticated && item.status === 'OPEN' && ownership.isError
+  const profileMissing = developerProfile.isError && developerProfile.error instanceof ApiError && developerProfile.error.status === 404
+  return <div className={panel ? 'request-detail-document bordful-detail-content' : 'learning-page request-detail-page'}>
+    <nav className="request-detail-breadcrumb" aria-label="Breadcrumb"><ol><li><Link to="/">Khám phá</Link></li><li aria-hidden="true">/</li><li className="request-detail-current" aria-current="page" title={item.title}>{item.title}</li></ol></nav>
     {notice && <p className="inline-success" role="status"><Check size={16} />{notice}</p>}
-    <div className="detail-header"><div><span className="detail-status">{statusLabels[item.status]}</span><h1>{item.title}</h1><p className="detail-published">Đăng ngày {dateLabel(item.publishedAt)}</p></div>
-      {item.status === 'OPEN' && (authenticated ? <button className="button button-outline" onClick={() => toggle.mutate()} disabled={toggle.isPending}><Bookmark size={16} fill={saved.data?.some((savedItem) => savedItem.id === id) ? 'currentColor' : 'none'} />{saved.data?.some((savedItem) => savedItem.id === id) ? 'Đã lưu' : 'Lưu yêu cầu'}</button>
-        : <Link className="button button-outline" to="/login">Đăng nhập để lưu</Link>)}
-    </div>
+    <header className="request-detail-header"><div><span className="detail-status">{statusLabels[item.status]}</span><h1>{item.title}</h1><p className="detail-published">Đăng ngày {dateLabel(item.publishedAt)}</p></div></header>
     {authenticated && <ReportButton targetType="LEARNING_REQUEST" targetId={item.id} />}
     {toggle.isError && <p className="form-error" role="alert">{errorMessage(toggle.error)}</p>}
     <div className="detail-layout"><article className="detail-content">
+      <dl className="request-detail-facts" aria-label="Thông tin yêu cầu">
+        <div className="detail-fact"><dt>Trình độ hiện tại</dt><dd>{levelLabels[item.currentLevel]}</dd></div>
+        <div className="detail-fact"><dt>Hình thức học</dt><dd>{formatLabels[item.preferredFormat]}{item.city ? ` · ${item.city}` : ''}</dd></div>
+        <div className="detail-fact"><dt>Ngân sách · VND</dt><dd>{formatMoney(item.budgetMin, item.budgetMax, item.budgetUnit)}</dd></div>
+        <div className="detail-fact"><dt>CV developer</dt><dd>{item.requiresCv ? 'Yêu cầu CV' : 'Không yêu cầu CV'}</dd></div>
+      </dl>
       <DetailSection title="Mục tiêu học tập"><p>{item.learningGoal}</p></DetailSection>
       <DetailSection title="Mô tả"><p className="detail-body">{item.description}</p></DetailSection>
       <DetailSection title="Kỹ năng cần hỗ trợ"><div className="tag-list">{item.skills.map((skill) => <span className="skill-tag" key={skill.id}>{skill.name}</span>)}</div></DetailSection>
       <DetailSection title="Điều người học mong đợi"><p>{item.teachingExpectations}</p></DetailSection>
       <DetailSection title="Lịch học"><p>{item.preferredSchedule}</p><p>{item.expectedDuration}</p></DetailSection>
-    </article><aside className="detail-aside">
-      <div className="detail-fact"><small>Trình độ hiện tại</small><strong>{levelLabels[item.currentLevel]}</strong></div>
-      <div className="detail-fact"><small>Hình thức</small><strong>{formatLabels[item.preferredFormat]}{item.city ? ` · ${item.city}` : ''}</strong></div>
-      <div className="detail-fact"><small>Ngân sách · VND</small><strong>{formatMoney(item.budgetMin, item.budgetMax, item.budgetUnit)}</strong></div>
-      <div className="detail-fact"><small>CV developer</small><strong>{item.requiresCv ? 'Yêu cầu CV' : 'Không yêu cầu CV'}</strong></div>
-      {item.status === 'OPEN' && (authenticated ? <Link className="button button-primary" to={`/learning-requests/${item.id}/proposals/new`}>Gửi đề xuất đồng hành <ArrowRight size={15} /></Link> : <Link className="button button-primary" to="/login">Đăng nhập để gửi đề xuất</Link>)}
-    </aside></div>
-  </main>
+    </article></div>
+    {item.status === 'OPEN' && <div className="request-detail-actionbar" aria-label="Thao tác yêu cầu">
+      {owner ? <Link className="button button-outline" to={`/my/learning-requests/${item.id}/proposals`}>Xem đề xuất</Link>
+        : ownershipPending ? <span role="status">Đang kiểm tra quyền thao tác…</span>
+          : ownershipFailed ? <span role="status">Chưa thể xác minh quyền thao tác. Tải lại để thử lại.</span>
+            : authenticated && ownership.data === false && developerProfile.isPending ? <span role="status">Đang kiểm tra hồ sơ developer…</span>
+              : authenticated && ownership.data === false && profileMissing ? <Link className="button button-primary" to="/developer-profile">Tạo hồ sơ developer <ArrowRight size={15} /></Link>
+                : authenticated && ownership.data === false && developerProfile.isError ? <span role="status">Chưa thể xác minh hồ sơ developer. Tải lại để thử lại.</span>
+            : <>
+              {authenticated ? <button className="button button-outline" onClick={() => toggle.mutate()} disabled={toggle.isPending}><Bookmark size={16} fill={saved.data?.some((savedItem) => savedItem.id === id) ? 'currentColor' : 'none'} />{saved.data?.some((savedItem) => savedItem.id === id) ? 'Đã lưu' : 'Lưu yêu cầu'}</button>
+                : <Link className="button button-outline" to="/login">Đăng nhập để lưu</Link>}
+              <Link className="button button-primary" to={authenticated ? `/learning-requests/${item.id}/proposals/new` : '/login'}>{authenticated ? 'Gửi đề xuất' : 'Đăng nhập để gửi đề xuất'} <ArrowRight size={15} /></Link>
+            </>}
+    </div>}
+  </div>
 }
 
 function DetailSection({ title, children }: { title: string; children: ReactNode }) {

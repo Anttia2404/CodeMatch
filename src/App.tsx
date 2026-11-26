@@ -65,7 +65,7 @@ function HomePage({ authenticated: authenticatedProp, selectedId }: { authentica
   const authenticated = authenticatedProp ?? (account.isSuccess && Boolean(account.data))
 
   return (
-    <div className="app-shell bordful-shell">
+    <div className={`app-shell bordful-shell${selectedId ? ' is-request-detail' : ''}`}>
       <header className="topbar bordful-topbar">
         <Link className="brand" to="/" aria-label="CodeMatch - khám phá yêu cầu học"><span className="brand-mark"><Braces size={18} strokeWidth={2.5} /></span><span>CodeMatch</span></Link>
         <label className="header-search"><span className="sr-only">Tìm yêu cầu học</span><input aria-label="Tìm yêu cầu học" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm yêu cầu học theo kỹ năng hoặc mục tiêu" /><kbd>⌘ K</kbd></label>
